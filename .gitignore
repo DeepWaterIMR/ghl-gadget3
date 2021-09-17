@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+*.Rdata
+.Ruserdata
+.DS_Store
+.Rhistory
+*.Rproj
+~$*
+README.html
+model_files
