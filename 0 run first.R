@@ -8,7 +8,7 @@
 #### Libraries ----
 
 # Package names
-packages <- c("remotes", "tidyverse", "reshape2", "data.table", "DBI", "mfdb", "gadget3", "cowplot")
+packages <- c("remotes", "tidyverse", "reshape2", "data.table", "DBI", "mfdb", "gadget3", "cowplot", "fishmethods")
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
