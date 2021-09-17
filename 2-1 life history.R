@@ -101,7 +101,7 @@ p2 <- ggplot() +
   scale_color_manual("Sex", values = c("#FF5F68", "#449BCF")) +
   theme(legend.position = "none")
 
-cowplot::plot_grid(p1, p2, labels = "auto", ncol = 1)
+print(cowplot::plot_grid(p1, p2, labels = "auto", ncol = 1))
 dev.off()
 
 rm(lw.dat, tmp, tmp2, p1, p2)
@@ -137,8 +137,7 @@ tmp[is.na(tmp$ml),"ml"] <- tmp[is.na(tmp$ml),"ml_mod"]
 tmp3 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..3, ..2)))
 
 png(file.path(base_dir, "figures/Initial sigma.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
-suppressWarnings(
-  ggplot() +
+  p <- ggplot() +
     geom_density(data = age_dat, aes(x = length, color = "Data", fill = "Data")) +
     geom_line(data = tmp2, aes(x = length, y = density, color = "Mean")) +
     geom_line(data = tmp3, aes(x = length, y = density, color = "Modeled")) +
@@ -146,20 +145,22 @@ suppressWarnings(
     scale_color_manual("Color", values = c("black", "red", "blue")) +
     facet_wrap(~age, scales = "free_y") +
     labs(x = "Length (cm)", y = "Density")
-)
+
+  suppressWarnings(print(p))
 dev.off()
 # Density distribution of lengths for each age group in data (grey) together with normal distributions using mean values (red) and linearly modeled standard deviations (blue). Modeled standard deviations were further used in the Gadget model to set initial stock age-length distributions.
 
 png(file.path(base_dir, "figures/Length at age.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
-ggplot() +
+p <- ggplot() +
   geom_vline(data = tmp, aes(xintercept = ml), color = "grey", size = 2) +
   geom_errorbarh(data = tmp, aes(xmin = ml - ms_mod, xmax = ml + ms_mod, y = 0), color = "grey", size = 2) +
   geom_freqpoly(data = age_dat, aes(x = length)) +
   facet_wrap(~age)  +
   labs(x = "Length (cm)", y = "Count")
+suppressMessages(print(p))
 dev.off()
 
-rm(age_dat, tmp, tmp2, tmp3)
+rm(age_dat, tmp, tmp2, tmp3, p)
 
 # Split initial sigma by sex?
 
