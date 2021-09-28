@@ -67,33 +67,22 @@ source("4 fleets.R")
 
 source("5 likelihood.R")
 
+## Get data out of the model
+
+# source("6 report.R")
+
 ## Formulate R based model and define initial parameters
 
-source("6 initial parameters.R")
+source("7 initial parameters.R")
 
 ## Run r-based model ####
 
 res <- model(param)
 
-
 ## Scratch code under ####
 
-attributes(res)$OtherNor_fishery__catch
-
-
-
-
-
-male_imm_report <- g3s_clone(male_imm, 'male_imm_report') %>%
-  g3s_time(year = local(model_params$year_range), step = 1:4)
-
-# Disaggregated report storage for *_mat (we store with same age/step/length as ling itself)
-male_mat_report <- g3s_clone(male_mat, 'male_mat_report') %>%
-  g3s_time(year = local(model_params$year_range), step = 1:4)
-
-
-g3a_report_stock(male_imm_report, male_imm,
-                 gadget3:::f_substitute(~stock_ss(x), list(x=as.symbol(paste0("male_imm", "__num")))))
+# List all available reports
+# names(attributes(res))
 
 ## Old stuff under
 #

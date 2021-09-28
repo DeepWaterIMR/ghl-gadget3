@@ -35,7 +35,7 @@ model_params$stock_names <- c(model_params$female_stock, model_params$male_stock
 model_params$trawl_fleets <- c("TrawlNor", "TrawlRus")
 model_params$other_fleets <- c("OtherNor", "OtherRus")
 model_params$hist_fleets <- c("HistNor", "HistRus", "Internat")
-model_params$survey_fleets <- c("NoSlope")
+model_params$survey_fleets <- c("EggaN")
 model_params$fleet_names <- c(model_params$trawl_fleets, model_params$other_fleets, model_params$hist_fleets, model_params$survey_fleets)
 model_params$species_name <- 'GHL'
 

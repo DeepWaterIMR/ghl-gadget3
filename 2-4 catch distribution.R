@@ -67,12 +67,11 @@ png(file.path(base_dir, "figures/TrawlNor_ldist.png"), width = pagewidth, height
 print(plot.ldist(TrawlNor_ldist))
 dev.off()
 
-TrawlNor_adist <- mfdb_sample_count(
+AllNorLandings_aldist <- mfdb_sample_count(
   mdb,
   cols = c("age", "length"),
   params =
     list(data_source = "ldist-landings-NOR",
-         gear = c("BottomTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
          age = mfdb_interval(
@@ -88,8 +87,8 @@ TrawlNor_adist <- mfdb_sample_count(
     )
 )[[1]]
 
-png(file.path(base_dir, "figures/TrawlNor_adist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-print(plot.adist(TrawlNor_adist))
+png(file.path(base_dir, "figures/AllNorLandings_aldist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
+print(plot.adist(AllNorLandings_aldist))
 dev.off()
 
 ### OtherNor
@@ -120,31 +119,31 @@ OtherNor_ldist <- mfdb_sample_count(
 png(file.path(base_dir, "figures/OtherNor_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.ldist(OtherNor_ldist))
 dev.off()
-
-OtherNor_adist <- mfdb_sample_count(
-  mdb,
-  cols = c("age", "length"),
-  params =
-    list(data_source = "ldist-landings-NOR",
-         gear = c("Lines", "Gillnets"),
-         year = model_params$year_range,
-         timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "age", stock_params$minage:stock_params$maxage,
-           open_ended = c("upper")
-         ),
-         length = mfdb_interval(
-           "len",
-           seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
-           open_ended = c("upper","lower")
-         )
-    )
-)[[1]]
-
-png(file.path(base_dir, "figures/OtherNor_adist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-print(plot.adist(OtherNor_adist))
-dev.off()
+#
+# OtherNor_adist <- mfdb_sample_count(
+#   mdb,
+#   cols = c("age", "length"),
+#   params =
+#     list(data_source = "ldist-landings-NOR",
+#          gear = c("Lines", "Gillnets"),
+#          year = model_params$year_range,
+#          timestep = model_params$timestep_fun,
+#          age = mfdb_interval(
+#            "age", stock_params$minage:stock_params$maxage,
+#            open_ended = c("upper")
+#          ),
+#          length = mfdb_interval(
+#            "len",
+#            seq(stock_params$minlength, stock_params$maxlength,
+#                by = stock_params$dl),
+#            open_ended = c("upper","lower")
+#          )
+#     )
+# )[[1]]
+#
+# png(file.path(base_dir, "figures/OtherNor_adist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
+# print(plot.adist(OtherNor_adist))
+# dev.off()
 
 
 ##############
@@ -179,7 +178,7 @@ png(file.path(base_dir, "figures/EggaN_ldist.png"), width = pagewidth, height = 
 print(plot.ldist(EggaN_ldist))
 dev.off()
 
-EggaN_adist_female <- mfdb_sample_count(
+EggaN_aldist_female <- mfdb_sample_count(
   mdb,
   cols = c("age", "length"),
   params =
@@ -201,11 +200,11 @@ EggaN_adist_female <- mfdb_sample_count(
     )
 )[[1]]
 
-png(file.path(base_dir, "figures/EggaN_adist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-print(plot.adist(EggaN_adist_female))
+png(file.path(base_dir, "figures/EggaN_aldist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
+print(plot.adist(EggaN_aldist_female))
 dev.off()
 
-EggaN_adist_male <- mfdb_sample_count(
+EggaN_aldist_male <- mfdb_sample_count(
   mdb,
   cols = c("age", "length"),
   params =
@@ -227,8 +226,8 @@ EggaN_adist_male <- mfdb_sample_count(
     )
 )[[1]]
 
-png(file.path(base_dir, "figures/EggaN_adist_male.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-print(plot.adist(EggaN_adist_male))
+png(file.path(base_dir, "figures/EggaN_aldist_male.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
+print(plot.adist(EggaN_aldist_male))
 dev.off()
 
 ############################
@@ -285,7 +284,7 @@ dev.off()
 
 # Save
 
-save(TrawlNor_ldist, TrawlNor_adist, OtherNor_ldist, OtherNor_adist, EggaN_ldist, EggaN_adist_female, EggaN_adist_male, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
+save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
 # } else {
 #   load(file.path(base_dir, "data/Survey indices to Gadget.rda"))
 # }

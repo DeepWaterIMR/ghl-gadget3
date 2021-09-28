@@ -34,7 +34,7 @@ model <- g3_to_r(c(
   stock_actions,
   fleet_actions,
   likelihood_actions,
-  #report_actions,
+  # report_actions,
   time_actions),
   #  trace = TRUE,
   strict = TRUE)

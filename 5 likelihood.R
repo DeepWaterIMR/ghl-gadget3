@@ -67,8 +67,8 @@ likelihood_actions <- list(
   ## Length-age distributions
 
   g3l_catchdistribution(
-    'EggaN_adist',
-    EggaN_adist_female %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    'EggaN_aldist',
+    EggaN_aldist_female %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
     g3l_distribution_sumofsquares(),
@@ -76,8 +76,8 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_catchdistribution(
-    'EggaN_adist',
-    EggaN_adist_male %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    'EggaN_aldist',
+    EggaN_aldist_male %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
     g3l_distribution_sumofsquares(),

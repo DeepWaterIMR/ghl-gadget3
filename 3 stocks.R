@@ -94,7 +94,7 @@ model_params <- c(model_params, list(
 
   ## Renewal:
   'rec.sd' = list(lower = 1, upper = 5),
-  'recl' = list(lower = -5, upper = 30),
+  'recl' = list(lower = 0, upper = 30),
   ## Growth:
   'Linf' = list(lower = 80, upper = 120),
   'K' = list(lower = 40, upper = 120),
