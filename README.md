@@ -84,7 +84,7 @@ sub-stocks.
 
 1.  Move to Gadget3.
 
-    -   Done. The next step is to make the model to compile.
+    -   Done. The next step is to make the TMB model to compile.
 
 2.  Include age data.
 
@@ -97,7 +97,7 @@ sub-stocks.
     -   Implemented but not done. In theory
         `model_params$timestep_fun <- mfdb::mfdb_timestep_yearly` in
         `1 settings.R` should do the trick but the model undoubedly
-        contain bugs that need to be ironed out.
+        contains bugs that need to be ironed out.
 
 4.  Move to Bjarki’s data weighting scheme.
 
@@ -158,6 +158,6 @@ sub-stocks.
 
 16. Fix length-weight relationship
 
-    -   Make a separate document which explains the decisions behing all
+    -   Make a separate document which explains the decisions behind all
         life history parameters and initial condiitons. Split initial
         sigma by sex.

@@ -115,4 +115,4 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
     
 17. Fix length-weight relationship 
 
-    - Make a separate document which explains the decisions behing all life history parameters and initial condiitons. Split initial sigma by sex.
+    - Make a separate document which explains the decisions behind all life history parameters and initial condiitons. Split initial sigma by sex.
