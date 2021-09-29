@@ -18,7 +18,7 @@ if(exists("mdb")) mfdb:: mfdb_disconnect(mdb)
 rm(list = ls())
 source("0 run first.R")
 
-## Model settings.
+## Model settings
 
 reset_model <- FALSE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
