@@ -30,14 +30,17 @@
 ## ---------------------------
 
 # Turn actions into an R function
+
 model <- g3_to_r(c(
   stock_actions,
   fleet_actions,
   likelihood_actions,
   # report_actions,
   time_actions),
-  #  trace = TRUE,
+    trace = TRUE,
   strict = TRUE)
+
+## Define the initial R parameters
 
 param <- attr(model, 'parameter_template')
 
@@ -53,12 +56,60 @@ param[grepl('\\.init\\.sd', names(param))] <- init_sigma %>%
           gsub('.+\\.([0-9]+)','\\1',.) %>% as.numeric()) %>%
   pull(ms)
 
+# param[grepl('\\.init.\\d', names(param))] <- 1
+# param[grepl('scalar', names(param))] <- 1
+
+param[grepl('init.F', names(param))] <- 0.4
+
 ## SI's
-# param[grepl('si_beta1', names(param))] <- 1
-# param[grepl('si_beta2', names(param))] <- 1
-# param[grepl('si_igfs_si.+weight$',names(param))] <- 1
+param[grepl('si_beta', names(param))] <- 1
+param[grepl('weight$',names(param))] <- 1
 
+## Write the parameters to a csv file
 
+write.csv(t(as.data.frame(param)), file = file.path(base_dir, "data/Initial R parameters.csv"))
+
+# TMB model
+
+tmb_model <- g3_to_tmb(c(
+  stock_actions,
+  fleet_actions,
+  likelihood_actions,
+  #report_actions,
+  time_actions),
+  #  trace = TRUE,
+  strict = TRUE)
+
+## Initial TMB model parameters
+
+tmb_param <- attr(tmb_model, 'parameter_template')
+
+# Copy initial guesses from R model
+tmb_param$value <- I(param[rownames(tmb_param)])
+
+# Configure lower and upper bounds
+tmb_param$lower <- vapply(tmb_param$value, function (x) 0.5 * x[[1]], numeric(1))
+tmb_param$upper <- vapply(tmb_param$value, function (x) 2 * x[[1]], numeric(1))
+#tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$lower <- 0.0001
+#tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$upper <- 1e3
+# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
+# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
+# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
+# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
+
+# Disable optimisation for some parameters, to make life easier
+tmb_param <-
+  tmb_param %>%
+  mutate(optimise = case_when(grepl('walpha',switch)~FALSE,
+                              grepl('wbeta',switch)~FALSE,
+                              grepl('male\\.M',switch)~FALSE,
+                              grepl('init\\.sd',switch)~FALSE,
+                              grepl('_weight',switch)~FALSE,
+                              TRUE~TRUE))
+
+## Write the parameters to a csv file
+
+write.csv(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.csv"), row.names = FALSE)
 
 ## Old stuff
 

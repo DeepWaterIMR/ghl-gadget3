@@ -13,7 +13,8 @@
 
 ## Source or list custom functions used within the script
 
-source("R/stock_param_functions.R")
+# source("R/stock_param_functions.R")
+devtools::source_url("https://raw.githubusercontent.com/gadget-framework/gadget3/master/demo-ling/stock_param_functions.r") # To access updated versions of the functions
 
 ## ---------------------------
 
@@ -88,13 +89,13 @@ model_params <- c(model_params, list(
   'wbeta' = list(lower = NULL, upper = NULL),
   'init.F' = list(lower = 0.2, upper = 0.8),
   'init.sd' = list(lower = NULL, upper = NULL),
-  'scalar' = list(lower = 1, upper = 100),      ## Scalar for initial abundance and recruitment (all stocks)
+  'scalar' = list(lower = 1, upper = 1e6),      ## Scalar for initial abundance and recruitment (all stocks)
   'init' = list(lower = 0.001, upper = 200),
   'renew' = list(lower = 0.001, upper = 200),
 
   ## Renewal:
   'rec.sd' = list(lower = 1, upper = 5),
-  'recl' = list(lower = 0, upper = 30),
+  'recl' = list(lower = 10, upper = 30),
   ## Growth:
   'Linf' = list(lower = 80, upper = 120),
   'K' = list(lower = 40, upper = 120),
@@ -123,33 +124,47 @@ model_params <- c(model_params, list(
 # INITIAL ABUNDANCE
 
 f_init_abund <-
-  ~bounded(g3_param("ghl_female.scalar"), 1, 100) * bounded(
-    if (cur_time == 0)
-      g3_param_table("ghl_female.init", expand.grid(
-        age = seq(
-          min(ghl_female_imm__minage, ghl_female_mat__minage),
-          max(ghl_female_imm__maxage, ghl_female_mat__maxage))))
-    else
-      g3_param_table("ghl_female.renew", expand.grid(
-        cur_year = seq(start_year, end_year)))
-    , 0.001, 200)
+  gadget3:::f_substitute(~scalar * bounded(
+    g3_param_table(init, expand.grid(age = seq(stock_params$minage,stock_params$maxage))),
+    lower, upper),
+    c(model_params,
+      model_params$init,
+      scalar = bounded_param(female_imm,id=c('species','sex'), "scalar", model_params),
+      init = paste(g3_stock_name(female_imm,id=c('species','sex')), "init", sep=".")))
 
 m_init_abund <-
-  ~bounded(g3_param("ghl_male.scalar"), 1, 100) * bounded(
-    if (cur_time == 0)
-      g3_param_table("ghl_male.init", expand.grid(
-        age = seq(
-          min(ghl_male_imm__minage, ghl_male_mat__minage),
-          max(ghl_male_imm__maxage, ghl_male_mat__maxage))))
-    else
-      g3_param_table("ghl_male.renew", expand.grid(
-        cur_year = seq(start_year, end_year)))
-    , 0.001, 200)
+  gadget3:::f_substitute(~scalar * bounded(
+    g3_param_table(init, expand.grid(age = seq(stock_params$minage,stock_params$maxage))),
+    lower, upper),
+    c(model_params,
+      model_params$init,
+      scalar = bounded_param(male_imm,id=c('species','sex'), "scalar", model_params),
+      init = paste(g3_stock_name(male_imm,id=c('species','sex')), "init", sep=".")))
+
+# RENEWAL
+m_renewal <-
+  gadget3:::f_substitute(~scalar * bounded(
+    g3_param_table(renew, expand.grid(cur_year = seq(start_year, end_year))),
+    lower, upper),
+    c(model_params,
+      model_params$renew,
+      scalar = bounded_param(male_imm,id=c('species','sex'), "scalar", model_params),
+      renew = paste(g3_stock_name(male_imm,id=c('species','sex')), "rec", sep=".")))
+
+
+f_renewal <- gadget3:::f_substitute(~scalar * bounded(
+  g3_param_table(renew, expand.grid(cur_year =seq(start_year, end_year))),
+  lower, upper),
+  c(model_params,
+    model_params$renew,
+    scalar = bounded_param(female_imm,id=c('species','sex'), "scalar", model_params),
+    renew = paste(g3_stock_name(female_imm,id=c('species','sex')), "rec", sep=".")))
 
 ## Ensure that old fish are not immature
 # a50 is bounded
 
 prop_m_age <- ~ 1/(1 + exp(-mat.a*(age - a50)))
+
 f_prop_m_age <-
   gadget3:::f_substitute(
     prop_m_age,
@@ -165,6 +180,7 @@ m_prop_m_age <-
 ## mean length is estimated based on a Von B relationship used for immature and mature
 
 mean_l <- ~Linf * (1 - exp(-1 * K * (age - (1 + log(1 - recl/Linf)/K))))
+
 m_mean_l <-
   gadget3:::f_substitute(
     mean_l,
@@ -203,15 +219,17 @@ female_imm_actions <- list(
                               data.frame(age = seq(ghl_female_imm__minage,
                                                    ghl_female_mat__maxage))))),
     mean_f = f_mean_l,
-    stddev_f = bounded_table(female_imm, "init.sd", model_params),
+    stddev_f = ~g3_param_table("ghl_female.init.sd",
+                               data.frame(age = seq(ghl_female_imm__minage,
+                                                    ghl_female_mat__maxage))),
     alpha_f = ~g3_param("female.walpha"),
     beta_f = ~g3_param("female.wbeta")),
 
   g3a_renewal_normalparam(
     female_imm,
-    factor_f = f_init_abund,
+    factor_f = f_renewal,
     mean_f = f_mean_l,
-    stddev_f = bounded_param(female_imm,id=c('species','sex'), "rec.sd", model_params),
+    stddev_f = bounded_param(female_imm, id = c('species','sex'), "rec.sd", model_params),
     alpha_f = ~g3_param("female.walpha"),
     beta_f = ~g3_param("female.wbeta"),
     run_f = ~cur_step == 1 && age == 1 && cur_time > 0),
@@ -221,23 +239,26 @@ female_imm_actions <- list(
     impl_f = g3a_grow_impl_bbinom(
       g3a_grow_lengthvbsimple(
         bounded_param(female_imm,id=c('species','sex'), "Linf", model_params),
-        gadget3:::f_substitute(~0.001 * K,
-                               list(
-                                 K = bounded_param(female_imm,id=c('species','sex'), "K", model_params))
+        gadget3:::f_substitute(
+          ~0.001 * K,
+          list(
+            K = bounded_param(female_imm,id=c('species','sex'), "K", model_params))
         )),
       g3a_grow_weightsimple(~g3_param("female.walpha"), ~g3_param("female.wbeta")),
       beta_f = bounded_param(female_imm,id=c('species','sex'), "bbin", model_params),
       maxlengthgroupgrowth = stock_params$maxlengthgroupgrowth),
     maturity_f = g3a_mature_continuous(
-      alpha = gadget3:::f_substitute(~(0.001 * exp(mat1)),
-                                     list(mat1 = bounded_param(female_imm,id=c('species','sex'), "mat1", model_params))),
+      alpha = gadget3:::f_substitute(
+        ~(0.001 * exp(mat1)),
+        list(mat1 = bounded_param(female_imm,id=c('species','sex'), "mat1", model_params))),
       l50 = bounded_param(female_imm,id=c('species','sex'), "mat2", model_params)),
     output_stocks = list(female_mat)),
 
   g3a_naturalmortality(female_imm,
-                       g3a_naturalmortality_exp(~g3_param_table("ghl_female.M",
-                                                                data.frame(age = seq(ghl_female_imm__minage,
-                                                                                     ghl_female_mat__maxage))))),
+                       g3a_naturalmortality_exp(
+                         ~g3_param_table("ghl_female.M",
+                                         data.frame(age = seq(ghl_female_imm__minage,
+                                                              ghl_female_mat__maxage))))),
   g3a_age(female_imm,
           output_stocks = list(female_mat)),
   list())
@@ -257,40 +278,47 @@ male_imm_actions <- list(
                               data.frame(age = seq(ghl_male_imm__minage,
                                                    ghl_male_mat__maxage))))),
     mean_f = m_mean_l,
-    stddev_f = bounded_table(male_imm, "init.sd", model_params),
+    stddev_f = ~g3_param_table("ghl_male.init.sd",
+                               data.frame(age = seq(ghl_male_imm__minage,
+                                                    ghl_male_mat__maxage))),
     alpha_f = ~g3_param("male.walpha"),
     beta_f = ~g3_param("male.wbeta")),
 
-  g3a_renewal_normalparam(male_imm,
-                          factor_f = m_init_abund,
-                          mean_f = m_mean_l,
-                          stddev_f = bounded_param(male_imm,id=c('species','sex'), "rec.sd", model_params),
-                          alpha_f = ~g3_param("male.walpha"),
-                          beta_f = ~g3_param("male.wbeta"),
-                          run_f = ~cur_step == 1 && age == 1 && cur_time > 0),
+  g3a_renewal_normalparam(
+    male_imm,
+    factor_f = m_renewal,
+    mean_f = m_mean_l,
+    stddev_f = bounded_param(male_imm, id = c('species','sex'), "rec.sd", model_params),
+    alpha_f = ~g3_param("male.walpha"),
+    beta_f = ~g3_param("male.wbeta"),
+    run_f = ~cur_step == 1 && age == 1 && cur_time > 0),
 
   g3a_growmature(
     male_imm,
     impl_f = g3a_grow_impl_bbinom(
       g3a_grow_lengthvbsimple(
         bounded_param(male_imm,id=c('species','sex'), "Linf", model_params),
-        gadget3:::f_substitute(~0.001 * K,
-                               list(
-                                 K = bounded_param(male_imm,id=c('species','sex'), "K", model_params))
+        gadget3:::f_substitute(
+          ~0.001 * K,
+          list(
+            K = bounded_param(male_imm,id=c('species','sex'), "K", model_params))
         )),
       g3a_grow_weightsimple(~g3_param("male.walpha"), ~g3_param("male.wbeta")),
-      beta_f = bounded_param(male_imm,id=c('species','sex'), "bbin", model_params),
+      beta_f = bounded_param(male_imm, id = c('species','sex'), "bbin", model_params),
       maxlengthgroupgrowth = stock_params$maxlengthgroupgrowth),
     maturity_f = g3a_mature_continuous(
-      alpha = gadget3:::f_substitute(~(0.001 * exp(mat1)),
-                                     list(mat1 = bounded_param(male_imm,id=c('species','sex'), "mat1", model_params))),
+      alpha = gadget3:::f_substitute(
+        ~(0.001 * exp(mat1)),
+        list(mat1 = bounded_param(male_imm,id=c('species','sex'), "mat1", model_params))),
       l50 = bounded_param(male_imm,id=c('species','sex'), "mat2", model_params)),
     output_stocks = list(male_mat)),
 
-  g3a_naturalmortality(male_imm,
-                       g3a_naturalmortality_exp(~g3_param_table("ghl_male.M",
-                                                                data.frame(age = seq(ghl_male_imm__minage,
-                                                                                     ghl_male_mat__maxage))))),
+  g3a_naturalmortality(
+    male_imm,
+    g3a_naturalmortality_exp(
+      ~g3_param_table("ghl_male.M",
+                      data.frame(age = seq(ghl_male_imm__minage,
+                                           ghl_male_mat__maxage))))),
 
   g3a_age(male_imm,
           output_stocks = list(male_mat)),
@@ -313,15 +341,19 @@ female_mat_actions <- list(
                              data.frame(age = seq(ghl_female_imm__minage,
                                                   ghl_female_mat__maxage))))),
     mean_f = f_mean_l,
-    stddev_f = bounded_table(female_mat, "init.sd", model_params),
+    stddev_f = ~g3_param_table("ghl_female.init.sd",
+                               data.frame(age = seq(ghl_female_imm__minage,
+                                                    ghl_female_mat__maxage))),
     alpha_f = ~g3_param("female.walpha"),
     beta_f = ~g3_param("female.wbeta")),
 
   g3a_growmature(female_mat,
                  impl_f = g3a_grow_impl_bbinom(
-                   g3a_grow_lengthvbsimple(bounded_param(female_mat,id=c('species','sex'), "Linf", model_params),
-                                           gadget3:::f_substitute(~0.001 * K,
-                                                                  list(K = bounded_param(female_mat,id=c('species','sex'), "K", model_params)))),
+                   g3a_grow_lengthvbsimple(
+                     bounded_param(female_mat,id=c('species','sex'), "Linf", model_params),
+                     gadget3:::f_substitute(
+                       ~0.001 * K,
+                       list(K = bounded_param(female_mat,id=c('species','sex'), "K", model_params)))),
                    g3a_grow_weightsimple(~g3_param("female.walpha"), ~g3_param("female.wbeta")),
                    beta_f = bounded_param(female_mat,id=c('species','sex'), "bbin", model_params),
                    maxlengthgroupgrowth = stock_params$maxlengthgroupgrowth)),
@@ -353,7 +385,9 @@ male_mat_actions <- list(
                               data.frame(age = seq(ghl_male_imm__minage,
                                                    ghl_male_mat__maxage))))),
     mean_f = f_mean_l,
-    stddev_f = bounded_table(male_mat, "init.sd", model_params),
+    stddev_f = ~g3_param_table("ghl_male.init.sd",
+                               data.frame(age = seq(ghl_male_imm__minage,
+                                                    ghl_male_mat__maxage))),
     alpha_f = ~g3_param("male.walpha"),
     beta_f = ~g3_param("male.wbeta")),
 
@@ -362,16 +396,18 @@ male_mat_actions <- list(
     impl_f = g3a_grow_impl_bbinom(
       g3a_grow_lengthvbsimple(
         bounded_param(male_mat,id=c('species','sex'), "Linf", model_params),
-        gadget3:::f_substitute(~0.001 * K,
-                               list(K = bounded_param(male_mat,id=c('species','sex'), "K", model_params)))),
+        gadget3:::f_substitute(
+          ~0.001 * K,
+          list(K = bounded_param(male_mat,id=c('species','sex'), "K", model_params)))),
       g3a_grow_weightsimple(~g3_param("male.walpha"), ~g3_param("male.wbeta")),
       beta_f = bounded_param(male_mat,id=c('species','sex'), "bbin", model_params),
       maxlengthgroupgrowth = stock_params$maxlengthgroupgrowth)),
 
   g3a_naturalmortality(male_mat,
-                       g3a_naturalmortality_exp(~g3_param_table("ghl_male.M",
-                                                                data.frame(age = seq(ghl_male_imm__minage,
-                                                                                     ghl_male_mat__maxage))))),
+                       g3a_naturalmortality_exp(
+                         ~g3_param_table("ghl_male.M",
+                                         data.frame(age = seq(ghl_male_imm__minage,
+                                                              ghl_male_mat__maxage))))),
 
 
   g3a_age(male_mat),

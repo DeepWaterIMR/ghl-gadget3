@@ -21,9 +21,9 @@
 
 ## ---------------------------
 
-## Norwegian Slope survey in autumn (EggaNor)
+if(reload_data) {
 
-# if(exists("mdb")) { # Replace this with a possibility to load data from base_dir
+  ## Norwegian Slope survey in autumn (EggaNor)
 
   EggaN_biomass_female <- mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
@@ -32,7 +32,8 @@
                   length = mfdb_interval(
                     "all", c(stock_params$minlength, stock_params$maxlength),
                     open_ended = c("upper","lower")),
-                  year = model_params$year_range,
+                  # Remove 94&95 data from the SI:
+                  year = model_params$year_range[model_params$year_range >= 1996],
                   timestep = model_params$timestep_fun
     )
   )[[1]]
@@ -44,7 +45,8 @@
                   length = mfdb_interval(
                     "all", c(stock_params$minlength, stock_params$maxlength),
                     open_ended = c("upper","lower")),
-                  year = model_params$year_range,
+                  # Remove 94&95 data from the SI:
+                  year = model_params$year_range[model_params$year_range >= 1996],
                   timestep = model_params$timestep_fun
     )
   )[[1]]
@@ -53,7 +55,7 @@
                  EggaN_biomass_male %>% mutate(sex = "M")) %>%
     ggplot(., aes(x = year, y = total_weight/1e6, fill = sex)) +
     geom_area(position = position_stack(reverse = TRUE)) +
-    scale_x_continuous("Year", expand = c(0, 0)) +
+    scale_x_continuous("Year", expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
     scale_y_continuous("Survey index biomass (1000 t)", expand = c(0, 0)) +
     labs(fill = "Sex") +
     theme(legend.position = "bottom")
@@ -65,6 +67,9 @@
   save(EggaN_biomass_female, EggaN_biomass_male, file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
   rm(p)
-# } else {
-#   load(file.path(base_dir, "data/Survey indices to Gadget.rda"))
-# }
+
+
+  ## !reload_data case
+} else {
+  load(file.path(base_dir, "data/Survey indices to Gadget.rda"))
+}

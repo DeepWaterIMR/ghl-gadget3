@@ -18,16 +18,29 @@ if(exists("mdb")) mfdb:: mfdb_disconnect(mdb)
 rm(list = ls())
 source("0 run first.R")
 
-## Model settings
+## Model settings.
 
-reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
+reset_model <- FALSE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
+reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 
+### Modify reload_data
+
+if(reset_model | !dir.exists(base_dir)) {
+  reload_data <- TRUE
+
+  if(!dir.exists(base_dir)) {
+    message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
+  } else {
+   message("You want to reset the model. Setting reload_data to TRUE. Data are reloaded from MFDB.")
+  }
+}
+
 ## Connect to the MFDB database
 
-if(!exists("mdb")) {
+if(!exists("mdb") & reload_data) {
   # When the ghl-gadget-data repo is made public, this should work as mfdb_path "https://github.com/DeepWaterIMR/ghl-gadget-data/raw/main/data/mfdb/ghl.duckdb"
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
@@ -75,49 +88,28 @@ source("5 likelihood.R")
 
 source("7 initial parameters.R")
 
-## Run r-based model ####
+## Run a R-based model ####
 
 res <- model(param)
 
+## Run the TMB-based model
+
+model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
+
+fit.opt <- optim(g3_tmb_par(tmb_param),
+                 model_tmb$fn,
+                 model_tmb$gr,
+                 method = 'BFGS',
+                 control = list(trace = 2,maxit = 1000, reltol = .Machine$double.eps^2))
+
+### Save the parameters
+
+write.csv(as.data.frame(fit.opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
+
 ## Scratch code under ####
 
-# List all available reports
-# names(attributes(res))
+# Debugging tricks:
 
-## Old stuff under
-#
-#
-# ## Initial optimization
-#
-# gadget_optimize(gd, params.in = 'params.in', params.out = 'params.init')
-#
-# ## Fit and make the initial plots
-#
-# fit <- gadget_fit(gd = gd, params.in = "params.init")
-#
-# # gadget_evaluate(gd, log = "thismodelaintcrashingisit.log")
-#
-# png("figures/ICES_plot_params_init.png", width = pagewidth*1.4, height = pagewidth, units = "mm", res = 300)
-# cowplot::plot_grid(
-#   plot(fit, data = 'res.by.year', type = 'catch'),
-#   plot(fit, data = 'res.by.year', type = 'rec'),
-#   plot(fit, data = 'res.by.year', type = 'F'),
-#   plot(fit, data = 'res.by.year', type = 'total')
-# )
-# dev.off()
-#
-# ## Iterate weights and params
-#
-# gadget_iterative_stage_1(gd, params.in = 'params.init') %>%
-#   parallel::mclapply(gadget_optimize, mc.cores = parallel::detectCores()) %>%
-#   gadget_iterative_stage_2() %>%
-#   gadget_optimize()
-#
-# gadget_evaluate(gd, params.in = 'params.init', log = "whatfhappened.txt")
-#
-# ## Fit the model with "final" parameters
-#
-# fit <- gadget_fit(gd = gd, params.in = "WGTS/params.final")
-#
-#
-# ## END (scratch code under) ####
+## Print the environment of a g3 object:
+# ls(environment(f_init_abund))
+# ls(rlang::f_env(f_init_abund))

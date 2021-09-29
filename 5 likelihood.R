@@ -89,9 +89,9 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'EggaN_mat',
     EggaN_mat %>%
-       mutate(area = 1) %>%
-       rename(stock = maturity_stage) %>%
-       mutate(stock = paste0("ghl_", stock)),
+      mutate(area = 1) %>%
+      rename(stock = maturity_stage) %>%
+      mutate(stock = paste0("ghl_", stock)),
     fleets = list(EggaN),
     stocks = stocks,
     g3l_distribution_sumofsquares(),
@@ -107,8 +107,9 @@ likelihood_actions <- list(
       rename("weight" = "total_weight"), # A bug here too
     fleets = list(),
     stocks = list(female_imm, female_mat),
-    g3l_distribution_surveyindices_log(alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_female"),
-                                       beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_fenale")),
+    g3l_distribution_surveyindices_log(
+      alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_female"),
+      beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_female")),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -119,8 +120,9 @@ likelihood_actions <- list(
       rename("weight" = "total_weight"), # A bug here too
     fleets = list(),
     stocks = list(male_imm, male_mat),
-    g3l_distribution_surveyindices_log(alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_male"),
-                                       beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_nale")),
+    g3l_distribution_surveyindices_log(
+      alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_male"),
+      beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_male")),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
