@@ -150,8 +150,8 @@ if(reload_data) {
   if(!exists("EggaN_biomass_female")) source("2-2 survey indices.R")
 
   EggaN_landings <- structure(
-    data.frame(year =
-                 unique(EggaN_biomass_female$year), step = 3, area = 1, total_weight = 1),
+    data.frame(
+      year = unique(EggaN_biomass_female$year), step = 3, area = 1, total_weight = 1),
     area_group = mfdb_group(`1` = 1))
 
   png(file.path(base_dir, "figures/EggaN_landings.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)

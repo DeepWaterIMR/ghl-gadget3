@@ -1,6 +1,6 @@
 ## ---------------------------
 ##
-## Script name: NOTE: THIS FILE IS NOT FINISHED YET
+## Script name:
 ##
 ## Purpose of script:
 ##
@@ -40,73 +40,26 @@ if(reload_data) {
     select(length, weight, sex) %>%
     collect()
 
-  lw.dat[is.na(lw.dat$sex) & lw.dat$length <= 25, "sex"] <- sample(c("F", "M"), nrow(lw.dat[is.na(lw.dat$sex) & lw.dat$length <= 25,]), replace = TRUE) # Randomly allocate sex for fish with missing sex information and under 25 cm.
+  # Randomly allocate sex for fish with missing sex information and under 25 cm.
+  lw.dat[is.na(lw.dat$sex) & lw.dat$length <= 25, "sex"] <-
+    sample(c("F", "M"),
+           nrow(lw.dat[is.na(lw.dat$sex) & lw.dat$length <= 25,]),
+           replace = TRUE)
 
   lw.dat <- lw.dat %>% filter(!is.na(sex))
 
-  lw_constants <- lw.dat %>%
-    split(.$sex) %>%
-    purrr::map(~nls(I(weight)~a*length^b,., start = list(a =1e-6,b=3))) %>%
-    purrr::map(broom::tidy) %>%
-    purrr::map(pull, estimate)
+  invisible(capture.output({
+    lw <- ggFishPlots::plot_lw(lw.dat, split.by.sex = TRUE, use.nls = TRUE)}))
 
-  lw_constants <- lapply(lw_constants, function(k) {names(k) <- c("a", "b"); k})
-
-  #
-  #   lm(log(weight)~log(length),.) %>%
-  #   broom::tidy() %>%
-  #   pull(estimate)
-  #
-  # ## Transport back to right dimension
-  # names(lw_constants) <- c("a", "b")
-  # lw_constants[1] <- exp(lw_constants[1])
+  lw_constants <- lw$params
 
   ## Control plot ####
 
   png(file.path(base_dir, "figures/Length_weight_relationship.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-
-  tmp <- bind_rows(tibble(length = 0:max(lw.dat[lw.dat$sex == "F", "length"]),
-                          weight = lw_constants[[1]][[1]]*length^lw_constants[[1]][[2]],
-                          sex = "F"),
-                   tibble(length = 0:max(lw.dat[lw.dat$sex == "M", "length"]),
-                          weight = lw_constants[[2]][[1]]*length^lw_constants[[2]][[2]],
-                          sex = "M")
-  )
-
-  tmp2 <- bind_rows(lapply(seq_along(lw_constants), function(i) {
-    out <- data.frame(matrix(lw_constants[[i]], ncol = 2))
-    names(out) <- names(lw_constants[[i]])
-    out$sex <- names(lw_constants[i])
-    out
-  }))
-
-  p1 <- ggplot() +
-    geom_point(data = lw.dat, aes(x = length, y = weight, color = sex), shape = 21, alpha = 0.4, size = 0.5) +
-    facet_wrap(~sex) +
-    annotate("line", x = tmp[tmp$sex == "F",]$length, y = tmp[tmp$sex == "F",]$weight, color = "tomato4") +
-    annotate("line", x = tmp[tmp$sex == "M",]$length, y = tmp[tmp$sex == "M",]$weight, color = "dodgerblue4") +
-    geom_text(data = tmp2,
-              aes(x = 0, y = Inf,
-                  label = paste("a (kg) =", round(a, 9),
-                                "\na (g) =", round(a*1000, 6),
-                                "\nb =", round(b, 3))),
-              vjust = 1, hjust = 0) +
-    scale_color_manual("Sex", values = c("#FF5F68", "#449BCF")) +
-    labs(x = "Length (cm)", y = "Weight (kg)") +
-    theme(legend.position = "none")
-
-  p2 <- ggplot() +
-    geom_point(data = lw.dat, aes(x = log(length), y = log(weight), color = sex), shape = 21, alpha = 0.4, size = 0.5) +
-    facet_wrap(~sex) +
-    annotate("line", x = log(tmp[tmp$sex == "F",]$length), y = log(tmp[tmp$sex == "F",]$weight), color = "tomato4") +
-    annotate("line", x = log(tmp[tmp$sex == "M",]$length), y = log(tmp[tmp$sex == "M",]$weight), color = "dodgerblue4") +
-    scale_color_manual("Sex", values = c("#FF5F68", "#449BCF")) +
-    theme(legend.position = "none")
-
-  print(cowplot::plot_grid(p1, p2, labels = "auto", ncol = 1))
+  print(lw$plot)
   dev.off()
 
-  rm(lw.dat, tmp, tmp2, p1, p2)
+  rm(lw.dat, lw)
 
   ########################################################
   ## Initial conditions sigma (of mean length by age) ####
@@ -114,8 +67,24 @@ if(reload_data) {
   age_dat <- mfdb_dplyr_sample(mdb) %>%
     dplyr::filter(data_source == "ldist-surveys-NOR",
                   !is.na(age)) %>%
-    dplyr::select(age,length) %>%
-    dplyr::collect()
+    dplyr::select(age, sex, maturity_stage, length) %>%
+    dplyr::collect() %>%
+    mutate(maturity = as.integer(maturity_stage >= 3)) %>%
+    dplyr::select(-maturity_stage)
+
+  ## Growth curve
+
+  growth <- ggFishPlots::plot_growth(age_dat, split.by.sex = TRUE)
+
+  png(file.path(base_dir, "figures/Growth_curve.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(growth$plot)
+  dev.off()
+
+  von_b_params <- growth$params
+
+  rm(growth)
+
+  ## Sigmas (these need likely be split to sex)
 
   mean_lengths <- age_dat %>%
     dplyr::group_by(age) %>%
@@ -126,26 +95,36 @@ if(reload_data) {
 
   init_sigma <- tibble(
     age = stock_params$minage:stock_params$maxage,
-    ms = predict(mod_sigma, data.frame(age = stock_params$minage:stock_params$maxage))
+    ms = predict(mod_sigma, data.frame(age = stock_params$minage:stock_params$maxage)),
+    ml = predict(mod_mean, data.frame(age = stock_params$minage:stock_params$maxage))
   )
+
+  init_sigma_coef <-
+    init_sigma %>%
+    filter(age > 3 & age < 20) %>%
+    lm(I(ms/ml)~I(1/age) + age, data = .) %>%
+    coefficients() %>%
+    setNames(c('alpha', 'beta', 'gamma'))
 
   ## Control plots
 
-  tmp <- init_sigma %>% rename("ms_mod" = "ms") %>% full_join(mean_lengths, by = "age") %>%
-    mutate(ml_mod = predict(mod_mean, data.frame(age = min(age):max(age))))
-  tmp2 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..3, ..4)))
+  tmp <- init_sigma %>%
+    rename("ms_mod" = "ms", "ml_mod" = "ml") %>%
+    full_join(mean_lengths, by = "age")
+
+  tmp2 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..4, ..5)))
   tmp[is.na(tmp$ml),"ml"] <- tmp[is.na(tmp$ml),"ml_mod"]
 
   tmp3 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..3, ..2)))
 
   png(file.path(base_dir, "figures/Initial_sigma.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
   p <- ggplot() +
+    facet_wrap(~age, scales = "free_y") +
     geom_density(data = age_dat, aes(x = length, color = "Data", fill = "Data")) +
     geom_line(data = tmp2, aes(x = length, y = density, color = "Mean")) +
     geom_line(data = tmp3, aes(x = length, y = density, color = "Modeled")) +
     scale_fill_manual("Fill", values = "grey") +
     scale_color_manual("Color", values = c("black", "red", "blue")) +
-    facet_wrap(~age, scales = "free_y") +
     labs(x = "Length (cm)", y = "Density")
 
   suppressWarnings(print(p))
@@ -159,25 +138,47 @@ if(reload_data) {
     geom_freqpoly(data = age_dat, aes(x = length)) +
     facet_wrap(~age)  +
     labs(x = "Length (cm)", y = "Count")
-  suppressMessages(print(p))
+  suppressWarnings(suppressMessages(print(p)))
   dev.off()
-
-  rm(age_dat, tmp, tmp2, tmp3, p)
 
   # Split initial sigma by sex?
 
-  ##############################
-  ## Initial maturity ogive ####
+  ###############################
+  ## Initial maturity ogives ####
 
-  mat_l50 <- plot.maturity(filter.exp = 'data_source == "ldist-surveys-NOR"', plot = FALSE)
+  # Should we use all survey data ('data_source == "ldist-surveys-NOR"') or only EggaN ('sampling_type == "ENS"') for maturity estimation? Applies also to 2-4 catchdistribution
+
+    mat_dat <- mfdb_dplyr_sample(mdb) %>%
+      filter(!is.na(length), !is.na(sex), !is.na(maturity_stage)) %>%
+      filter(data_source == "ldist-surveys-NOR") %>%
+      select(year, month, areacell, age, sex, maturity_stage, length) %>%
+      collect() %>%
+      mutate(maturity = as.integer(maturity_stage >= 3))
+
+  mat_l50 <- plot_maturity(mat_dat, split.by.sex = TRUE)
+
+  png(file.path(base_dir, "figures/Maturity_ogive_by_length.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  suppressMessages(print(mat_l50$plot))
+  dev.off()
+
+  mat_l50 <- mat_l50$params
+
+  mat_a50 <- plot_maturity(age_dat, length = "age", split.by.sex = T, xlab = "Age",
+                           length.bin.width = 1, length.unit = "years")
+
+  png(file.path(base_dir, "figures/Maturity_ogive_by_age.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  suppressMessages(print(mat_a50$plot))
+  dev.off()
+
+  mat_a50 <- mat_a50$params
 
   #############################
   # Save the required data ####
 
-  save(lw_constants, init_sigma, mat_l50, file = file.path(base_dir, "data/Initial stock parameters.rda"))
+  save(lw_constants, init_sigma, mat_l50, mat_a50, von_b_params, file = file.path(base_dir, "data/Initial stock parameters.rda"))
 
+  rm(age_dat, tmp, tmp2, tmp3, p)
 
-  ## !reload_data case
-} else {
+} else { ## !reload_data case
   load(file.path(base_dir, "data/Initial stock parameters.rda"))
 }

@@ -60,7 +60,7 @@ if(reload_data) {
     labs(fill = "Sex") +
     theme(legend.position = "bottom")
 
-  png(file.path(base_dir, "figures/EggaN_index.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  png(file.path(base_dir, "figures/EggaN_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
   print(p)
   dev.off()
 

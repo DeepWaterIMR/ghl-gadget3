@@ -27,7 +27,7 @@ if(!dir.exists(base_dir)) {
 
 model_params <- list()
 
-model_params$year_range <- 1992:2020
+model_params$year_range <- 1992:2021
 model_params$timestep_fun <- mfdb::mfdb_timestep_quarterly
 model_params$female_stock <- c("female_imm", "female_mat")
 model_params$male_stock <- c("male_imm", "male_mat")
@@ -37,7 +37,8 @@ model_params$other_fleets <- c("OtherNor", "OtherRus")
 model_params$hist_fleets <- c("HistNor", "HistRus", "Internat")
 model_params$survey_fleets <- c("EggaN")
 model_params$fleet_names <- c(model_params$trawl_fleets, model_params$other_fleets, model_params$hist_fleets, model_params$survey_fleets)
-model_params$species_name <- 'GHL'
+model_params$species_name <- "Greenland halibut"
+model_params$species_code <- "GHL"
 
 ## Model term glossary
 # - m = male
@@ -52,24 +53,24 @@ model_params$species_name <- 'GHL'
 stock_params <- list()
 
 stock_params$dl <- 1 # delta length i.e. length group binning
-stock_params$maxlengthgroupgrowth <- 4
+stock_params$maxlengthgroupgrowth <- 10
 
 stock_params$male_imm$minage <- 1
-stock_params$male_imm$maxage <- 30
+stock_params$male_imm$maxage <- 10
 stock_params$male_imm$minlength <- 1
 stock_params$male_imm$maxlength <- 120
 
 stock_params$female_imm$minage <- 1
-stock_params$female_imm$maxage <- 30
+stock_params$female_imm$maxage <- 10
 stock_params$female_imm$minlength <- 1
 stock_params$female_imm$maxlength <- 120
 
-stock_params$male_mat$minage <- 1
+stock_params$male_mat$minage <- 3
 stock_params$male_mat$maxage <- 30
 stock_params$male_mat$minlength <- 1
 stock_params$male_mat$maxlength <- 120
 
-stock_params$female_mat$minage <- 1
+stock_params$female_mat$minage <- 3
 stock_params$female_mat$maxage <- 30
 stock_params$female_mat$minlength <- 1
 stock_params$female_mat$maxlength <- 120
@@ -89,7 +90,7 @@ defaults <- list(
   area = mfdb::mfdb_group("1" = MainAreaFilter),
   timestep = model_params$timestep_fun,
   year = model_params$year_range,
-  species = 'GHL')
+  species = model_params$species_code)
 
 # Map area names to integer area numbers (in this case only "1" ==> 1, but could be anything)
 areas <- structure(

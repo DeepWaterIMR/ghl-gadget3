@@ -56,18 +56,18 @@ Internat <- g3_fleet(c("Internat", "fishery")) %>%
 
 
 ## Bounded parameters for fleet suitabilities
-fleet_bounds <- list(
-
-  'trawl.l50' = list(lower = 40, upper = 100),
-  'trawl.alpha' = list(lower = 0.01, upper = 1),
-
-  'other.l50' = list(lower = 40, upper = 100),
-  'other.alpha' = list(lower = 0.01, upper = 1),
-
-  'survey.l50' = list(lower = 40, upper = 100),
-  'survey.alpha' = list(lower = 0.01, upper = 1)
-
-)
+# fleet_bounds <- list(
+#
+#   'trawl.l50' = list(lower = 40, upper = 100),
+#   'trawl.alpha' = list(lower = 0.01, upper = 1),
+#
+#   'other.l50' = list(lower = 40, upper = 100),
+#   'other.alpha' = list(lower = 0.01, upper = 1),
+#
+#   'survey.l50' = list(lower = 40, upper = 100),
+#   'survey.alpha' = list(lower = 0.01, upper = 1)
+#
+# )
 
 ## Create fleet actions
 
@@ -81,8 +81,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','trawl.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','trawl.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'trawl.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'trawl.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','trawl.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','trawl.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('TrawlNor_landings',
@@ -101,8 +107,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','other.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','other.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'other.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'other.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','other.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','other.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('OtherNor_landings',
@@ -121,8 +133,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','trawl.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','trawl.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'trawl.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'trawl.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','trawl.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','trawl.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('TrawlRus_landings',
@@ -141,8 +159,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','other.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','other.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'other.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'other.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','other.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','other.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('OtherRus_landings',
@@ -161,8 +185,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','other.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','other.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'other.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'other.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','other.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','other.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('Internat_landings',
@@ -181,8 +211,14 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              bounded_param(x, id = 'species','survey.alpha',fleet_bounds),
-              bounded_param(x, id = 'species','survey.l50',fleet_bounds))),
+              g3_stock_param(x, id = 'species', 'survey.alpha',
+                             setup_options$bound_params),
+              g3_stock_param(x, id = 'species', 'survey.l50',
+                             setup_options$bound_params)
+              # bounded_param(x, id = 'species','survey.alpha',fleet_bounds),
+              # bounded_param(x, id = 'species','survey.l50',fleet_bounds)
+              )
+            ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('EggaN_landings',

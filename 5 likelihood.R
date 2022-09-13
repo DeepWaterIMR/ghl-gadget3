@@ -86,17 +86,19 @@ likelihood_actions <- list(
 
   ## Maturity proportions
 
-  g3l_catchdistribution(
-    'EggaN_mat',
-    EggaN_mat %>%
-      mutate(area = 1) %>%
-      rename(stock = maturity_stage) %>%
-      mutate(stock = paste0("ghl_", stock)),
-    fleets = list(EggaN),
-    stocks = stocks,
-    g3l_distribution_sumofsquares(),
-    nll_breakdown = nll_breakdown,
-    report = lik_report),
+  # g3l_catchdistribution(
+  #   'EggaN_mat',
+  #   EggaN_mat %>%
+  #     mutate(area = 1) %>%
+  #     rename(stock = maturity_stage) %>%
+  #     mutate(stock = paste0("ghl_", stock)),
+  #   fleets = list(EggaN),
+  #   stocks = stocks,
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  # Error in if (all(diff(ag) == 1)) { :
+  # missing value where TRUE/FALSE needed
 
   ## Survey indices
 

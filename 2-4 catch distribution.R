@@ -39,7 +39,7 @@ if(reload_data) {
   ### TrawlNor
 
   ## A problem for ldist data allocation to sexes: most of the data do not contain sex information! Therefore, not done in the current model. Must be solved in another way.
-  # mfdb_dplyr_sample(mdb) %>% filter(data_source == "ldist-landings-NOR") %>% group_by(sex) %>% count() %>% mutate(pr = 100*(n/sum(n, na.rm = TRUE))) %>% collect()
+  # mfdb_dplyr_sample(mdb) %>% filter(data_source == "ldist-landings-NOR") %>% group_by(sex) %>% count() %>% collect() %>% mutate(pr = 100*(n/sum(n, na.rm = TRUE)))
 
   TrawlNor_ldist <- mfdb_sample_count(
     mdb,
@@ -232,10 +232,6 @@ if(reload_data) {
 
   ############################
   ## Maturity proportions ####
-
-  png(file.path(base_dir, "figures/Maturity_ogive.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-  print(plot.maturity('sampling_type == "ENS"'))
-  dev.off()
 
   EggaN_mat <- mfdb_concatenate_results(
     mfdb_sample_count(

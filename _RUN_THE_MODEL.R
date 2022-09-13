@@ -4,7 +4,9 @@
 ##
 ## Purpose of script:
 ##
-## Author: Mikko Vihtakari // Institute of Marine Research, Norway
+## Authors:
+## Mikko Vihtakari // Institute of Marine Research, Norway
+## Will Butler and Bjarki Elvarsson // Marine and Freshwater Research Institute, Iceland
 ## Email: mikko.vihtakari@hi.no
 ##
 ## Date Created: 2021-02-12
@@ -16,17 +18,39 @@
 if(exists("mdb")) mfdb:: mfdb_disconnect(mdb)
 
 rm(list = ls())
+
 source("0 run first.R")
+source("R/stock_param_functions.R")
+source('R/g3_iterative.R')
+source('R/g3_init_guess.R')
+source('R/g3_jitter.R')
+source('R/get_gadget_plots.R')
+source('R/g3_retro.R')
+source('R/step-utils.R')
 
 ## Model settings
 
-reset_model <- FALSE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
+reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
+run_iterative <- TRUE # Whether or not to run iterative reweighting
+run_retro <- FALSE # Run retrospective analysis?
 
-### Modify reload_data
+## Optimisation mode (param_opt_mode), options:
+# (1) parameters are bounded internally (ie using the bounded function) works with 'BFGS' optim method
+# (2) parameters are bounded externally so the optim function must use a box-constrained optimisation method
+# (3) global search, all parameters unbounded, unconstrained optimisation can be used (eg 'BFGS')
+
+setup_options <- list(param_opt_mode = 1,
+                      initial_abund_mode = 1)
+
+## Whether or not to bound parameters internally
+setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FALSE)
+
+###########################
+### Modify reload_data ####
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
@@ -91,10 +115,14 @@ source("7 initial parameters.R")
 ## Run a R-based model ####
 
 res <- model(param)
+fit <- gadget3:::g3_fit(model,param)
+
 
 ## Run the TMB-based model
 
 model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
+
+
 
 fit.opt <- optim(g3_tmb_par(tmb_param),
                  model_tmb$fn,
