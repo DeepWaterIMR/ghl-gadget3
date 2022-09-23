@@ -8,7 +8,7 @@
 #### Libraries ----
 
 # Package names
-packages <- c("remotes", "tidyverse", "reshape2", "data.table", "DBI", "mfdb", "gadget3", "cowplot", "fishmethods", "ggFishPlots")
+packages <- c("remotes", "tidyverse", "reshape2", "data.table", "DBI", "mfdb", "gadget3", "gadgetutils", "cowplot", "fishmethods", "ggFishPlots")
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -21,6 +21,10 @@ if (any(installed_packages == FALSE)) {
 
   if("gadget3" %in% packages[!installed_packages]) {
     remotes::install_github("gadget-framework/gadget3", upgrade = "never")
+  }
+
+  if("gadgetutils" %in% packages[!installed_packages]) {
+    remotes::install_github("gadget-framework/gadgetutils", upgrade = "never")
   }
 
   if("ggFishPlots" %in% packages[!installed_packages]) {

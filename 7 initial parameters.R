@@ -1,32 +1,9 @@
 ## ---------------------------
 ##
-## Script name:
+## Script name: Gadget initial parameters
 ##
-## Purpose of script:
+## Purpose of script: Build the model and define initial parameters
 ##
-## Author: Mikko Vihtakari // Institute of Marine Research, Norway
-## Email: mikko.vihtakari@hi.no
-##
-## Date Created: 2021-09-17
-##
-## ---------------------------
-
-## Source the run first script
-
-# source("0 run first.R")
-
-## ---------------------------
-
-## Load packages
-
-## ---------------------------
-
-## Source or list custom functions used within the script
-
-## ---------------------------
-
-## Read data
-
 ## ---------------------------
 
 ## Collate actions
@@ -44,66 +21,66 @@ model <- g3_to_r(actions, trace = TRUE)
 #model <- edit(model)
 
 ## Define the initial R parameters
-
-param <- attr(model, 'parameter_template')
-
-param[grepl('_female.walpha$', names(param))] <- lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate)
-param[grepl('_male.walpha$', names(param))] <- lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate)
-param[grepl('_female.wbeta$', names(param))] <- lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate)
-param[grepl('_male.wbeta$', names(param))] <- lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate)
-param[grepl('\\.bbin$', names(param))] <- 6
-param[grepl('male\\.M\\.', names(param))] <- 0.1
-param[grepl('female\\.M\\.', names(param))] <- 0.1
-param[grepl('\\.rec\\.sd$', names(param))] <- 1
-
-param[grepl('\\.init\\.sd', names(param))] <- init_sigma %>%
-  slice(names(param[grepl('\\.init\\.sd', names(param))]) %>%
-          gsub('.+\\.([0-9]+)','\\1',.) %>% as.numeric()) %>%
-  pull(ms)
-
-# param[grepl('\\.init.\\d', names(param))] <- 1
-# param[grepl('scalar', names(param))] <- 1
-
-param[grepl('init.F', names(param))] <- 0.4
-
-## SI's
-param[grepl('si_beta', names(param))] <- 1
-param[grepl('weight$',names(param))] <- 1
-
-## Write the parameters to a csv file
-
-write.csv(t(as.data.frame(param)), file = file.path(base_dir, "data/Initial R parameters.csv"))
-
-# TMB model
-
-tmb_model <- g3_to_tmb(actions)
-
-## Initial TMB model parameters
-
-tmb_param <- attr(tmb_model, 'parameter_template')
-
-# Copy initial guesses from R model
-tmb_param$value <- I(param[rownames(tmb_param)])
-
-# Configure lower and upper bounds
-tmb_param$lower <- vapply(tmb_param$value, function (x) 0.5 * x[[1]], numeric(1))
-tmb_param$upper <- vapply(tmb_param$value, function (x) 2 * x[[1]], numeric(1))
-#tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$lower <- 0.0001
-#tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$upper <- 1e3
-# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
-# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
-# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
-# tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
+#
+# param <- attr(model, 'parameter_template')
+#
+# param[grepl('_female.walpha$', names(param))] <- lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate)
+# param[grepl('_male.walpha$', names(param))] <- lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate)
+# param[grepl('_female.wbeta$', names(param))] <- lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate)
+# param[grepl('_male.wbeta$', names(param))] <- lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate)
+# param[grepl('\\.bbin$', names(param))] <- 6
+# param[grepl('male\\.M\\.', names(param))] <- 0.1
+# param[grepl('female\\.M\\.', names(param))] <- 0.1
+# param[grepl('\\.rec\\.sd$', names(param))] <- 1
+#
+# param[grepl('\\.init\\.sd', names(param))] <- init_sigma %>%
+#   slice(names(param[grepl('\\.init\\.sd', names(param))]) %>%
+#           gsub('.+\\.([0-9]+)','\\1',.) %>% as.numeric()) %>%
+#   pull(ms)
+#
+# # param[grepl('\\.init.\\d', names(param))] <- 1
+# # param[grepl('scalar', names(param))] <- 1
+#
+# param[grepl('init.F', names(param))] <- 0.4
+#
+# ## SI's
+# param[grepl('si_beta', names(param))] <- 1
+# param[grepl('weight$',names(param))] <- 1
+#
+# ## Write the parameters to a csv file
+#
+# write.csv(t(as.data.frame(param)), file = file.path(base_dir, "data/Initial R parameters.csv"))
+#
+# # TMB model
+#
+# tmb_model <- g3_to_tmb(actions)
+#
+# ## Initial TMB model parameters
+#
+# tmb_param <- attr(tmb_model, 'parameter_template')
+#
+# # Copy initial guesses from R model
+# tmb_param$value <- I(param[rownames(tmb_param)])
+#
+# # Configure lower and upper bounds
+# # tmb_param$lower <- vapply(tmb_param$value, function (x) 0.5 * x[[1]], numeric(1))
+# # tmb_param$upper <- vapply(tmb_param$value, function (x) 2 * x[[1]], numeric(1))
+# #tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$lower <- 0.0001
+# #tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$upper <- 1e3
+# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
+# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
+# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
+# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
 
 # Disable optimisation for some parameters, to make life easier
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 1, 0.001, 1000, 1) %>%
-  g3_init_guess('\\.init', 1, 0.001, 1000, 1) %>%
+  g3_init_guess('\\.rec', 500, 0.001, 1000, 1) %>%
+  g3_init_guess('\\.init', 500, 0.001, 1000, 1) %>%
   g3_init_guess('recl', 12, 10, 30, 1) %>%
   g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
-  g3_init_guess('rec.scalar', 400, 1, 500, 1) %>%
-  g3_init_guess('init.scalar', 200, 1, 300, 1) %>%
+  g3_init_guess('rec.scalar', 250, 1, 500, 1) %>%
+  g3_init_guess('init.scalar', 150, 1, 300, 1) %>%
   g3_init_guess('Linf', 90, 80, 120, 1) %>%
   g3_init_guess('\\.K', 50, 40, 120, 1) %>%
   g3_init_guess('bbin', 6, 1e-08, 100, 1) %>%
@@ -112,59 +89,57 @@ tmb_param <-
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   g3_init_guess('\\.M', 0.15, 0.001, 1, 0) %>%
   g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
-  g3_init_guess('_female.mat_initial_a50', mat_l50 %>% filter(sex == "F") %>% pull(slope), 3, 25, 0) %>%
-  g3_init_guess('_male.mat_initial_a50', mat_l50 %>% filter(sex == "M") %>% pull(slope), 3, 25, 0) %>%
+  g3_init_guess('_female.mat_initial_a50',
+                mat_l50 %>% filter(sex == "F") %>% pull(slope), 3, 25, 0) %>%
+  g3_init_guess('_male.mat_initial_a50',
+                mat_l50 %>% filter(sex == "M") %>% pull(slope), 3, 25, 0) %>%
   #  g3_init_guess('prop_mat0', 0.5, 0.1, 0.9, 0) %>%
   #  g3_init_guess('B0', 100, 1, 5000, 1) %>%
-  g3_init_guess('mat1', log(70), log(10), log(200), 1) %>%
-  # g3_init_guess('mat1', 0, 10, 200, 1) %>%
-  g3_init_guess('_female.mat2', mat_l50$mean[1], 0.75*mat_l50$mean[1], 1.25*mat_l50$mean[1], 1) %>%
-  g3_init_guess('_male.mat2', mat_l50$mean[2], 0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2], 1) %>%
+  g3_init_guess('mat1', 70, 10, 200, 1) %>% # these were log() before
+  g3_init_guess('_female.mat2', mat_l50$mean[1],
+                0.75*mat_l50$mean[1], 1.25*mat_l50$mean[1], 1) %>%
+  g3_init_guess('_male.mat2', mat_l50$mean[2],
+                0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2], 1) %>%
   g3_init_guess('sigma_alpha', init_sigma_coef[['alpha']], -1, 1, 0) %>%
   g3_init_guess('sigma_beta', init_sigma_coef[['beta']], 0, 2, 0) %>%
   g3_init_guess('sigma_gamma', init_sigma_coef[['gamma']], 0, 1, 0) %>%
-  g3_init_guess('female.walpha', lw_constants$`F`[[1]], 1e-10, 1, 0) %>%
-  g3_init_guess('female.wbeta', lw_constants$`F`[[2]], 2, 4, 0) %>%
-  g3_init_guess('male.walpha', lw_constants$M[[1]], 1e-10, 1, 0) %>%
-  g3_init_guess('male.wbeta', lw_constants$M[[1]], 2, 4, 0)
-  # mutate(optimise = case_when(grepl('walpha',switch)~FALSE,
-  #                             grepl('wbeta',switch)~FALSE,
-  #                             grepl('male\\.M',switch)~FALSE,
-  #                             grepl('init\\.sd',switch)~FALSE,
-  #                             grepl('_weight',switch)~FALSE,
-  #                             TRUE~TRUE))
-
-## Initial sd's
-if (any(grepl('\\.init\\.sd', tmb_param$switch))){
-
-  tmb_param[grepl('female_mat\\.init\\.sd', tmb_param$switch), 'value'] <-
-    init_sigma %>% filter(age %in%
-                            gadget3:::stock_definition(female_mat, 'minage'):
-                            gadget3:::stock_definition(female_mat, 'maxage')) %>% .$ms
-
-  tmb_param[grepl('male_mat\\.init\\.sd', tmb_param$switch), 'value'] <-
-    init.sigma %>% filter(age %in%
-                            gadget3:::stock_definition(male_mat, 'minage'):
-                            gadget3:::stock_definition(male_mat, 'maxage')) %>% .$ms
-
-  tmb_param[grepl('female_imm\\.init\\.sd', tmb_param$switch), 'value'] <-
-    init.sigma %>% filter(age %in%
-                            gadget3:::stock_definition(female_imm, 'minage'):
-                            gadget3:::stock_definition(female_imm, 'maxage')) %>% .$ms
-
-  tmb_param[grepl('male_imm\\.init\\.sd', tmb_param$switch), 'value'] <-
-    init.sigma %>% filter(age %in%
-                            gadget3:::stock_definition(male_imm, 'minage'):
-                            gadget3:::stock_definition(male_imm, 'maxage')) %>% .$ms
-
-  ## Turn off optimisation
-  tmb_param <-
-    tmb_param %>%
-    mutate(optimise = case_when(grepl('init.sd', switch) ~ FALSE,
-                                grepl('.M.[\\.[0-9]', switch) ~ FALSE,
-                                TRUE~optimise))
-}
-
+  g3_init_guess('female.walpha',
+                lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate),
+                1e-10, 1, 0) %>%
+  g3_init_guess('female.wbeta',
+                lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate),
+                2, 4, 0) %>%
+  g3_init_guess('male.walpha',
+                lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate),
+                1e-10, 1, 0) %>%
+  g3_init_guess('male.wbeta',
+                lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate),
+                2, 4, 0) %>%
+  g3_init_guess(pattern = 'female_mat\\.init\\.sd',
+                value = init_sigma %>%
+                  filter(age %in%
+                           stock_params$female_mat$minage:
+                           stock_params$female_mat$maxage) %>%
+                  pull(ms),
+                lower = 0, upper = 20, optimise = FALSE) %>%
+  g3_init_guess('male_mat\\.init\\.sd',
+                init_sigma %>%
+                  filter(age %in%
+                           stock_params$male_mat$minage:
+                           stock_params$male_mat$maxage) %>%
+                  pull(ms), 0, 20, 0) %>%
+  g3_init_guess('female_imm\\.init\\.sd',
+                init_sigma %>%
+                  filter(age %in%
+                           stock_params$female_imm$minage:
+                           stock_params$female_imm$maxage) %>%
+                  pull(ms), 0, 20, 0) %>%
+  g3_init_guess('male_imm\\.init\\.sd',
+                init_sigma %>%
+                  filter(age %in%
+                           stock_params$male_imm$minage:
+                           stock_params$male_imm$maxage) %>%
+                  pull(ms), 0, 20, 0)
 
 
 ## Write the parameters to a csv file

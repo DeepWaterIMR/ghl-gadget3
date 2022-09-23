@@ -4,11 +4,6 @@
 ##
 ## Purpose of script: Set up file structure and define parameters
 ##
-## Author: Mikko Vihtakari // Institute of Marine Research, Norway
-## Email: mikko.vihtakari@hi.no
-##
-## Date Created: 2021-02-22
-##
 ## ---------------------------
 
 ## Set up the model folders
@@ -53,7 +48,7 @@ model_params$species_code <- "GHL"
 stock_params <- list()
 
 stock_params$dl <- 1 # delta length i.e. length group binning
-stock_params$maxlengthgroupgrowth <- 10
+stock_params$maxlengthgroupgrowth <- 10 # Maximum number of length groups a stock can group within a time step (maxlengthgroupgrowth).  Default within gadget is 15
 
 stock_params$male_imm$minage <- 1
 stock_params$male_imm$maxage <- 10
