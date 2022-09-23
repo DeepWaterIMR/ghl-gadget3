@@ -18,27 +18,30 @@ likelihood_actions <- list(
 
   g3l_catchdistribution(
     'trawl_ldist',
-    TrawlNor_ldist %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    TrawlNor_ldist,
     fleets = list(TrawlNor, TrawlRus),
     stocks = stocks,
+    area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
   g3l_catchdistribution(
     'other_ldist',
-    TrawlNor_ldist %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    TrawlNor_ldist,
     fleets = list(OtherNor, OtherRus, Internat),
     stocks = stocks,
+    area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
   g3l_catchdistribution(
     'EggaN_ldist',
-    EggaN_ldist %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    EggaN_ldist,
     fleets = list(EggaN),
     stocks = stocks,
+    area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
@@ -47,18 +50,20 @@ likelihood_actions <- list(
 
   g3l_catchdistribution(
     'EggaN_aldist',
-    EggaN_aldist_female %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    EggaN_aldist_female,
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
+    area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
   g3l_catchdistribution(
     'EggaN_aldist',
-    EggaN_aldist_male %>% mutate(area = 1), # This hack due to a bug in g3/mfdb
+    EggaN_aldist_male,
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
+    area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
@@ -84,10 +89,10 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'EggaN_si_female',
     EggaN_biomass_female %>%
-      mutate(area = 1) %>% # This hack due to a bug in g3/mfdb
-      rename("weight" = "total_weight"), # A bug here too
+      rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = list(female_imm, female_mat),
+    area_group = c(all = 1),
     g3l_distribution_surveyindices_log(
       alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_female"),
       beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_female")),
@@ -97,10 +102,10 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'EggaN_si_male',
     EggaN_biomass_male %>%
-      mutate(area = 1) %>% # This hack due to a bug in g3/mfdb
-      rename("weight" = "total_weight"), # A bug here too
+      rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = list(male_imm, male_mat),
+    area_group = c(all = 1),
     g3l_distribution_surveyindices_log(
       alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_male"),
       beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_male")),
