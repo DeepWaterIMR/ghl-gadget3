@@ -147,24 +147,29 @@ fit.opt <- optim(g3_tmb_par(tmb_param),
 write.csv(as.data.frame(fit.opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
 save(fit.opt, file = file.path(base_dir, "data/Optimized TMB model.rda"), compress = "xz")
 
-## Stupid plots
+## Plots
 
 # fit <- gadget3:::g3_fit(model, params.out)
 fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit.opt$par))
 save(fit, file = file.path(base_dir, "data/Fitted optimized TMB model.rda"), compress = "xz")
 
-cowplot::plot_grid(
+png(file.path(base_dir, "figures/Central_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(cowplot::plot_grid(
   plot(fit, data = 'res.by.year', type = 'F'),
   plot(fit, data = 'res.by.year', type = 'total'),
   plot(fit, data = 'res.by.year', type = 'rec'),
   plot(fit, data = 'res.by.year', type = 'catch'),
   labels = "AUTO"
-)
+))
+dev.off()
 
+png(file.path(base_dir, "figures/Model_suitability.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
+plot(fit,data = "suitability")
+dev.off()
 
-
-plot(fit, data = 'res.by.year', type = 'catch')
-plot(fit, data = "summary")
+png(file.path(base_dir, "figures/Model_age_composition.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
+plot(fit,data = "stock.std")
+dev.off()
 
 ## Scratch code under ####
 
