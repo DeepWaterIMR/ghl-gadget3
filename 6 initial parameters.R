@@ -15,64 +15,19 @@ actions <- c(
 
 # Turn actions into an R function
 
-model <- g3_to_r(actions, trace = TRUE)
+model <- g3_to_r(actions)
 
 # You can edit the model code with:
 #model <- edit(model)
 
-## Define the initial R parameters
-#
-# param <- attr(model, 'parameter_template')
-#
-# param[grepl('_female.walpha$', names(param))] <- lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate)
-# param[grepl('_male.walpha$', names(param))] <- lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate)
-# param[grepl('_female.wbeta$', names(param))] <- lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate)
-# param[grepl('_male.wbeta$', names(param))] <- lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate)
-# param[grepl('\\.bbin$', names(param))] <- 6
-# param[grepl('male\\.M\\.', names(param))] <- 0.1
-# param[grepl('female\\.M\\.', names(param))] <- 0.1
-# param[grepl('\\.rec\\.sd$', names(param))] <- 1
-#
-# param[grepl('\\.init\\.sd', names(param))] <- init_sigma %>%
-#   slice(names(param[grepl('\\.init\\.sd', names(param))]) %>%
-#           gsub('.+\\.([0-9]+)','\\1',.) %>% as.numeric()) %>%
-#   pull(ms)
-#
-# # param[grepl('\\.init.\\d', names(param))] <- 1
-# # param[grepl('scalar', names(param))] <- 1
-#
-# param[grepl('init.F', names(param))] <- 0.4
-#
-# ## SI's
-# param[grepl('si_beta', names(param))] <- 1
-# param[grepl('weight$',names(param))] <- 1
-#
-# ## Write the parameters to a csv file
-#
-# write.csv(t(as.data.frame(param)), file = file.path(base_dir, "data/Initial R parameters.csv"))
-#
-# # TMB model
-#
-# tmb_model <- g3_to_tmb(actions)
-#
-# ## Initial TMB model parameters
-#
-# tmb_param <- attr(tmb_model, 'parameter_template')
-#
-# # Copy initial guesses from R model
-# tmb_param$value <- I(param[rownames(tmb_param)])
-#
-# # Configure lower and upper bounds
-# # tmb_param$lower <- vapply(tmb_param$value, function (x) 0.5 * x[[1]], numeric(1))
-# # tmb_param$upper <- vapply(tmb_param$value, function (x) 2 * x[[1]], numeric(1))
-# #tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$lower <- 0.0001
-# #tmb_param[grepl('^ling\\.rec\\.', rownames(tmb_param)),]$upper <- 1e3
-# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
-# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
-# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$lower <- 0.0001
-# # tmb_param[grepl('^ling\\.init\\.', rownames(tmb_param)),]$upper <- 1e3
+tmb_model <- g3_to_tmb(actions)
 
-# Disable optimisation for some parameters, to make life easier
+# Get the parameter template
+
+tmb_param <- attr(tmb_model, "parameter_template")
+
+## Define the initial parameters
+
 tmb_param <-
   tmb_param %>%
   g3_init_guess('\\.rec', 500, 0.001, 1000, 1) %>%

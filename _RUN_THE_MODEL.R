@@ -30,7 +30,7 @@ source("0 run first.R")
 
 ## Model settings
 
-reset_model <- FALSE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
+reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
@@ -64,7 +64,7 @@ if(reset_model | !dir.exists(base_dir)) {
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
-   message("You want to reset the model. Setting reload_data to TRUE. Data are reloaded from MFDB.")
+    message("You want to reset the model. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   }
 }
 
@@ -116,20 +116,31 @@ source("5 likelihood.R")
 
 ## Formulate R based model and define initial parameters
 
-source("7 initial parameters.R")
+source("6 initial parameters.R")
 
 ## Run the R-model
 result <- model(tmb_param$value)
 result[[1]]
 
+fit_init <- gadget3:::g3_fit(model,tmb_param)
+
+png(file.path(base_dir, "figures/Initial_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(cowplot::plot_grid(
+  plot(fit_init, data = 'res.by.year', type = 'F'),
+  plot(fit_init, data = 'res.by.year', type = 'total'),
+  plot(fit_init, data = 'res.by.year', type = 'rec'),
+  plot(fit_init, data = 'res.by.year', type = 'catch'),
+  labels = "AUTO"
+))
+dev.off()
+
 # List all available reports
-print(names(attributes(result)))
+# print(names(attributes(result)))
 
 ## Run a R-based model ####
 
-res <- model(param)
-fit <- gadget3:::g3_fit(model,tmb_param)
-gadget_plots(fit, file.path(base_dir, "figures"))
+# fit <- gadget3:::g3_fit(model,tmb_param)
+# gadget_plots(fit, file.path(base_dir, "figures"))
 
 ## Run the TMB-based model
 
@@ -137,11 +148,16 @@ model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 
-fit.opt <- optim(g3_tmb_par(tmb_param),
-                 model_tmb$fn,
-                 model_tmb$gr,
-                 method = 'BFGS',
-                 control = list(trace = 2,maxit = 1000, reltol = .Machine$double.eps^2))
+fit.opt <- optim(
+  g3_tmb_par(tmb_param),
+  model_tmb$fn,
+  model_tmb$gr,
+  method = 'BFGS',
+  control = list(trace = 2,
+                 maxit = 1000,
+                 reltol = .Machine$double.eps^2,
+                 parscale = g3_tmb_parscale(tmb_param))
+)
 ### Save the parameters
 
 write.csv(as.data.frame(fit.opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
@@ -155,10 +171,10 @@ save(fit, file = file.path(base_dir, "data/Fitted optimized TMB model.rda"), com
 
 png(file.path(base_dir, "figures/Central_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
 print(cowplot::plot_grid(
-  plot(fit, data = 'res.by.year', type = 'F'),
-  plot(fit, data = 'res.by.year', type = 'total'),
-  plot(fit, data = 'res.by.year', type = 'rec'),
-  plot(fit, data = 'res.by.year', type = 'catch'),
+  plot(fit2, data = 'res.by.year', type = 'F'),
+  plot(fit2, data = 'res.by.year', type = 'total'),
+  plot(fit2, data = 'res.by.year', type = 'rec'),
+  plot(fit2, data = 'res.by.year', type = 'catch'),
   labels = "AUTO"
 ))
 dev.off()

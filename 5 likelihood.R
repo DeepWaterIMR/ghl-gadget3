@@ -19,7 +19,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'trawl_ldist',
     TrawlNor_ldist,
-    fleets = list(TrawlNor, TrawlRus),
+    fleets = list(TrawlNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
@@ -28,7 +28,7 @@ likelihood_actions <- list(
 
   g3l_catchdistribution(
     'other_ldist',
-    TrawlNor_ldist,
+    OtherNor_ldist,
     fleets = list(OtherNor, OtherRus, Internat),
     stocks = stocks,
     area_group = c(all = 1),
@@ -49,7 +49,7 @@ likelihood_actions <- list(
   ## Length-age distributions
 
   g3l_catchdistribution(
-    'EggaN_aldist',
+    'EggaN_aldist_female',
     EggaN_aldist_female,
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
@@ -59,7 +59,7 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_catchdistribution(
-    'EggaN_aldist',
+    'EggaN_aldist_male',
     EggaN_aldist_male,
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
@@ -70,19 +70,17 @@ likelihood_actions <- list(
 
   ## Maturity proportions
 
-  # g3l_catchdistribution(
-  #   'EggaN_mat',
-  #   EggaN_mat %>%
-  #     mutate(area = 1) %>%
-  #     rename(stock = maturity_stage) %>%
-  #     mutate(stock = paste0("ghl_", stock)),
-  #   fleets = list(EggaN),
-  #   stocks = stocks,
-  #   g3l_distribution_sumofsquares(),
-  #   nll_breakdown = nll_breakdown,
-  #   report = lik_report),
-  # Error in if (all(diff(ag) == 1)) { :
-  # missing value where TRUE/FALSE needed
+  g3l_catchdistribution(
+    'EggaN_matp',
+    EggaN_mat %>%
+      rename(stock = maturity_stage) %>%
+      mutate(stock = paste0("ghl_", stock)),
+    fleets = list(EggaN),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
 
   ## Survey indices
 
@@ -93,9 +91,7 @@ likelihood_actions <- list(
     fleets = list(),
     stocks = list(female_imm, female_mat),
     area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(
-      alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_female"),
-      beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_female")),
+    g3l_distribution_surveyindices_log(beta = 1),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -106,9 +102,7 @@ likelihood_actions <- list(
     fleets = list(),
     stocks = list(male_imm, male_mat),
     area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(
-      alpha = g3_stock_param(stocks[[1]],id ='species', "si_alpha_male"),
-      beta = g3_stock_param(stocks[[1]],id ='species', "si_beta_male")),
+    g3l_distribution_surveyindices_log(beta = 1),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 

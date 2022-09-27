@@ -269,6 +269,8 @@ if(reload_data) {
       ))[[1]]
   )
 
+  attributes(EggaN_mat)$age$all <- stock_params$minage:stock_params$maxage
+
   png(file.path(base_dir, "figures/Maturity_data.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
   print(plot.mat(EggaN_mat))
   dev.off()
