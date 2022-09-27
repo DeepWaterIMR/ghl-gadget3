@@ -23,7 +23,7 @@ if (any(installed_packages == FALSE)) {
     remotes::install_github("gadget-framework/gadget3", upgrade = "never")
   }
 
-  if("rgadget" %in% packages[!installed_packages]) {
+  if("Rgadget" %in% packages[!installed_packages]) {
     devtools::install_github("gadget-framework/rgadget", upgrade = "never")
   }
 

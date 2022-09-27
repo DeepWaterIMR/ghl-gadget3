@@ -20,13 +20,6 @@ if(exists("mdb")) mfdb:: mfdb_disconnect(mdb)
 rm(list = ls())
 
 source("0 run first.R")
-# source("R/stock_param_functions.R")
-# source('R/g3_iterative.R')
-# source('R/g3_init_guess.R')
-# source('R/g3_jitter.R')
-# source('R/get_gadget_plots.R')
-# source('R/g3_retro.R')
-# source('R/step-utils.R')
 
 ## Model settings
 
@@ -110,10 +103,6 @@ source("4 fleets.R")
 
 source("5 likelihood.R")
 
-## Get data out of the model
-
-# source("6 report.R")
-
 ## Formulate R based model and define initial parameters
 
 source("6 initial parameters.R")
@@ -158,6 +147,7 @@ fit.opt <- optim(
                  reltol = .Machine$double.eps^2,
                  parscale = g3_tmb_parscale(tmb_param))
 )
+
 ### Save the parameters
 
 write.csv(as.data.frame(fit.opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
