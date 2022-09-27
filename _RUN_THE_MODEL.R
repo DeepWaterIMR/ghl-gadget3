@@ -129,7 +129,7 @@ dev.off()
 ## Run a R-based model ####
 
 # fit <- gadget3:::g3_fit(model,tmb_param)
-# gadget_plots(fit, file.path(base_dir, "figures"))
+# gadget_plots(fit_init, file.path(base_dir, "figures"))
 
 ## Run the TMB-based model
 
