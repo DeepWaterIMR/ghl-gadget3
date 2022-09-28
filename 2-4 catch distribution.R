@@ -310,7 +310,7 @@ if(reload_data) {
   if(nremoved > 0) {
     message("Removed ", nremoved, " observations from EggaN maturity proportions to smooth the data going into likelihood")
   }
-  
+
   rm(nremoved)
 
   EggaN_mat <- EggaN_mat %>%
@@ -337,6 +337,9 @@ if(reload_data) {
   print(plot.matp(EggaN_mat))
   dev.off()
 
+  png(file.path(base_dir, "figures/Maturity_vs_ldist_lengts.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(compare_mat_ldist(EggaN_ldist, EggaN_mat))
+  dev.off()
 
   # Save
 

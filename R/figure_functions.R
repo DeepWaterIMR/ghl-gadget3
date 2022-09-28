@@ -192,33 +192,33 @@ plot.maturity <- function(filter.exp = NULL, plot = TRUE) {
 
   if(plot) {
 
-  ggplot() +
-    geom_point(data = dt, aes(x = length, y = maturity, shape = sex)) +
-    geom_segment(data = modDat,
-                 aes(x = mean, xend = mean, y = 0, yend = 0.5, color = sex),
-                 linetype = 2) +
-    geom_segment(data = modDat,
-                 aes(x = -Inf, xend = mean, y = 0.5, yend = 0.5, color = sex),
-                 linetype = 2) +
-    geom_errorbarh(data = modDat,
-                   aes(xmin = ci.min, xmax = ci.max, y = 0.5, color = sex),
-                   height = 0.1) +
-    geom_text(data = modDat,
-              aes(x = mean, y = -0.03, label =
-                    paste0(round(mean, 1), " cm (n = ", n, ")"),
-                color = sex), size = 3) +
-    stat_smooth(data = dt, aes(x = length, y = maturity, color = sex),
-                method = "glm", formula = y ~ x,
-                method.args = list(family = "binomial")) +
-    xlab("Total length (cm)") +
-    ylab("Maturity") +
-    scale_color_manual("Sex", values = c("#FF5F68", "#449BCF")) +
-    scale_shape("Sex", solid = FALSE) +
-    facet_wrap(~sex, ncol = 1) +
-    theme_bw() +
-    guides(color=guide_legend(override.aes=list(fill=NA))) +
-    theme(legend.position = "none",
-          legend.background = element_blank(), legend.key = element_blank())
+    ggplot() +
+      geom_point(data = dt, aes(x = length, y = maturity, shape = sex)) +
+      geom_segment(data = modDat,
+                   aes(x = mean, xend = mean, y = 0, yend = 0.5, color = sex),
+                   linetype = 2) +
+      geom_segment(data = modDat,
+                   aes(x = -Inf, xend = mean, y = 0.5, yend = 0.5, color = sex),
+                   linetype = 2) +
+      geom_errorbarh(data = modDat,
+                     aes(xmin = ci.min, xmax = ci.max, y = 0.5, color = sex),
+                     height = 0.1) +
+      geom_text(data = modDat,
+                aes(x = mean, y = -0.03, label =
+                      paste0(round(mean, 1), " cm (n = ", n, ")"),
+                    color = sex), size = 3) +
+      stat_smooth(data = dt, aes(x = length, y = maturity, color = sex),
+                  method = "glm", formula = y ~ x,
+                  method.args = list(family = "binomial")) +
+      xlab("Total length (cm)") +
+      ylab("Maturity") +
+      scale_color_manual("Sex", values = c("#FF5F68", "#449BCF")) +
+      scale_shape("Sex", solid = FALSE) +
+      facet_wrap(~sex, ncol = 1) +
+      theme_bw() +
+      guides(color=guide_legend(override.aes=list(fill=NA))) +
+      theme(legend.position = "none",
+            legend.background = element_blank(), legend.key = element_blank())
 
   } else {
     modDat
@@ -710,9 +710,27 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
 }
 
 # ldist = EggaN_ldist; mat = EggaN_mat
-# compare_mat_ldist <- function(ldist, mat) {
-#
-# ldist %>%
-#     mutate(len = as.numeric(gsub("len", "", length)))
-#
-# }
+compare_mat_ldist <- function(ldist, mat) {
+
+  ldist %>%
+    mutate(len = as.numeric(gsub("len", "", length))) %>%
+    dplyr::select(-area, -age) %>%
+    group_by(year, step) %>%
+    mutate(maxn = max(number),
+           pn = number/maxn,
+           type = "ldist") %>%
+    bind_rows( mat %>%
+                 mutate(len = as.numeric(gsub("len", "", length))) %>%
+                 group_by(year, step, length, len) %>%
+                 summarise(number = sum(number)) %>%
+                 group_by(year, step) %>%
+                 mutate(maxn = max(number),
+                        pn = number/maxn,
+                        type = "mat")) %>%
+    ggplot(., aes(x = len, y = pn, color = type)) +
+    geom_line() +
+    scale_color_manual(values = c("ldist" = "black", "mat" = "grey")) +
+    labs(x = "Length", y = "Standardized number", color = "Data type") +
+    facet_wrap(~year)
+
+}
