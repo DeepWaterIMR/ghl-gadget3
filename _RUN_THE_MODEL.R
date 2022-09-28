@@ -152,7 +152,7 @@ fit_opt <- optim(
 ### Save the parameters
 
 write.csv(as.data.frame(fit_opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
-save(fit_opt, file = file.path(base_dir, "data/Optimized TMB model parameters.rda"), compress = "xz")
+save(fit_opt, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
 
 ## Plots
 

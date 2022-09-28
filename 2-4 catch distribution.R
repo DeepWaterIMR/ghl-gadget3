@@ -310,6 +310,8 @@ if(reload_data) {
   if(nremoved > 0) {
     message("Removed ", nremoved, " observations from EggaN maturity proportions to smooth the data going into likelihood")
   }
+  
+  rm(nremoved)
 
   EggaN_mat <- EggaN_mat %>%
     mutate(len = as.numeric(gsub("len", "", length))) %>%

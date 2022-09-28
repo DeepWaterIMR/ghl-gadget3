@@ -18,13 +18,11 @@ actions <- c(
 model <- g3_to_r(actions)
 
 # You can edit the model code with:
-#model <- edit(model)
+# model <- edit(model)
 
 tmb_model <- g3_to_tmb(actions)
 
 # Get the parameter template
-
-# g3_tmb_relist(tmb_param, fit.opt$par)
 
 tmb_param <- attr(tmb_model, "parameter_template")
 
@@ -99,9 +97,19 @@ tmb_param <-
                   pull(ms), 0, 20, 0)
 
 
+## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
+
+# if(exists("prev_param")) {
+#   tmb_param$switch[order(match(tmb_param$switch, names(prev_param)))]
+#     names(prev_param)
+#   
+# }
+
+
 ## Write the parameters to a csv file
 
 write.csv(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.csv"), row.names = FALSE)
+save(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.rda"))
 
 ## Old stuff
 

@@ -9,6 +9,14 @@
 ## Set up the model folders
 
 if(reset_model & dir.exists(base_dir)) {
+  if(previous_model_params_as_initial &
+     file.exists("model_files/data/Optimized TMB parameters.rda")) {
+    load("model_files/data/Optimized TMB parameters.rda")
+    prev_param <- fit.opt$par
+    names(prev_param) <- gsub("__", ".", names(prev_param))
+    rm(fit.opt)
+  }
+    
   unlink(base_dir, recursive = TRUE)
   message("Resetting the model. The ", base_dir, " folder deleted and recreated.")
 }
