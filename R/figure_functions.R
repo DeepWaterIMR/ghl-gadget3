@@ -709,9 +709,10 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
   }
 }
 
-#ldist = EggaN_ldist; mat = EggaN_mat
+# ldist = EggaN_ldist; mat = EggaN_mat
 # compare_mat_ldist <- function(ldist, mat) {
 #
-#
+# ldist %>%
+#     mutate(len = as.numeric(gsub("len", "", length)))
 #
 # }

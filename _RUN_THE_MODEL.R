@@ -108,7 +108,8 @@ source("5 likelihood.R")
 
 source("6 initial parameters.R")
 
-## Run the R-model
+## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
+
 result <- model(tmb_param$value)
 result[[1]]
 
@@ -129,17 +130,14 @@ gadget_plots(fit_init, file.path(base_dir, "figures"))
 # List all available reports
 # print(names(attributes(result)))
 
-## Run a R-based model ####
-
-# fit <- gadget3:::g3_fit(model,tmb_param)
-# gadget_plots(fit_init, file.path(base_dir, "figures"))
-
-## Run the TMB-based model
+## Compile the TMB-based model
 
 # Change NA to NAN on lines 265 and 299
 model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
+
+## Optimize model parameters. Takes hours.
 
 fit_opt <- optim(
   g3_tmb_par(tmb_param),
@@ -152,40 +150,27 @@ fit_opt <- optim(
                  parscale = g3_tmb_parscale(tmb_param))
 )
 
-### Save the parameters
+### Save the model parameters
 
 write.csv(as.data.frame(fit_opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
 save(fit_opt, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
 
 ## Plots
 
-# fit <- gadget3:::g3_fit(model, params.out)
 fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
 save(fit, file = file.path(base_dir, "data/Fitted and optimized TMB model.rda"), compress = "xz")
 
 gadget_plots(fit, file.path(base_dir, "figures"))
 
-# png(file.path(base_dir, "figures/Central_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(cowplot::plot_grid(
-#   plot(fit, data = 'res.by.year', type = 'F'),
-#   plot(fit, data = 'res.by.year', type = 'total'),
-#   plot(fit, data = 'res.by.year', type = 'rec'),
-#   plot(fit, data = 'res.by.year', type = 'catch'),
-#   labels = "AUTO"
-# ))
-# dev.off()
-
-# png(file.path(base_dir, "figures/Model_suitability.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
-# plot(fit,data = "suitability")
-# dev.off()
-#
 png(file.path(base_dir, "figures/model_age_composition.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
 plot(fit,data = "stock.std")
 dev.off()
 
-## Scratch code under ####
+## Save workspace
 
-# save.image(file = "/Users/a22357/Desktop/Ghl_model_problem.RData")
+save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+
+## Scratch code under ####
 
 # Debugging tricks:
 
