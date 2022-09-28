@@ -25,7 +25,7 @@ source("0 run first.R")
 
 reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
-previous_model_params_as_initial <- TRUE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
+previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
@@ -114,15 +114,17 @@ result[[1]]
 
 fit_init <- gadget3:::g3_fit(model,tmb_param)
 
-png(file.path(base_dir, "figures/Initial_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(cowplot::plot_grid(
-  plot(fit_init, data = 'res.by.year', type = 'F'),
-  plot(fit_init, data = 'res.by.year', type = 'total'),
-  plot(fit_init, data = 'res.by.year', type = 'rec'),
-  plot(fit_init, data = 'res.by.year', type = 'catch'),
-  labels = "AUTO"
-))
-dev.off()
+gadget_plots(fit_init, file.path(base_dir, "figures"))
+
+# png(file.path(base_dir, "figures/Initial_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+# print(cowplot::plot_grid(
+#   plot(fit_init, data = 'res.by.year', type = 'F'),
+#   plot(fit_init, data = 'res.by.year', type = 'total'),
+#   plot(fit_init, data = 'res.by.year', type = 'rec'),
+#   plot(fit_init, data = 'res.by.year', type = 'catch'),
+#   labels = "AUTO"
+# ))
+# dev.off()
 
 # List all available reports
 # print(names(attributes(result)))
@@ -182,7 +184,7 @@ dev.off()
 
 ## Scratch code under ####
 
-# save.image(file = "/Users/a22357/Desktop/Ghl_model_that_worked.RData")
+# save.image(file = "/Users/a22357/Desktop/Ghl_model_problem.RData")
 
 # Debugging tricks:
 
