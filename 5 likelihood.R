@@ -19,7 +19,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'trawl_ldist',
     TrawlNor_ldist,
-    fleets = list(TrawlNor),
+    fleets = list(TrawlNor, TrawlRus),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
