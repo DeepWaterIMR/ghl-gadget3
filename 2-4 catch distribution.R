@@ -337,7 +337,7 @@ if(reload_data) {
   print(plot.matp(EggaN_mat))
   dev.off()
 
-  png(file.path(base_dir, "figures/Maturity_vs_ldist_lengts.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  png(file.path(base_dir, "figures/Maturity_vs_ldist_lengths.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
   print(compare_mat_ldist(EggaN_ldist, EggaN_mat))
   dev.off()
 
