@@ -24,6 +24,8 @@ tmb_model <- g3_to_tmb(actions)
 
 # Get the parameter template
 
+# g3_tmb_relist(tmb_param, fit.opt$par)
+
 tmb_param <- attr(tmb_model, "parameter_template")
 
 ## Define the initial parameters

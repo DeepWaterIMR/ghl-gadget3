@@ -60,8 +60,21 @@ if(reload_data) {
              open_ended = c("upper","lower")
            )
       )
-  )[[1]]
+  )[[1]] %>%
+    filter(!(year == 2000 & step == 1)) %>% # Only 1 fish
+    filter(!(year == 1993 & step == 2)) %>% ## Weird spike
+    filter(!(year == 1996 & step == 4)) ## Weird spike
 
+  test <- TrawlNor_ldist %>%
+    group_by(year, step) %>%
+    summarise(n = sum(number)) %>%
+    filter(n < 10)
+
+  if(nrow(test) > 0) {
+    warning("Following year-step in TrawlNor_ldist contain < 10 fish: ", paste(paste(test$year, test$step, sep = "-"), collapse = ", "))
+  } else {
+    rm(test)
+  }
 
   png(file.path(base_dir, "figures/TrawlNor_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
   print(plot.ldist(TrawlNor_ldist))
@@ -81,7 +94,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = stock_params$dl),
+                 by = 5*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
@@ -115,6 +128,17 @@ if(reload_data) {
            )
       )
   )[[1]]
+
+  test <- OtherNor_ldist %>%
+    group_by(year, step) %>%
+    summarise(n = sum(number)) %>%
+    filter(n < 10)
+
+  if(nrow(test) > 0) {
+    warning("Following year-step in OtherNor_ldist contain < 10 fish: ", paste(paste(test$year, test$step, sep = "-"), collapse = ", "))
+  } else {
+    rm(test)
+  }
 
   png(file.path(base_dir, "figures/OtherNor_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
   print(plot.ldist(OtherNor_ldist))
@@ -194,7 +218,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = stock_params$dl),
+                 by = 5*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
@@ -220,7 +244,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = stock_params$dl),
+                 by = 5*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
@@ -241,7 +265,7 @@ if(reload_data) {
         length =
           mfdb_interval('len',
                         seq(stock_params$minlength, stock_params$maxlength,
-                            by = 2*stock_params$dl),
+                            by = 5*stock_params$dl),
                         open_ended = c('lower','upper')),
         maturity_stage = mfdb_group(male_imm = 1:2, male_mat = 3:5),
         sex = "M",
@@ -258,7 +282,7 @@ if(reload_data) {
         length =
           mfdb_interval('len',
                         seq(stock_params$minlength, stock_params$maxlength,
-                            by = 2*stock_params$dl),
+                            by = 5*stock_params$dl),
                         open_ended = c('lower','upper')),
         maturity_stage = mfdb_group(female_imm = 1:2, female_mat = 3:5),
         sex = "F",
@@ -268,6 +292,38 @@ if(reload_data) {
         year = model_params$year_range[model_params$year_range >= 1996]
       ))[[1]]
   )
+
+  nremoved <- sum(EggaN_mat$number) -
+    EggaN_mat %>%
+    mutate(len = as.numeric(gsub("len", "", length))) %>%
+    filter(
+      (grepl("^female_mat", maturity_stage) &
+         len > stock_params$female_mat$min_possible_data_length) |
+        (grepl("^female_imm", maturity_stage) &
+           len <stock_params$female_imm$max_possible_data_length) |
+        (grepl("^male_mat", maturity_stage) &
+           len > stock_params$male_mat$min_possible_data_length) |
+        (grepl("^male_imm", maturity_stage) &
+           len < stock_params$male_imm$max_possible_data_length)
+    ) %>% pull(number) %>% sum()
+
+  if(nremoved > 0) {
+    message("Removed ", nremoved, " observations from EggaN maturity proportions to smooth the data going into likelihood")
+  }
+
+  EggaN_mat <- EggaN_mat %>%
+    mutate(len = as.numeric(gsub("len", "", length))) %>%
+    filter(
+      (grepl("^female_mat", maturity_stage) &
+         len > stock_params$female_mat$min_possible_data_length) |
+      (grepl("^female_imm", maturity_stage) &
+         len <stock_params$female_imm$max_possible_data_length) |
+        (grepl("^male_mat", maturity_stage) &
+           len > stock_params$male_mat$min_possible_data_length) |
+        (grepl("^male_imm", maturity_stage) &
+           len < stock_params$male_imm$max_possible_data_length)
+    ) %>%
+    dplyr::select(-len)
 
   attributes(EggaN_mat)$age$all <- stock_params$minage:stock_params$maxage
 

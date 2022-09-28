@@ -54,21 +54,25 @@ stock_params$male_imm$minage <- 1
 stock_params$male_imm$maxage <- 10
 stock_params$male_imm$minlength <- 1
 stock_params$male_imm$maxlength <- 120
+stock_params$male_imm$max_possible_data_length <- 60 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$female_imm$minage <- 1
 stock_params$female_imm$maxage <- 10
 stock_params$female_imm$minlength <- 1
 stock_params$female_imm$maxlength <- 120
+stock_params$female_imm$max_possible_data_length <- 75 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$male_mat$minage <- 3
 stock_params$male_mat$maxage <- 30
 stock_params$male_mat$minlength <- 1
 stock_params$male_mat$maxlength <- 120
+stock_params$male_mat$min_possible_data_length <- 30 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$female_mat$minage <- 3
 stock_params$female_mat$maxage <- 30
 stock_params$female_mat$minlength <- 1
 stock_params$female_mat$maxlength <- 120
+stock_params$female_mat$min_possible_data_length <- 40 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$minage <- min(sapply(model_params$stock_names, function(k) stock_params[[k]]$minage))
 stock_params$maxage <- max(sapply(model_params$stock_names, function(k) stock_params[[k]]$maxage))
