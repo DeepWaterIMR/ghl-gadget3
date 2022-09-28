@@ -99,12 +99,9 @@ tmb_param <-
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
 
-# if(exists("prev_param")) {
-#   tmb_param$switch[order(match(tmb_param$switch, names(prev_param)))]
-#     names(prev_param)
-#   
-# }
-
+if(exists("prev_param")) {
+  tmb_param[match(names(prev_param),tmb_param$switch), "value"] <- unname(prev_param)
+}
 
 ## Write the parameters to a csv file
 
