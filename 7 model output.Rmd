@@ -141,21 +141,41 @@ for(i in seq_along(x)) {
 Maturity 
 =======================================================================
 
-Column {data-width=1000}
------------------------------------------------------------------------
-
 ```{r}
-plot_maturity(fit) + 
-           scale_color_manual(
-             values = c("ghl_female_imm" = "tomato1", 
-                        "ghl_female_mat" = "tomato4", 
-                        "ghl_male_imm" = "dodgerblue1", 
-                        "ghl_male_mat" = "dodgerblue4"))
-```
+x <- plot_maturity(fit, stocks = "separate")
 
+plotly::subplot(lapply(x, function(k) {
+  k + scale_color_manual(
+    values = c("ghl_female_imm" = "tomato1", 
+               "ghl_female_mat" = "tomato4", 
+               "ghl_male_imm" = "dodgerblue1", 
+               "ghl_male_mat" = "dodgerblue4")) +
+    theme(legend.position = "none")
+}),
+nrows = 2
+)
+```
 
 Growth 
 =======================================================================
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+```{r, echo = FALSE}
+x <- plot_growth(fit, base_size = 14)
+```
+
+```{r, echo = FALSE, fig.height = 10, fig.width = 20, results='asis'}
+
+for(i in seq_along(x)) {
+  
+  cat("  \n###",  names(x)[i], "  \n")
+  print(x[[i]])
+  cat("  \n")
+}
+```
+
 
 Survey indices
 =======================================================================

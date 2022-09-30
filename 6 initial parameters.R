@@ -41,12 +41,12 @@ tmb_param <-
   g3_init_guess('bbin', 6, 1e-08, 100, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
   g3_init_guess('l50', 50, 40, 100, 1) %>%
-  g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
-  g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
-  g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
-  g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
-  g3_init_guess('\\.p3$', 50, 1e-6, 100, 1) %>%
-  g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
+  # g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
+  # g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
+  # g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
+  # g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
+  # g3_init_guess('\\.p3$', 50, 1e-6, 100, 1) %>%
+  # g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   g3_init_guess('\\.M', 0.15, 0.001, 1, 0) %>%
   g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
@@ -64,38 +64,38 @@ tmb_param <-
   g3_init_guess('sigma_alpha', init_sigma_coef[['alpha']], -1, 1, 0) %>%
   g3_init_guess('sigma_beta', init_sigma_coef[['beta']], 0, 2, 0) %>%
   g3_init_guess('sigma_gamma', init_sigma_coef[['gamma']], 0, 1, 0) %>%
-  g3_init_guess('female.walpha',
+  g3_init_guess('_female.walpha',
                 lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate),
                 1e-10, 1, 0) %>%
-  g3_init_guess('female.wbeta',
+  g3_init_guess('_female.wbeta',
                 lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate),
                 2, 4, 0) %>%
-  g3_init_guess('male.walpha',
+  g3_init_guess('_male.walpha',
                 lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate),
                 1e-10, 1, 0) %>%
-  g3_init_guess('male.wbeta',
+  g3_init_guess('_male.wbeta',
                 lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate),
                 2, 4, 0) %>%
-  g3_init_guess(pattern = 'female_mat\\.init\\.sd',
+  g3_init_guess(pattern = '_female_mat\\.init\\.sd',
                 value = init_sigma %>%
                   filter(age %in%
                            stock_params$female_mat$minage:
                            stock_params$female_mat$maxage) %>%
                   pull(ms),
                 lower = 0, upper = 20, optimise = FALSE) %>%
-  g3_init_guess('male_mat\\.init\\.sd',
+  g3_init_guess('_male_mat\\.init\\.sd',
                 init_sigma %>%
                   filter(age %in%
                            stock_params$male_mat$minage:
                            stock_params$male_mat$maxage) %>%
                   pull(ms), 0, 20, 0) %>%
-  g3_init_guess('female_imm\\.init\\.sd',
+  g3_init_guess('_female_imm\\.init\\.sd',
                 init_sigma %>%
                   filter(age %in%
                            stock_params$female_imm$minage:
                            stock_params$female_imm$maxage) %>%
                   pull(ms), 0, 20, 0) %>%
-  g3_init_guess('male_imm\\.init\\.sd',
+  g3_init_guess('_male_imm\\.init\\.sd',
                 init_sigma %>%
                   filter(age %in%
                            stock_params$male_imm$minage:
@@ -113,42 +113,3 @@ if(exists("prev_param")) {
 
 write.csv(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.csv"), row.names = FALSE)
 save(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.rda"))
-
-## Old stuff
-
-# suppressWarnings(gadget_evaluate(gd, params.out = "params.tmp"))
-#
-# ## update the input parameters with those from assessment Gadget runs (BESTINPUT)
-# tmp <- read.gadget.parameters(sprintf('%s/params.tmp', gd)) %>%
-#   init_guess('rec.[0-9]|init.[0-9]', 1e3,1,1e4,1) %>%
-#   init_guess('M$', 0.1, 0.001, 1, 0) %>%
-#   init_guess('init.F', 0.4, 0.01, 1, 1) %>%
-#   init_guess('m.Linf', 56, 50, 200, 1) %>%
-#   init_guess('f.Linf', 72, 50, 200, 1) %>%
-#   init_guess('m.k', 135, 10, 1000, 1) %>% # the k's are divided by 1000 to help the H&J optimizer (sensitive to digits)
-#   init_guess('f.k', 102, 10, 1000, 1) %>% # the k's are divided by 1000 to help the H&J optimizer (sensitive to digits)
-#   init_guess('walpha', lw.constants$estimate[1], 1e-10, 1,0) %>%
-#   init_guess('wbeta', lw.constants$estimate[2], 2, 4,0) %>%
-#   init_guess('bbin',2, 0.1, 100, 1) %>%
-#   init_guess('rec.scalar',15,1,50,1) %>%
-#   init_guess('init.scalar',15,1,30,1) %>%
-#   init_guess('recl',10,7,15,1) %>%
-#   init_guess('rec.sd', 2, 0.001, 4, 1) %>%
-#   init_guess('m.l50', 47, 20, 70, 1) %>%
-#   init_guess('f.l50', 69, 40, 100, 1) %>%
-#   init_guess('mat.alpha', 1, -9999, 9999, 1) %>%
-#   init_guess('other.l50', 50, 1, 100, 1) %>%
-#   init_guess('other.alpha', 0.5, 0.01, 3, 1) %>%
-#   init_guess('p\\d$', 1, 0, 9999, 1) %>%
-#   init_guess('L$', 1, -9999, 9999, 1)
-#
-# tmp %>% write.gadget.parameters(., file = sprintf('%s/params.tmp', gd))
-#
-# rm(tmp)
-#
-# ## Update the model using initial parameters
-#
-# gadget_evaluate(gd, params.in = "params.tmp", params.out = "params.in")
-#
-# unlink(file.path(gd, "params.tmp"))
-#

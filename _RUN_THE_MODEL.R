@@ -132,7 +132,6 @@ gadget_plots(fit_init, file.path(base_dir, "figures"))
 
 ## Compile the TMB-based model
 
-# Change NA to NAN on lines 265 and 299
 model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
@@ -159,7 +158,6 @@ fit_iter <- g3_iterative(
   tmb_model = tmb_model,
   params.in = tmb_param
 )
-
 
 ### Save the model parameters
 
