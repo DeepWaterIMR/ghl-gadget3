@@ -37,8 +37,6 @@ Use [`_RUN_THE_MODEL.R`](https://github.com/DeepWaterIMR/ghl-gadget3/blob/master
 * The **figures** folder contains figures illustrating the data based into the model
 * The **data** folder contains all data required by the model. In order to acquire the data for the first time, you'll need the [ghl-gadget-data](https://github.com/DeepWaterIMR/ghl-gadget-data) repository.
 
-The model works until the TMB step (line 97 in `_RUN_THE_MODEL.R`), which does not compile due to unidentified bugs in the model.
-
 # Model overview
 
 We use the new [Gadget3 framework](https://gadget-framework.github.io/gadget3/) for R that is currently under an active development. This means that gadget3 is not feature complete and contains bugs in addition to the bugs in this model. 
@@ -51,15 +49,15 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
 
 # Things to do before the benchmark
 
-*Last edited: MV, 29.09.2021.* Comments in italics.
+*Last edited: MV, 29.09.2022.* Comments in italics.
 
 1.  Move to Gadget3. 
 
-    - Done. The next step is to make the TMB model to compile.
+    - Done. 
     
 2.  Include age data. 
 
-    - Done. The next step is to make the model to compile. After that the data need to be setup optimally.
+    - Done. 
       
 3.  Move to a one year time-step. Structure the model so that different time-steps can be examined.
 
@@ -71,7 +69,7 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
 
 5.  Survey indices
 
-    - Redo all of them. See [strata-and-survey-indices](https://github.com/DeepWaterIMR/ghl-gadget-data/blob/main/docs/strata-and-survey-indices.Rmd)
+    - EggaN and BESS based juvenile index done. Add: EcoSouth (>35 cm, ldist, sex?), (Russian index & ldist), 
 
 6.  Estimate or exact catch in tonnes? 
 
@@ -79,11 +77,11 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
 
 7.  Think again about the Russian survey do this one with lengthdist + biomass levels (but need to keep the option of also including biomass levels possible)
 
-    - Remove because the survey has been suspended?
+    - Add (started in 1983)
 
 8.  Fleet structure. 
   
-    - New structure proposed in [landings-data](https://github.com/DeepWaterIMR/ghl-gadget-data/blob/main/docs/landings-data.Rmd). Implemented into the model although historical fleets probably contain bugs that need to be ironed out.
+    - New structure proposed in [landings-data](https://github.com/DeepWaterIMR/ghl-gadget-data/blob/main/docs/landings-data.Rmd) and implemented.
 
 9.  M 
   
@@ -91,7 +89,7 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
 
 10. Let the model split to sex instead of us doing it
 
-    - Done.
+    - Done. Check which datasets are sex-split?
 
 11. Transparency, reproducibility and documentation
 
@@ -103,16 +101,29 @@ There are four sub-stocks, N fleets, and N survey time-series in the model. In c
 
 14. Make the model extend further back in time. 
 
-    - The model can be extended back to 1935 if needed. Define `model_params$year_range` in `1 settings.R` as an integer sequence and iron out the bugs.
+    - Extend Norwegian and Russian catches to 1980.
 
 15. Move to mature female SSB as the reporting measure instead of 45cm+
   
-    - Can be done with the new model structure
+    - Done.
 
-16. HCR
+16. Fix length-weight relationship 
+
+    - Make a separate document which explains the decisions behind all life history parameters and initial conditions. Split initial sigma by sex.
+    
+17. Add Russian catch and survey ldist with sex
+
+18. Add CPUE index
+
+19. Reference points
+
+20. Uncertainties
+
+21. Jitter
+
+
+PS. HCR
 
     - Some time after the benchmark
-    
-17. Fix length-weight relationship 
 
-    - Make a separate document which explains the decisions behind all life history parameters and initial condiitons. Split initial sigma by sex.
+

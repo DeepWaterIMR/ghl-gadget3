@@ -87,7 +87,7 @@ male_imm_actions <- model_actions(
   tv_params = c()
   )
 
-## Immature stock actions
+## Mature stock actions
 female_mat_actions <- model_actions(
   imm = female_imm,
   mat = female_mat,

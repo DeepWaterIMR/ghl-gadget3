@@ -63,12 +63,19 @@ if(reload_data) {
   )[[1]] %>%
     filter(!(year == 2000 & step == 1)) %>% # Only 1 fish
     filter(!(year == 1993 & step == 2)) %>% ## Weird spike
-    filter(!(year == 1996 & step == 4)) ## Weird spike
+    filter(!(year == 1996 & step == 4)) %>% ## Weird spike
+    filter(!(year == 1997 & step == 4)) %>%
+    filter(!(year == 1998)) %>% ## Few data points
+    filter(!(year == 1999 & step == 1)) %>%
+    filter(!(year == 1999 & step == 3)) %>%
+    filter(!(year == 2001 & step == 4)) %>%
+    filter(!(year == 2005 & step == 1)) %>%
+    filter(!(year == 2009 & step == 3))
 
   test <- TrawlNor_ldist %>%
     group_by(year, step) %>%
     summarise(n = sum(number)) %>%
-    filter(n < 10)
+    filter(n < 20)
 
   if(nrow(test) > 0) {
     warning("Following year-step in TrawlNor_ldist contain < 10 fish: ", paste(paste(test$year, test$step, sep = "-"), collapse = ", "))
@@ -94,7 +101,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 5*stock_params$dl),
+                 by = 5),
              open_ended = c("upper","lower")
            )
       )
@@ -127,12 +134,13 @@ if(reload_data) {
              open_ended = c("upper","lower")
            )
       )
-  )[[1]]
+  )[[1]] %>%
+    filter(!(year == 1995 & step == 3))
 
   test <- OtherNor_ldist %>%
     group_by(year, step) %>%
     summarise(n = sum(number)) %>%
-    filter(n < 10)
+    filter(n < 50)
 
   if(nrow(test) > 0) {
     warning("Following year-step in OtherNor_ldist contain < 10 fish: ", paste(paste(test$year, test$step, sep = "-"), collapse = ", "))
@@ -173,7 +181,7 @@ if(reload_data) {
   ##############
   ## Surveys ###
 
-  ### NoSlope (EggaN)
+  ### EggaN (Norwegian slope survey)
 
   # mfdb_dplyr_sample(mdb) %>% filter(sampling_type == "ENS") %>% group_by(gear) %>% count() %>% collect()
 
@@ -218,7 +226,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 5*stock_params$dl),
+                 by = 5),
              open_ended = c("upper","lower")
            )
       )
@@ -244,7 +252,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 5*stock_params$dl),
+                 by = 5),
              open_ended = c("upper","lower")
            )
       )
@@ -318,8 +326,8 @@ if(reload_data) {
     filter(
       (grepl("^female_mat", maturity_stage) &
          len > stock_params$female_mat$min_possible_data_length) |
-      (grepl("^female_imm", maturity_stage) &
-         len <stock_params$female_imm$max_possible_data_length) |
+        (grepl("^female_imm", maturity_stage) &
+           len <stock_params$female_imm$max_possible_data_length) |
         (grepl("^male_mat", maturity_stage) &
            len > stock_params$male_mat$min_possible_data_length) |
         (grepl("^male_imm", maturity_stage) &

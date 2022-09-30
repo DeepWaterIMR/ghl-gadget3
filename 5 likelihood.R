@@ -85,8 +85,8 @@ likelihood_actions <- list(
   ## Survey indices
 
   g3l_abundancedistribution(
-    'EggaN_si_female',
-    EggaN_biomass_female %>%
+    'EggaN_SI_female',
+    EggaN_SI_biomass_female %>%
       rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = list(female_imm, female_mat),
@@ -96,11 +96,41 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_abundancedistribution(
-    'EggaN_si_male',
-    EggaN_biomass_male %>%
+    'EggaN_SI_male',
+    EggaN_SI_biomass_male %>%
       rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = list(male_imm, male_mat),
+    area_group = c(all = 1),
+    g3l_distribution_surveyindices_log(beta = 1),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_abundancedistribution(
+    'Juv_SI_1',
+    Juv_SI_1,
+    fleets = list(),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_surveyindices_log(beta = 1),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_abundancedistribution(
+    'Juv_SI_2',
+    Juv_SI_2,
+    fleets = list(),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_surveyindices_log(beta = 1),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_abundancedistribution(
+    'Juv_SI_3',
+    Juv_SI_3,
+    fleets = list(),
+    stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_surveyindices_log(beta = 1),
     nll_breakdown = nll_breakdown,

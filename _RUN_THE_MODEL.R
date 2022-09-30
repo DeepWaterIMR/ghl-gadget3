@@ -141,14 +141,25 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 fit_opt <- optim(
   g3_tmb_par(tmb_param),
-  model_tmb$fn,
-  model_tmb$gr,
+  model,
+  tmb_model,
   method = 'BFGS',
   control = list(trace = 2,
                  maxit = 1000,
                  reltol = .Machine$double.eps^2,
                  parscale = g3_tmb_parscale(tmb_param))
 )
+
+## Iterative reweighting and optimization
+
+fit_iter <- g3_iterative(
+  gd = base_dir,
+  wgts = "iterative_reweighting",
+  r_model = model,
+  tmb_model = tmb_model,
+  params.in = tmb_param
+)
+
 
 ### Save the model parameters
 
@@ -160,7 +171,7 @@ save(fit_opt, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), c
 fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
 save(fit, file = file.path(base_dir, "data/Fitted and optimized TMB model.rda"), compress = "xz")
 
-gadget_plots(fit, file.path(base_dir, "figures"), width = 7, height = 5, units = "in")
+gadget_plots(fit, file.path(base_dir, "figures"))
 
 png(file.path(base_dir, "figures/model_age_composition.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
 plot(fit,data = "stock.std")

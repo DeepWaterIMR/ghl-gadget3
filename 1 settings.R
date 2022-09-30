@@ -16,7 +16,7 @@ if(reset_model & dir.exists(base_dir)) {
     names(prev_param) <- gsub("__", ".", names(prev_param))
     rm(fit.opt)
   }
-    
+
   unlink(base_dir, recursive = TRUE)
   message("Resetting the model. The ", base_dir, " folder deleted and recreated.")
 }
@@ -24,6 +24,7 @@ if(reset_model & dir.exists(base_dir)) {
 if(!dir.exists(base_dir)) {
   dir.create(file.path(base_dir, "data"), recursive = TRUE)
   dir.create(file.path(base_dir, "figures"))
+  dir.create(file.path(base_dir, "iterative_reweighting"))
 }
 
 ## Model settings
