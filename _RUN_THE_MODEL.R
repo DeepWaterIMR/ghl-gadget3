@@ -113,9 +113,9 @@ source("6 initial parameters.R")
 result <- model(tmb_param$value)
 result[[1]]
 
-fit_init <- gadget3:::g3_fit(model,tmb_param)
-
-gadget_plots(fit_init, file.path(base_dir, "figures"))
+# fit_init <- gadget3:::g3_fit(model,tmb_param)
+#
+# gadget_plots(fit_init, file.path(base_dir, "figures"))
 
 # png(file.path(base_dir, "figures/Initial_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
 # print(cowplot::plot_grid(
@@ -140,23 +140,13 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 fit_opt <- optim(
   g3_tmb_par(tmb_param),
-  model,
-  tmb_model,
+  model_tmb$fn,
+  model_tmb$gr,
   method = 'BFGS',
   control = list(trace = 2,
                  maxit = 1000,
                  reltol = .Machine$double.eps^2,
                  parscale = g3_tmb_parscale(tmb_param))
-)
-
-## Iterative reweighting and optimization
-
-fit_iter <- g3_iterative(
-  gd = base_dir,
-  wgts = "iterative_reweighting",
-  r_model = model,
-  tmb_model = tmb_model,
-  params.in = tmb_param
 )
 
 ### Save the model parameters
@@ -178,6 +168,17 @@ dev.off()
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+
+## Iterative reweighting and optimization
+
+fit_iter <- g3_iterative(
+  gd = base_dir,
+  wgts = "iterative_reweighting",
+  r_model = model,
+  tmb_model = tmb_model,
+  params.in = tmb_param
+)
+
 
 ## Scratch code under ####
 
