@@ -125,7 +125,7 @@ plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 
 ## Landings
 
-plot.landings <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
+plot.landings <- function(x) {
 
   if(nrow(x) == 0) {
     return({
@@ -137,11 +137,7 @@ plot.landings <- function(x, quarterly = all(names(model_params$timestep_fun) ==
     })
   }
 
-  if(quarterly) {
-    x$date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
-  } else {
-    stop("Other time steps than quarterly have not been implemented.")
-  }
+  x$date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q")) # Note that this may not work for biannual data, maybe.
 
   ggplot(x, aes(x = date, y = total_weight)) +
     geom_col(fill = "#449BCF") +

@@ -61,16 +61,18 @@ if(reload_data) {
            )
       )
   )[[1]] %>%
-    filter(!(year == 2000 & step == 1)) %>% # Only 1 fish
-    filter(!(year == 1993 & step == 2)) %>% ## Weird spike
-    filter(!(year == 1996 & step == 4)) %>% ## Weird spike
-    filter(!(year == 1997 & step == 4)) %>%
-    filter(!(year == 1998)) %>% ## Few data points
-    filter(!(year == 1999 & step == 1)) %>%
-    filter(!(year == 1999 & step == 3)) %>%
-    filter(!(year == 2001 & step == 4)) %>%
-    filter(!(year == 2005 & step == 1)) %>%
-    filter(!(year == 2009 & step == 3))
+  filter(!year %in% c(1993, 1995, 1998))
+  ## For quarterly
+  # filter(!(year == 2000 & step == 1)) %>% # Only 1 fish
+  # filter(!(year == 1993 & step == 2)) %>% ## Weird spike
+  # filter(!(year == 1996 & step == 4)) %>% ## Weird spike
+  # filter(!(year == 1997 & step == 4)) %>%
+  # filter(!(year == 1998)) %>% ## Few data points
+  # filter(!(year == 1999 & step == 1)) %>%
+  # filter(!(year == 1999 & step == 3)) %>%
+  # filter(!(year == 2001 & step == 4)) %>%
+  # filter(!(year == 2005 & step == 1)) %>%
+  # filter(!(year == 2009 & step == 3))
 
   test <- TrawlNor_ldist %>%
     group_by(year, step) %>%
@@ -134,8 +136,8 @@ if(reload_data) {
              open_ended = c("upper","lower")
            )
       )
-  )[[1]] %>%
-    filter(!(year == 1995 & step == 3))
+  )[[1]] # %>%
+    # filter(!(year == 1995 & step == 3))
 
   test <- OtherNor_ldist %>%
     group_by(year, step) %>%

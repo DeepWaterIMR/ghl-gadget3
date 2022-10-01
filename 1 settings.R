@@ -24,7 +24,7 @@ if(reset_model & dir.exists(base_dir)) {
 if(!dir.exists(base_dir)) {
   dir.create(file.path(base_dir, "data"), recursive = TRUE)
   dir.create(file.path(base_dir, "figures"))
-  dir.create(file.path(base_dir, "iterative_reweighting"))
+  # dir.create(file.path(base_dir, "iterative_reweighting"))
 }
 
 ## Model settings
@@ -32,7 +32,7 @@ if(!dir.exists(base_dir)) {
 model_params <- list()
 
 model_params$year_range <- 1992:2021
-model_params$timestep_fun <- mfdb::mfdb_timestep_quarterly
+model_params$timestep_fun <- mfdb::mfdb_timestep_yearly
 model_params$female_stock <- c("female_imm", "female_mat")
 model_params$male_stock <- c("male_imm", "male_mat")
 model_params$stock_names <- c(model_params$female_stock, model_params$male_stock)

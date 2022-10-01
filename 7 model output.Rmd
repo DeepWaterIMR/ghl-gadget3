@@ -20,7 +20,7 @@ library(plotly)
 library(DT)
 
 ## Example data
-load("/Users/a22357/ownCloud/GadgetGhl/g3 runs/model_files_20220928/data/Fitted and optimized TMB model.rda")
+load("/Users/a22357/ownCloud/GadgetGhl/g3 runs/model_files_20220930/data/Fitted and optimized TMB model.rda")
 ```
 
 Annual plot
