@@ -157,17 +157,13 @@ save(fit_opt, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), c
 ## Plots
 
 fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
-save(fit, file = file.path(base_dir, "data/Fitted and optimized TMB model.rda"), compress = "xz")
+save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
 gadget_plots(fit, file.path(base_dir, "figures"))
 
 png(file.path(base_dir, "figures/model_age_composition.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
 plot(fit,data = "stock.std")
 dev.off()
-
-## Save workspace
-
-save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
 
 ## Iterative reweighting and optimization
 
@@ -179,6 +175,14 @@ fit_iter <- g3_iterative(
   params.in = tmb_param
 )
 
+fit <- gadget3:::g3_fit(model, fit_iter)
+save(fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
+
+gadget_plots(fit, file.path(base_dir, "figures"))
+
+## Save workspace
+
+save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
 
 ## Scratch code under ####
 
