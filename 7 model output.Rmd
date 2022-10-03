@@ -15,7 +15,7 @@ editor_options:
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
-library(gadgetutils)
+library(gadgetplots)
 library(plotly)
 library(DT)
 
@@ -78,7 +78,7 @@ ggplotly(plot_rec(fit) +
 ### Biomass
 
 ```{r}
-ggplotly(plot_biomass(fit, plot_total = TRUE) + 
+ggplotly(plot_biomass(fit, total = TRUE) + 
            scale_color_manual(
              values = c("ghl_female_imm" = "tomato1", 
                         "ghl_female_mat" = "tomato4", 
@@ -156,14 +156,14 @@ nrows = 2
 )
 ```
 
-Growth 
+Growth (age-length)
 =======================================================================
 
 Column {.tabset}
 -----------------------------------------------------------------------
 
 ```{r, echo = FALSE}
-x <- plot_growth(fit, base_size = 14)
+x <- plot_agelength(fit, base_size = 14)
 ```
 
 ```{r, echo = FALSE, fig.height = 10, fig.width = 20, results='asis'}
@@ -175,6 +175,19 @@ for(i in seq_along(x)) {
   cat("  \n")
 }
 ```
+
+### Growth
+
+```{r}
+plot_growth(fit, base_size = 14) +
+  scale_color_manual(
+    values = c("ghl_female_imm" = "tomato1", 
+               "ghl_female_mat" = "tomato4", 
+               "ghl_male_imm" = "dodgerblue1", 
+               "ghl_male_mat" = "dodgerblue4")) +
+    theme(legend.position = "none")
+```
+
 
 
 Survey indices
