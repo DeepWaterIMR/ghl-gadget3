@@ -56,10 +56,10 @@ tmb_param <-
                 mat_l50 %>% filter(sex == "M") %>% pull(slope), 3, 25, 0) %>%
   #  g3_init_guess('prop_mat0', 0.5, 0.1, 0.9, 0) %>%
   #  g3_init_guess('B0', 100, 1, 5000, 1) %>%
-  g3_init_guess('mat1', 70, 10, 200, 1) %>% # these were log() before
-  g3_init_guess('_female.mat2', mat_l50$mean[1],
+  g3_init_guess('mat_alpha', 70, 10, 200, 1) %>% # these were log() before
+  g3_init_guess('_female.mat_l50', mat_l50$mean[1],
                 0.75*mat_l50$mean[1], 1.25*mat_l50$mean[1], 1) %>%
-  g3_init_guess('_male.mat2', mat_l50$mean[2],
+  g3_init_guess('_male.mat_l50', mat_l50$mean[2],
                 0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2], 1) %>%
   g3_init_guess('sigma_alpha', init_sigma_coef[['alpha']], -1, 1, 0) %>%
   g3_init_guess('sigma_beta', init_sigma_coef[['beta']], 0, 2, 0) %>%
