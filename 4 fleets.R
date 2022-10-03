@@ -69,8 +69,8 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('trawl.alpha_exp', by_stock = 'species', exponentiate = TRUE),
-              g3_parameterized('trawl.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('trawl.alpha', by_stock = 'species', exponentiate = TRUE),
+              g3_parameterized('trawl.l50', by_stock = 'species', exponentiate = TRUE)
               )
           ),
         catchability_f =
@@ -99,8 +99,8 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha_exp', by_stock = 'species', exponentiate = TRUE),
-              g3_parameterized('other.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('other.alpha', by_stock = 'species', exponentiate = TRUE),
+              g3_parameterized('other.l50', by_stock = 'species', exponentiate = TRUE)
               )
           ),
         catchability_f =
@@ -129,8 +129,8 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('trawl.alpha_exp', by_stock = 'species', exponentiate = TRUE),
-              g3_parameterized('trawl.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('trawl.alpha', by_stock = 'species', exponentiate = TRUE),
+              g3_parameterized('trawl.l50', by_stock = 'species', exponentiate = TRUE)
             )
           ),
         catchability_f =
@@ -159,8 +159,8 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha_exp', by_stock = 'species', exponentiate = TRUE),
-              g3_parameterized('other.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('other.alpha', by_stock = 'species', exponentiate = TRUE),
+              g3_parameterized('other.l50', by_stock = 'species', exponentiate = TRUE)
             )
           ),
         catchability_f =
@@ -189,8 +189,8 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha_exp', by_stock = 'species', exponentiate = TRUE),
-              g3_parameterized('other.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('other.alpha', by_stock = 'species', exponentiate = TRUE),
+              g3_parameterized('other.l50', by_stock = 'species', exponentiate = TRUE)
             )
           ),
         catchability_f =
@@ -211,9 +211,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('survey.alpha_exp', by_stock = 'species',
+              g3_parameterized('survey.alpha', by_stock = 'species',
                                exponentiate = TRUE),
-              g3_parameterized('survey.l50_exp', by_stock = 'species', exponentiate = TRUE)
+              g3_parameterized('survey.l50', by_stock = 'species', exponentiate = TRUE)
             )
           ),
         catchability_f =

@@ -57,7 +57,12 @@ model_params$species_code <- "GHL"
 stock_params <- list()
 
 stock_params$dl <- 1 # delta length i.e. length group binning
-stock_params$maxlengthgroupgrowth <- 10 # Maximum number of length groups a stock can group within a time step (maxlengthgroupgrowth).  Default within gadget is 15
+
+# Maximum number of length groups a stock can group within a time step (maxlengthgroupgrowth).  Default within gadget is 15:
+stock_params$maxlengthgroupgrowth <-
+  if(identical(stock_params$maxlengthgroupgrowth, mfdb::mfdb_timestep_quarterly)) {
+  10} else if(identical(stock_params$maxlengthgroupgrowth,
+                        mfdb::mfdb_timestep_quarterly)) {20} else {15}
 
 stock_params$male_imm$minage <- 1
 stock_params$male_imm$maxage <- 10
