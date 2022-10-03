@@ -151,16 +151,12 @@ if(reload_data) {
 
   EggaN_landings <- structure(
     data.frame(
-      year = unique(EggaN_SI_biomass_female$year), step = 3, area = 1, total_weight = 1),
+      year = unique(EggaN_SI_biomass_female$year), step = 1, area = 1, total_weight = 1),
     area_group = mfdb_group(`1` = 1))
 
   png(file.path(base_dir, "figures/EggaN_landings.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
   print(plot.landings(EggaN_landings))
   dev.off()
-
-
-  # NoSlope <- tibble(year = unique(NoSlope.biomass.f$year), step = 3, area = "all", value = 1)
-  # attributes(noslope)$area  <- list(all = 1)
 
   # Save
 
