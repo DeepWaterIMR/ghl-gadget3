@@ -114,17 +114,10 @@ result <- model(tmb_param$value)
 result[[1]]
 
 # fit_init <- gadget3:::g3_fit(model,tmb_param)
-#
 # gadget_plots(fit_init, file.path(base_dir, "figures"))
 
-# png(file.path(base_dir, "figures/Initial_model_stats.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(cowplot::plot_grid(
-#   plot(fit_init, data = 'res.by.year', type = 'F'),
-#   plot(fit_init, data = 'res.by.year', type = 'total'),
-#   plot(fit_init, data = 'res.by.year', type = 'rec'),
-#   plot(fit_init, data = 'res.by.year', type = 'catch'),
-#   labels = "AUTO"
-# ))
+# png(file.path(base_dir, "figures/Initial_annual_plot.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+# plot_annual(fit_init)
 # dev.off()
 
 # List all available reports
