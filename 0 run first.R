@@ -19,18 +19,6 @@ if (any(installed_packages == FALSE)) {
     install.packages("remotes")
   }
   
-  #if("gadget3" %in% packages[!installed_packages]) {
-  remotes::install_github("gadget-framework/gadget3", upgrade = "never", quiet = TRUE)
-  #}
-  
-  # if("gadgetutils" %in% packages[!installed_packages]) {
-  remotes::install_github("gadget-framework/gadgetutils", upgrade = "never", quiet = TRUE)
-  #}
-  
-  #if("gadgetplots" %in% packages[!installed_packages]) {
-  devtools::install_github("gadget-framework/gadgetplots", upgrade = "never", quiet = TRUE)
-  #}
-  
   if("ggFishPlots" %in% packages[!installed_packages]) {
     remotes::install_github("DeepWaterIMR/ggFishPlots", upgrade = "never")
   }
@@ -39,6 +27,12 @@ if (any(installed_packages == FALSE)) {
   
   install.packages(packages[!installed_packages])
 }
+
+## Always try installing the gadget-framework packages to keep them up to date
+
+remotes::install_github("gadget-framework/gadget3", upgrade = "never", quiet = TRUE)
+remotes::install_github("gadget-framework/gadgetutils", upgrade = "never", quiet = TRUE)
+remotes::install_github("gadget-framework/gadgetplots", upgrade = "never", quiet = TRUE)
 
 # Packages loading
 invisible(lapply(packages, library, character.only = TRUE))

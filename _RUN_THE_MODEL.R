@@ -108,6 +108,10 @@ source("5 likelihood.R")
 
 source("6 initial parameters.R")
 
+tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
+
+# tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
+
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
 result <- model(tmb_param$value)
