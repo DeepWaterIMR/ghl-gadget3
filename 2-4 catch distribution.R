@@ -347,8 +347,8 @@ if(reload_data) {
   print(plot.matp(EggaN_mat))
   dev.off()
 
-  png(file.path(base_dir, "figures/Maturity_vs_ldist_lengths.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-  print(compare_mat_ldist(EggaN_ldist, EggaN_mat))
+  png(file.path(base_dir, "figures/Maturity_age_ldist_length_comparison.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(compare_mat_ldist(EggaN_ldist, EggaN_mat, rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))))
   dev.off()
 
   # Save

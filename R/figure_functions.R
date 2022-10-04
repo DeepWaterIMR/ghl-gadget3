@@ -705,28 +705,52 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
   }
 }
 
-# ldist = EggaN_ldist; mat = EggaN_mat
-compare_mat_ldist <- function(ldist, mat) {
+# ldist = EggaN_ldist; mat = EggaN_mat; aldist = rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))
+compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
 
-  ldist %>%
+  dat <- ldist %>%
     mutate(len = as.numeric(gsub("len", "", length))) %>%
     dplyr::select(-area, -age) %>%
     group_by(year, step) %>%
     mutate(maxn = max(number),
            pn = number/maxn,
-           type = "ldist") %>%
-    bind_rows( mat %>%
-                 mutate(len = as.numeric(gsub("len", "", length))) %>%
-                 group_by(year, step, length, len) %>%
-                 summarise(number = sum(number)) %>%
-                 group_by(year, step) %>%
-                 mutate(maxn = max(number),
-                        pn = number/maxn,
-                        type = "mat")) %>%
-    ggplot(., aes(x = len, y = pn, color = type)) +
-    geom_line() +
-    scale_color_manual(values = c("ldist" = "black", "mat" = "grey")) +
-    labs(x = "Length", y = "Standardized number", color = "Data type") +
-    facet_wrap(~year)
+           type = "ldist",
+           sex = "both") %>%
+    bind_rows(mat %>%
+                mutate(
+                  len = as.numeric(gsub("len", "", length)),
+                  sex = ifelse(grepl("^male_", maturity_stage), "M", "F")) %>%
+                group_by(year, step, sex, length, len) %>%
+                summarise(number = sum(number)) %>%
+                group_by(year, step, sex) %>%
+                mutate(maxn = max(number),
+                       pn = number/maxn,
+                       type = "mat"))
 
+  if(is.null(aldist)) {
+    dat %>%
+      ggplot(., aes(x = len, y = pn, color = type, lty = sex)) +
+      geom_line() +
+      scale_color_manual(values = c("ldist" = "black", "mat" = "grey")) +
+      labs(x = "Length", y = "Standardized number", color = "Data type",
+           lty = "Sex") +
+      facet_wrap(~year)
+  } else {
+
+    aldist %>%
+      mutate(len = as.numeric(gsub("len", "", length))) %>%
+      group_by(year, step, sex, length, len) %>%
+      summarise(number = sum(number)) %>%
+      group_by(year, step, sex) %>%
+      mutate(maxn = max(number),
+             pn = number/maxn,
+             type = "aldist") %>%
+      bind_rows(dat) %>%
+      ggplot(aes(x = len, y = pn, color = type, lty = sex)) +
+      geom_line() +
+      # scale_color_manual(values = c("ldist" = "black", "mat" = "grey")) +
+      labs(x = "Length", y = "Standardized number", color = "Data type") +
+      facet_wrap(~year)
+
+  }
 }

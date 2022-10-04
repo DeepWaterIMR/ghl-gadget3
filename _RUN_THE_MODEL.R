@@ -154,10 +154,6 @@ save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compre
 
 gadget_plots(fit, file.path(base_dir, "figures"))
 
-png(file.path(base_dir, "figures/model_age_composition.png"), width = pagewidth*2, height = 2*pagewidth, units = "mm", res = 300)
-plot(fit,data = "stock.std")
-dev.off()
-
 ## Iterative reweighting and optimization
 
 fit_iter <- g3_iterative(
