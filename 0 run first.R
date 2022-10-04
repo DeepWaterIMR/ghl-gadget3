@@ -14,29 +14,29 @@ packages <- c("remotes", "tidyverse", "reshape2", "data.table", "DBI", "duckdb",
 installed_packages <- packages %in% rownames(installed.packages())
 
 if (any(installed_packages == FALSE)) {
-
+  
   if("remotes" %in% packages[!installed_packages]) {
     install.packages("remotes")
   }
-
-  if("gadget3" %in% packages[!installed_packages]) {
-    remotes::install_github("gadget-framework/gadget3", upgrade = "never")
-  }
-
-  if("gadgetplots" %in% packages[!installed_packages]) {
-    devtools::install_github("gadget-framework/gadgetplots", upgrade = "never")
-  }
-
-  if("gadgetutils" %in% packages[!installed_packages]) {
-    remotes::install_github("gadget-framework/gadgetutils", upgrade = "never")
-  }
-
+  
+  #if("gadget3" %in% packages[!installed_packages]) {
+  remotes::install_github("gadget-framework/gadget3", upgrade = "never", quiet = TRUE)
+  #}
+  
+  # if("gadgetutils" %in% packages[!installed_packages]) {
+  remotes::install_github("gadget-framework/gadgetutils", upgrade = "never", quiet = TRUE)
+  #}
+  
+  #if("gadgetplots" %in% packages[!installed_packages]) {
+  devtools::install_github("gadget-framework/gadgetplots", upgrade = "never", quiet = TRUE)
+  #}
+  
   if("ggFishPlots" %in% packages[!installed_packages]) {
     remotes::install_github("DeepWaterIMR/ggFishPlots", upgrade = "never")
   }
-
+  
   installed_packages <- packages %in% rownames(installed.packages())
-
+  
   install.packages(packages[!installed_packages])
 }
 
@@ -60,20 +60,20 @@ h <- head
 ## Intervals for gadged ldist files. From:
 
 create_intervals <- function (prefix, vect) {
-
+  
   x <- structure(vect[1:(length(vect)-1)],
                  names = paste0(prefix, vect[1:(length(vect)-1)])) %>%
     as.list(.) %>%
     purrr::map(~structure(seq(.,vect[-1][which(vect[1:(length(vect)-1)]==.)],1)[-length(seq(.,vect[-1][which(vect[1:(length(vect)-1)]==.)],1))],
                           min = .,
                           max = vect[-1][which(vect[1:(length(vect)-1)]==.)]))
-
+  
   x[[length(x)]] <- c(x[[length(x)]], attributes(x[[length(x)]])$max) %>%
     structure(.,
               min = min(.),
               max = max(.))
-
-
+  
+  
   return(x)
 }
 
@@ -81,12 +81,12 @@ create_intervals <- function (prefix, vect) {
 
 unlogit <- function(p, model) {
   mean <- unname((log(p/(1 - p)) - coef(model)[1])/coef(model)[2])
-
+  
   tmp.cis <- suppressMessages(confint(model))
-
+  
   ci.max <- unname((log(p/(1 - p)) - tmp.cis[1])/tmp.cis[2])
   ci.min <- unname((log(p/(1 - p)) - tmp.cis[3])/tmp.cis[4])
-
+  
   data.frame(mean = mean, ci.min = ci.min, ci.max = ci.max)
 }
 
@@ -126,13 +126,13 @@ coln <- function (x)
 #' @author Mikko Vihtakari
 
 check_cols <- function(cols) {
-
+  
   if (is.null(names(cols))) {
     labs <- seq_along(cols)
   } else {
     labs <- paste0(names(cols), "\n[", seq_along(cols), "]")
   }
-
+  
   mp <- barplot(rep(1, length(cols)), yaxt = "n", col = cols, border = NA, names.arg = labs, xlab = "Color sequence",  ylim = c(0,1.2))
   points(mp, rep(1.1, length(cols)), col = cols, pch = 16, cex = 4)
 }
