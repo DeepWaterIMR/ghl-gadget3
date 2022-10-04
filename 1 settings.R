@@ -60,9 +60,9 @@ stock_params$dl <- 1 # delta length i.e. length group binning
 
 # Maximum number of length groups a stock can group within a time step (maxlengthgroupgrowth).  Default within gadget is 15:
 stock_params$maxlengthgroupgrowth <-
-  if(identical(stock_params$maxlengthgroupgrowth, mfdb::mfdb_timestep_quarterly)) {
-  10} else if(identical(stock_params$maxlengthgroupgrowth,
-                        mfdb::mfdb_timestep_quarterly)) {20} else {15}
+  if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_quarterly)) {
+  10} else if(identical(model_params$timestep_fun,
+                        mfdb::mfdb_timestep_yearly)) {20} else {15}
 
 stock_params$male_imm$minage <- 1
 stock_params$male_imm$maxage <- 10
@@ -76,13 +76,13 @@ stock_params$female_imm$minlength <- 1
 stock_params$female_imm$maxlength <- 120
 stock_params$female_imm$max_possible_data_length <- 75 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
-stock_params$male_mat$minage <- 3
+stock_params$male_mat$minage <- 1
 stock_params$male_mat$maxage <- 20
 stock_params$male_mat$minlength <- 1
 stock_params$male_mat$maxlength <- 80
 stock_params$male_mat$min_possible_data_length <- 30 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
-stock_params$female_mat$minage <- 3
+stock_params$female_mat$minage <- 1
 stock_params$female_mat$maxage <- 30
 stock_params$female_mat$minlength <- 1
 stock_params$female_mat$maxlength <- 120
