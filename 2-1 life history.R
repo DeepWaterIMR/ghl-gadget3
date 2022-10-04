@@ -148,14 +148,14 @@ if(reload_data) {
 
   # Should we use all survey data ('data_source == "ldist-surveys-NOR"') or only EggaN ('sampling_type == "ENS"') for maturity estimation? Applies also to 2-4 catchdistribution
 
-    mat_dat <- mfdb_dplyr_sample(mdb) %>%
-      filter(!is.na(length), !is.na(sex), !is.na(maturity_stage)) %>%
-      filter(data_source == "ldist-surveys-NOR") %>%
-      select(year, month, areacell, age, sex, maturity_stage, length) %>%
-      collect() %>%
-      mutate(maturity = as.integer(maturity_stage >= 3))
+  mat_dat <- mfdb_dplyr_sample(mdb) %>%
+    filter(!is.na(length), !is.na(sex), !is.na(maturity_stage)) %>%
+    filter(data_source == "ldist-surveys-NOR") %>%
+    select(year, month, areacell, age, sex, maturity_stage, length) %>%
+    collect() %>%
+    mutate(maturity = as.integer(maturity_stage >= 3))
 
-  mat_l50 <- plot_maturity(mat_dat, split.by.sex = TRUE)
+  mat_l50 <- ggFishPlots::plot_maturity(mat_dat, split.by.sex = TRUE)
 
   png(file.path(base_dir, "figures/Maturity_ogive_by_length.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
   suppressMessages(print(mat_l50$plot))
@@ -163,8 +163,9 @@ if(reload_data) {
 
   mat_l50 <- mat_l50$params
 
-  mat_a50 <- plot_maturity(age_dat, length = "age", split.by.sex = T, xlab = "Age",
-                           length.bin.width = 1, length.unit = "years")
+  mat_a50 <- ggFishPlots::plot_maturity(
+    age_dat, length = "age", split.by.sex = T, xlab = "Age",
+    length.bin.width = 1, length.unit = "years")
 
   png(file.path(base_dir, "figures/Maturity_ogive_by_age.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
   suppressMessages(print(mat_a50$plot))
