@@ -30,15 +30,16 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 500, 0.001, 1000, 1) %>%
-  g3_init_guess('\\.init', 500, 0.001, 1000, 1) %>%
-  g3_init_guess('recl', 12, 10, 30, 1) %>%
+  g3_init_guess('\\.rec', 250, 0.001, 500, 1) %>%
+  g3_init_guess('\\.init', 250, 0.001, 500, 1) %>%
+  g3_init_guess('recl', 12, 5, 20, 1) %>%
   g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
-  g3_init_guess('rec.scalar', 250, 1, 500, 1) %>%
-  g3_init_guess('init.scalar', 150, 1, 300, 1) %>%
-  g3_init_guess('Linf', 90, 80, 120, 1) %>%
-  g3_init_guess('\\.K', 50, 40, 120, 1) %>%
-  g3_init_guess('bbin', 6, 1e-08, 100, 1) %>%
+  g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%
+  g3_init_guess('init.scalar', 50, 1, 100, 1) %>%
+  g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
+  g3_init_guess('_male.Linf', 60, 40, 80, 1) %>%
+  g3_init_guess('\\.K', 20, 5, 60, 1) %>%
+  g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
   g3_init_guess('l50', 50, 40, 100, 1) %>%
   # g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
