@@ -46,7 +46,7 @@ run_retro <- FALSE # Run retrospective analysis?
 ## 2 - parameter for each age group of each stock
 
 setup_options <- list(param_opt_mode = 1,
-                      initial_abund_mode = 2)
+                      initial_abund_mode = 1)
 
 ## Whether or not to bound parameters internally
 setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FALSE)
@@ -138,7 +138,7 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 ## Optimize model parameters. Takes hours.
 
 # tmb_param %>% filter(optimise, lower >= upper)
-  
+
 fit_opt <- optim(
   par = g3_tmb_par(tmb_param),
   fn = model_tmb$fn,
@@ -163,6 +163,9 @@ fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
 save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
 gadget_plots(fit, file.path(base_dir, "figures"))
+# gadget_plots(fit, path = file.path(base_dir, "figures"), file_type = "html")
+
+plot_html(fit, path = file.path(getwd(), "figures"))
 
 ## Iterative reweighting and optimization
 
