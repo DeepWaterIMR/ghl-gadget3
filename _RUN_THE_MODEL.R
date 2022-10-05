@@ -27,7 +27,9 @@ reset_model <- TRUE # Change to TRUE to reset the model (delete all model files)
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
 bootstrap <- FALSE # Not implemented yet
+
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
+
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether or not to run iterative reweighting
 run_retro <- FALSE # Run retrospective analysis?
@@ -135,11 +137,15 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 ## Optimize model parameters. Takes hours.
 
+# tmb_param %>% filter(optimise, lower >= upper)
+  
 fit_opt <- optim(
-  g3_tmb_par(tmb_param),
-  model_tmb$fn,
-  model_tmb$gr,
-  method = 'BFGS',
+  par = g3_tmb_par(tmb_param),
+  fn = model_tmb$fn,
+  gr = model_tmb$gr,
+  method = 'BFGS', # for bounnded: 'L-BFGS-B'
+  # lower = g3_tmb_lower(tmb_param),
+  # upper = g3_tmb_upper(tmb_param),
   control = list(trace = 2,
                  maxit = 1000,
                  reltol = .Machine$double.eps^2,
@@ -165,7 +171,12 @@ fit_iter <- g3_iterative(
   wgts = "iterative_reweighting",
   r_model = model,
   tmb_model = tmb_model,
-  params.in = tmb_param
+  params.in = tmb_param,
+  grouping = list(si_bio = c('log_EggaN_SI_female',
+                             'log_EggaN_SI_male'),
+                  si_juv = c('log_Juv_SI_1',
+                             'log_Juv_SI_2',
+                             'log_Juv_SI_3'))
 )
 
 fit <- gadget3:::g3_fit(model, fit_iter)
