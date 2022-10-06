@@ -31,7 +31,7 @@ if(!dir.exists(base_dir)) {
 
 model_params <- list()
 
-model_params$year_range <- 1992:2021
+model_params$year_range <- 1980:2021
 model_params$timestep_fun <- mfdb::mfdb_timestep_yearly
 model_params$female_stock <- c("female_imm", "female_mat")
 model_params$male_stock <- c("male_imm", "male_mat")
@@ -73,7 +73,7 @@ stock_params$male_imm$max_possible_data_length <- 60 # This parameter is used to
 stock_params$female_imm$minage <- 1
 stock_params$female_imm$maxage <- 10
 stock_params$female_imm$minlength <- 1
-stock_params$female_imm$maxlength <- 120
+stock_params$female_imm$maxlength <- 90
 stock_params$female_imm$max_possible_data_length <- 75 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$male_mat$minage <- 3
@@ -83,7 +83,7 @@ stock_params$male_mat$maxlength <- 80
 stock_params$male_mat$min_possible_data_length <- 30 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$female_mat$minage <- 3
-stock_params$female_mat$maxage <- 30
+stock_params$female_mat$maxage <- 25
 stock_params$female_mat$minlength <- 1
 stock_params$female_mat$maxlength <- 120
 stock_params$female_mat$min_possible_data_length <- 40 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
