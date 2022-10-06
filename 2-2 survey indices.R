@@ -114,9 +114,31 @@ if(reload_data) {
     print(p)
     dev.off()
 
+    ## Russian survey index
+
+    Russian_SI <- read.csv('../ghl-gadget-data/data/out/Russian survey index from gadget2.csv')
+
+    attr(Russian_SI, "table_name")
+
+    attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
+    attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
+    attributes(Russian_SI)$length <- attributes(EggaN_SI_biomass_female)$length
+
+    p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
+      geom_col() +
+      labs(y = "Survey index biomass (1000 t)", x = "Year") +
+      scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+      scale_y_continuous(expand = c(0, 0))
+
+    ggsave(filename = file.path(base_dir, "figures/Russian_index.png"),
+           plot = print(p), width = pagewidth, height = pagewidth*0.7,
+           units = "mm")
+
   ## Save
 
-  save(EggaN_SI_biomass_female, EggaN_SI_biomass_male, file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
+  save(EggaN_SI_biomass_female, EggaN_SI_biomass_male, Juv_SI_1, Juv_SI_2,
+       Juv_SI_3, Russian_SI,
+       file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
   rm(p)
 
