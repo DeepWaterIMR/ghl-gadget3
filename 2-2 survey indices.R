@@ -118,8 +118,10 @@ if(reload_data) {
 
     Russian_SI <- read.csv('../ghl-gadget-data/data/out/Russian survey index from gadget2.csv')
 
-    attr(Russian_SI, "table_name")
-
+    if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
+     Russian_SI$step <- 1
+    }
+    
     attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
     attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
     attributes(Russian_SI)$length <- attributes(EggaN_SI_biomass_female)$length
