@@ -165,7 +165,9 @@ save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compre
 gadget_plots(fit, file.path(base_dir, "figures"))
 # gadget_plots(fit, path = file.path(base_dir, "figures"), file_type = "html")
 
-# plot_html(fit, path = file.path(getwd(), "figures"))
+tmppath <- file.path(getwd(), base_dir, "figures")
+plot_html(fit, path = tmppath)
+rm(tmppath)
 
 ## Iterative reweighting and optimization
 
