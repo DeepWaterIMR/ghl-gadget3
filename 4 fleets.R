@@ -30,10 +30,10 @@ TrawlNor <- g3_fleet(c("TrawlNor", "fishery")) %>%
 OtherNor <- g3_fleet(c("OtherNor", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])
 
-if(nrow(HistNor_landings) > 0) {
-  HistNor <- g3_fleet(c("HistNor", "fishery")) %>%
-    g3s_livesonareas(areas[c('1')])
-}
+# if(nrow(HistNor_landings) > 0) {
+#   HistNor <- g3_fleet(c("HistNor", "fishery")) %>%
+#     g3s_livesonareas(areas[c('1')])
+# }
 
 TrawlRus <- g3_fleet(c("TrawlRus", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])
@@ -41,10 +41,10 @@ TrawlRus <- g3_fleet(c("TrawlRus", "fishery")) %>%
 OtherRus <- g3_fleet(c("OtherRus", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])
 
-if(nrow(HistRus_landings) > 0) {
-  HistRus <- g3_fleet(c("HistRus", "fishery")) %>%
-    g3s_livesonareas(areas[c('1')])
-}
+# if(nrow(HistRus_landings) > 0) {
+#   HistRus <- g3_fleet(c("HistRus", "fishery")) %>%
+#     g3s_livesonareas(areas[c('1')])
+# }
 
 Internat <- g3_fleet(c("Internat", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])

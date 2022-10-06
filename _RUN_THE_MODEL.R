@@ -46,7 +46,7 @@ run_retro <- FALSE # Run retrospective analysis?
 ## 2 - parameter for each age group of each stock
 
 setup_options <- list(param_opt_mode = 1,
-                      initial_abund_mode = 1)
+                      initial_abund_mode = 2)
 
 ## Whether or not to bound parameters internally
 setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FALSE)
@@ -165,7 +165,7 @@ save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compre
 gadget_plots(fit, file.path(base_dir, "figures"))
 # gadget_plots(fit, path = file.path(base_dir, "figures"), file_type = "html")
 
-plot_html(fit, path = file.path(getwd(), "figures"))
+# plot_html(fit, path = file.path(getwd(), "figures"))
 
 ## Iterative reweighting and optimization
 

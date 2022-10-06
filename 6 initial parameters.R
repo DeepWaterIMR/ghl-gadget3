@@ -25,6 +25,7 @@ tmb_model <- g3_to_tmb(actions)
 # Get the parameter template
 
 tmb_param <- attr(tmb_model, "parameter_template")
+# rownames(tmb_param) <- 1:nrow(tmb_param)
 
 ## Define the initial parameters
 
