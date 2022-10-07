@@ -181,7 +181,8 @@ fit_iter <- g3_iterative(
                              'log_EggaN_SI_male'),
                   si_juv = c('log_Juv_SI_1',
                              'log_Juv_SI_2',
-                             'log_Juv_SI_3'))
+                             'log_Juv_SI_3')),
+  use_parscale = TRUE
 )
 
 fit <- gadget3:::g3_fit(model, fit_iter)
