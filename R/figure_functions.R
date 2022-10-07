@@ -79,23 +79,46 @@ plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
 
 ## Length distributions
 
-plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
+plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4),
+                       type = "bar") {
 
-  x$Length <- as.integer(gsub("len", "", x$length))
+  x$min_length <- unname(sapply(x$length, function(k) {
+      tmp <- attributes(x)$length
+      attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+    }))
 
-  if(quarterly) {
-    x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
+  x$max_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  if(type == "bar") {
+    ggplot(data = x,
+           aes(xmin = .data$min_length, xmax = .data$max_length,
+               ymin = 0, ymax = .data$number)) +
+      geom_rect(fill = "grey", color = "black") +
+      labs(x = "Length (cm)", y = "Number") +
+      facet_wrap(~.data$year+.data$step,
+                 labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
+      coord_cartesian(expand = FALSE)
   } else {
-    x$Date <- x$year
-  }
 
-  x <- x %>% arrange(Date, Length)
+    x$Length <- as.integer(gsub("len", "", x$length))
 
-  ggplot(x, aes(x = Length, y = number, color = step)) +
+    if(quarterly) {
+      x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
+    } else {
+      x$Date <- x$year
+    }
+
+    x <- x %>% arrange(Date, Length)
+
+    ggplot(x, aes(x = Length, y = number, color = step))
     geom_path() +
-    facet_wrap(~year, scales = "free_y", ncol = 4, dir = "v") +
-    labs(x = "Length (cm)", y = "Count", color = "Timestep") +
-    theme(legend.position = "bottom")
+      facet_wrap(~year, scales = "free_y", ncol = 4, dir = "v") +
+      labs(x = "Length (cm)", y = "Count", color = "Timestep") +
+      theme(legend.position = "bottom")
+  }
 }
 
 ## Age-Length distributions

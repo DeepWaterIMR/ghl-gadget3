@@ -46,6 +46,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  g3l_catchdistribution(
+    'RussianSurvey_ldist',
+    RussianSurvey_ldist,
+    fleets = list(RussianSurvey),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
   ## Length-age distributions
 
   g3l_catchdistribution(

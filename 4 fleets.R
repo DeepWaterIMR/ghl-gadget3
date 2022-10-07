@@ -22,6 +22,9 @@ if(!exists("TrawlNor_landings")) source("2-3 landings.R")
 EggaN <- g3_fleet(c("EggaN", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
+RussianSurvey <- g3_fleet(c("RussianSurvey", "survey")) %>%
+  g3s_livesonareas(areas[c('1')])
+
 ## Commercial
 
 TrawlNor <- g3_fleet(c("TrawlNor", "fishery")) %>%
@@ -71,9 +74,9 @@ fleet_actions <-
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
-            #   g3_parameterized('trawl.alpha', by_stock = 'species', 
+            #   g3_parameterized('trawl.alpha', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('trawl.l50', by_stock = 'species', 
+            #   g3_parameterized('trawl.l50', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets)
             #   )
           ),
@@ -103,9 +106,9 @@ fleet_actions <-
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
-            #   g3_parameterized('other.alpha', by_stock = 'species', 
+            #   g3_parameterized('other.alpha', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('other.l50', by_stock = 'species', 
+            #   g3_parameterized('other.l50', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets)
             #   )
           ),
@@ -135,9 +138,9 @@ fleet_actions <-
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
-            #   g3_parameterized('trawl.alpha', by_stock = 'species', 
+            #   g3_parameterized('trawl.alpha', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('trawl.l50', by_stock = 'species', 
+            #   g3_parameterized('trawl.l50', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets)
             # )
           ),
@@ -167,9 +170,9 @@ fleet_actions <-
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
-            #   g3_parameterized('other.alpha', by_stock = 'species', 
+            #   g3_parameterized('other.alpha', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('other.l50', by_stock = 'species', 
+            #   g3_parameterized('other.l50', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets)
             # )
           ),
@@ -199,9 +202,9 @@ fleet_actions <-
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
-            #   g3_parameterized('other.alpha', by_stock = 'species', 
+            #   g3_parameterized('other.alpha', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('other.l50', by_stock = 'species', 
+            #   g3_parameterized('other.l50', by_stock = 'species',
             #                    exponentiate = exponentiate_fleets)
             # )
           ),
@@ -223,9 +226,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('survey.alpha', by_stock = 'species',
+              g3_parameterized('eggan.survey.alpha', by_stock = 'species',
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('survey.l50', by_stock = 'species', 
+              g3_parameterized('eggan.survey.l50', by_stock = 'species',
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -233,6 +236,30 @@ fleet_actions <-
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('EggaN_landings',
                             EggaN_landings %>%
+                              mutate(area = 1, # Check this hack out
+                                     step = as.numeric(step),
+                                     year = as.numeric(year))
+            )
+          )
+      ),
+    RussianSurvey %>%
+      g3a_predate_fleet(
+        stocks,
+        suitabilities =
+          stocks %>%
+          set_names(.,map(.,'name')) %>%
+          map(function(x)
+            g3_suitability_exponentiall50(
+              g3_parameterized('rus.survey.alpha', by_stock = 'species',
+                               exponentiate = exponentiate_fleets),
+              g3_parameterized('rus.survey.l50', by_stock = 'species',
+                               exponentiate = exponentiate_fleets)
+            )
+          ),
+        catchability_f =
+          g3a_predate_catchability_totalfleet(
+            g3_timeareadata('RussianSurvey_landings',
+                            RussianSurvey_landings %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))

@@ -92,58 +92,98 @@ if(reload_data) {
   )[[1]]
 
 
-    p <- bind_rows(Juv_SI_1 %>% mutate(length = "Juv_SI_1 (10-17 cm)"),
-                   Juv_SI_2 %>% mutate(length = "Juv_SI_2 (18-27 cm)"),
-                   Juv_SI_3 %>% mutate(length = "Juv_SI_3 (28-35 cm)")) %>%
+  p <- bind_rows(Juv_SI_1 %>% mutate(length = "Juv_SI_1 (10-17 cm)"),
+                 Juv_SI_2 %>% mutate(length = "Juv_SI_2 (18-27 cm)"),
+                 Juv_SI_3 %>% mutate(length = "Juv_SI_3 (28-35 cm)")) %>%
     ggplot(., aes(x = year, y = number/1e6)) +
     geom_col() +
     facet_wrap(~length, scales = "free_y", ncol = 1) +
     labs(y = "Abundance\n(millions)", x = "Year") +
     scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
     scale_y_continuous(expand = c(0, 0)) # +
-    # geom_segment(ggplot2::aes(x = year-0.5, xend = year+.5,
-    #                           y=Inf, yend = number/1e6),
-    #              lty=2, col='gray', inherit.aes = FALSE) +
-    # coord_cartesian(clip = "off")#+
-    # theme(legend.position='none',panel.spacing = ggplot2::unit(0,'cm'),
-    #       plot.margin = ggplot2::unit(c(0,0,0,0),'cm'),
-    #       strip.background = ggplot2::element_blank(),
-    #       strip.text.x = ggplot2::element_blank())
+  # geom_segment(ggplot2::aes(x = year-0.5, xend = year+.5,
+  #                           y=Inf, yend = number/1e6),
+  #              lty=2, col='gray', inherit.aes = FALSE) +
+  # coord_cartesian(clip = "off")#+
+  # theme(legend.position='none',panel.spacing = ggplot2::unit(0,'cm'),
+  #       plot.margin = ggplot2::unit(c(0,0,0,0),'cm'),
+  #       strip.background = ggplot2::element_blank(),
+  #       strip.text.x = ggplot2::element_blank())
 
-    png(file.path(base_dir, "figures/Juvenile_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-    print(p)
-    dev.off()
+  png(file.path(base_dir, "figures/Juvenile_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(p)
+  dev.off()
 
-    ## Russian survey index
+  ## Russian survey index
 
-    Russian_SI <- read.csv('../ghl-gadget-data/data/out/Russian survey index from gadget2.csv')
+  Russian_SI <- read.csv('../ghl-gadget-data/data/out/Russian survey index from gadget2.csv')
 
-    if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
-     Russian_SI$step <- 1
-    }
-    
-    attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
-    attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
-    attributes(Russian_SI)$length <- attributes(EggaN_SI_biomass_female)$length
+  if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
+    Russian_SI$step <- 1
+  }
 
-    p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
-      geom_col() +
-      labs(y = "Survey index biomass (1000 t)", x = "Year") +
-      scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
-      scale_y_continuous(expand = c(0, 0))
+  attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
+  attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
+  attributes(Russian_SI)$length <- attributes(EggaN_SI_biomass_female)$length
 
-    ggsave(filename = file.path(base_dir, "figures/Russian_index.png"),
-           plot = print(p), width = pagewidth, height = pagewidth*0.7,
-           units = "mm")
+  p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
+    geom_col() +
+    labs(y = "Survey index biomass (1000 t)", x = "Year") +
+    scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+    scale_y_continuous(expand = c(0, 0))
 
+  ggsave(filename = file.path(base_dir, "figures/Russian_index.png"),
+         plot = print(p), width = pagewidth, height = pagewidth*0.7,
+         units = "mm", bg = "white")
+
+  rm(p)
   ## Save
 
   save(EggaN_SI_biomass_female, EggaN_SI_biomass_male, Juv_SI_1, Juv_SI_2,
        Juv_SI_3, Russian_SI,
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
-  rm(p)
 
+  ### Plot all
+
+  p <- dplyr::bind_rows(
+    EggaN_SI_biomass_female %>%
+      dplyr::mutate(index = "EggaN_SI_biomass_female",
+                    p = total_weight/max(total_weight)) %>%
+      dplyr::select(-total_weight),
+    EggaN_SI_biomass_male %>%
+      dplyr::mutate(index = "EggaN_SI_biomass_male",
+                    p = total_weight/max(total_weight)) %>%
+      dplyr::select(-total_weight),
+    Juv_SI_1 %>%
+      dplyr::mutate(index = "Juv_SI_1",
+                    p = number/max(number)) %>%
+      dplyr::select(-number),
+    Juv_SI_2 %>%
+      dplyr::mutate(index = "Juv_SI_2",
+                    p = number/max(number)) %>%
+      dplyr::select(-number),
+    Juv_SI_3 %>%
+      dplyr::mutate(index = "Juv_SI_3",
+                    p = number/max(number)) %>%
+      dplyr::select(-number),
+    Russian_SI %>%
+      dplyr::mutate(step = as.character(step),
+                    index = "Russian_SI",
+                    p = total_weight/max(total_weight)) %>%
+      dplyr::select(-total_weight)
+  ) %>%
+    ggplot(aes(x = year, y = p, color = index)) +
+    geom_line() +
+    labs(x = "Year", y = "Stadardized index", color = "Survey index") +
+    scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    theme(legend.position = "bottom")
+
+  ggsave(
+    filename = file.path(base_dir, "figures/Survey_index_comparison.png"),
+    plot = print(p), width = pagewidth, height = pagewidth*0.7,  units = "mm",
+    bg = "white")
 
   ## !reload_data case
 } else {

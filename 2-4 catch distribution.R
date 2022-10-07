@@ -264,6 +264,22 @@ if(reload_data) {
   print(plot.adist(EggaN_aldist_male))
   dev.off()
 
+  ## Russian survey
+
+  RussianSurvey_ldist <- readRDS("../ghl-gadget-data/data/out/Russian survey ldist from gadget2.rds")
+
+  if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
+    RussianSurvey_ldist$step <- 1
+  }
+
+  attributes(RussianSurvey_ldist)$step <- attributes(EggaN_ldist)$step
+  attributes(RussianSurvey_ldist)$area <- attributes(EggaN_ldist)$area
+  attributes(RussianSurvey_ldist)$age <- attributes(EggaN_ldist)$age
+
+  png(file.path(base_dir, "figures/RussianSurvey_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(RussianSurvey_ldist))
+  dev.off()
+
   ############################
   ## Maturity proportions ####
 
@@ -353,7 +369,7 @@ if(reload_data) {
 
   # Save
 
-  save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
+  save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, RussianSurvey_ldist, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
 
   ## !reload_data case
 } else {
