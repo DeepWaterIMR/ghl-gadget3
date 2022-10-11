@@ -163,10 +163,9 @@ fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
 save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
 gadget_plots(fit, file.path(base_dir, "figures"))
-# gadget_plots(fit, path = file.path(base_dir, "figures"), file_type = "html")
 
 tmppath <- file.path(getwd(), base_dir, "figures")
-plot_html(fit, path = tmppath)
+gadget_plots(fit, path = tmppath, file_type = "html")
 rm(tmppath)
 
 ## Iterative reweighting and optimization
