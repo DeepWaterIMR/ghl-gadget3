@@ -189,6 +189,10 @@ save(fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compres
 
 gadget_plots(fit, file.path(base_dir, "figures"))
 
+tmppath <- file.path(getwd(), base_dir, "figures")
+gadget_plots(fit, path = eval(file.path(getwd(), base_dir, "figures")), file_type = "html")
+rm(tmppath)
+
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
