@@ -31,8 +31,8 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 250, 0.001, 1000, 1) %>% 
-  g3_init_guess('\\.init', 250, 0.001, 1000, 1) %>%
+  g3_init_guess('\\.rec', 250, 0.001, 750, 1) %>% 
+  g3_init_guess('\\.init', 250, 0.001, 750, 1) %>%
   g3_init_guess('recl', 12, 5, 20, 1) %>%
   g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
   g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%

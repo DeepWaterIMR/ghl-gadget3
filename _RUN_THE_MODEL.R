@@ -1,15 +1,13 @@
 ## ---------------------------
 ##
-## Script name:
+## Script name: Run the gadget3 model for NEA Greenland halibut
 ##
-## Purpose of script:
+## Purpose of script: Master script to run the model. Source the entire script or run from top to a desired line (Ctrl+Alt+B on Rstudio)
 ##
 ## Authors:
 ## Mikko Vihtakari // Institute of Marine Research, Norway
 ## Will Butler and Bjarki Elvarsson // Marine and Freshwater Research Institute, Iceland
 ## Email: mikko.vihtakari@hi.no
-##
-## Date Created: 2021-02-12
 ##
 ## ---------------------------
 
