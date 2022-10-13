@@ -17,15 +17,35 @@ likelihood_actions <- list(
   ## Length distributions
 
   g3l_catchdistribution(
-    'trawl_ldist',
+    'trawlnor_ldist',
     TrawlNor_ldist,
-    fleets = list(TrawlNor, TrawlRus),
+    fleets = list(TrawlNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  g3l_catchdistribution(
+    'trawlrus_ldist_f',
+    TrawlRus_ldist_female,
+    fleets = list(TrawlRus),
+    stocks = list(female_imm, female_mat),
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+  
+  g3l_catchdistribution(
+    'trawlrus_ldist_m',
+    TrawlRus_ldist_male,
+    fleets = list(TrawlRus),
+    stocks = list(male_imm, male_mat),
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+  
   g3l_catchdistribution(
     'other_ldist',
     OtherNor_ldist,
