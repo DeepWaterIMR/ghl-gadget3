@@ -166,7 +166,12 @@ tmppath <- file.path(getwd(), base_dir, "figures")
 gadget_plots(fit, path = tmppath, file_type = "html")
 rm(tmppath)
 
-## Iterative reweighting and optimization
+
+
+
+####################################################################
+## Iterative reweighting and optimization                       ####
+## Running this part takes a long time (3-6 hours on a server)  ####
 
 fit_iter <- g3_iterative(
   gd = base_dir,
@@ -174,11 +179,15 @@ fit_iter <- g3_iterative(
   r_model = model,
   tmb_model = tmb_model,
   params.in = tmb_param,
-  grouping = list(si_bio = c('log_EggaN_SI_female',
+  grouping = list(si_eggan = c('log_EggaN_SI_female',
                              'log_EggaN_SI_male'),
                   si_juv = c('log_Juv_SI_1',
                              'log_Juv_SI_2',
-                             'log_Juv_SI_3')),
+                             'log_Juv_SI_3'),
+                  otherrus = c('otherrus_ldist_f',
+                               'otherrus_ldist_m'),
+                  trawlrus = c('trawlrus_ldist_f',
+                               'trawlrus_ldist_m')),
   use_parscale = TRUE
 )
 
