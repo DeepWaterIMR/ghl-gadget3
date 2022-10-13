@@ -180,7 +180,7 @@ if(reload_data) {
   # print(plot.adist(OtherNor_adist))
   # dev.off()
   
-  ## Russian catches
+  ## Russian trawl catches
   
   ### Females (combine eventually with males?)
   
@@ -245,6 +245,64 @@ if(reload_data) {
   #   group_by(year, step) %>%
   #   summarise(n = sum(number)) %>%
   #   filter(n < 50)
+  
+  ## Russian other catches
+  
+  ### Females (combine eventually with males?)
+  
+  tmp <- readRDS("../ghl-gadget-data/data/out/Russian other ldist female from gadget2.rds")
+  
+  if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
+    tmp$step <- 1
+  }
+  
+  tmp2 <- attributes(tmp)$length
+  
+  tmp <- tmp %>% 
+    group_by(year, step, area, age, length) %>% 
+    summarise(number = sum(number)) %>% 
+    ungroup()
+  
+  attributes(tmp)$length <- tmp2
+  attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
+  attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
+  attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
+  
+  # plot.ldist(tmp, free_y = T)
+  OtherRus_ldist_female <- tmp %>% 
+    filter(!year %in% c(1995, 2005))
+  
+  png(file.path(base_dir, "figures/OtherRus_ldist_female.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(OtherRus_ldist_female, free_y = T))
+  dev.off()
+  
+  ### Males (combine eventually with males?)
+  
+  tmp <- readRDS("../ghl-gadget-data/data/out/Russian other ldist male from gadget2.rds")
+  
+  if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
+    tmp$step <- 1
+  }
+  
+  tmp2 <- attributes(tmp)$length
+  
+  tmp <- tmp %>% 
+    group_by(year, step, area, age, length) %>% 
+    summarise(number = sum(number)) %>% 
+    ungroup()
+  
+  attributes(tmp)$length <- tmp2
+  attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
+  attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
+  attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
+  
+  # plot.ldist(tmp, free_y = T)
+  OtherRus_ldist_male <- tmp %>% 
+    filter(!year %in% c(1995, 2005))
+  
+  png(file.path(base_dir, "figures/OtherRus_ldist_male.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(OtherRus_ldist_male, free_y = T))
+  dev.off()
   
   rm(tmp, tmp2)
   
@@ -468,7 +526,7 @@ if(reload_data) {
   
   # Save
   
-  save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, RussianSurvey_ldist, TrawlRus_ldist_male, TrawlRus_ldist_female, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
+  save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, RussianSurvey_ldist, TrawlRus_ldist_male, TrawlRus_ldist_female, OtherRus_ldist_male, OtherRus_ldist_female, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
   
   ## !reload_data case
 } else {

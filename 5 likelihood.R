@@ -49,13 +49,33 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'other_ldist',
     OtherNor_ldist,
-    fleets = list(OtherNor, OtherRus, Internat),
+    fleets = list(OtherNor, Internat),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  g3l_catchdistribution(
+    'otherrus_ldist_f',
+    OtherRus_ldist_female,
+    fleets = list(OtherRus),
+    stocks = list(female_imm, female_mat),
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+  
+  g3l_catchdistribution(
+    'otherrus_ldist_m',
+    OtherRus_ldist_male,
+    fleets = list(OtherRus),
+    stocks = list(male_imm, male_mat),
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+  
   g3l_catchdistribution(
     'EggaN_ldist',
     EggaN_ldist,

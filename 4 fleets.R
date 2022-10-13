@@ -163,10 +163,10 @@ fleet_actions <-
           map(function(x)
             g3_suitability_andersen(
               g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('other.p1', by_stock = 'species'),
+              p1 = g3_parameterized('otherrus.p1', by_stock = 'species'),
               p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('other.p3', by_stock = 'species'),
-              p4 = g3_parameterized('other.p4', by_stock = 'species'),
+              p3 = g3_parameterized('otherrus.p3', by_stock = 'species'),
+              p4 = g3_parameterized('otherrus.p4', by_stock = 'species'),
               p5 = g3_parameterized('andersen.L', by_stock = 'species')
             )
             # g3_suitability_exponentiall50(
@@ -266,6 +266,5 @@ fleet_actions <-
             )
           )
       )
-    # Add the historic fleets here when you'll need them
   )
 
