@@ -5,8 +5,8 @@
 Research Institute, Iceland**
 
 **Authors (alphabetic order): Butler Will, Elvarsson Bjarki,
-Hallfredsson Elvar H., Howell Daniel, Vihtakari Mikko, Vollen Tone,
-Windsland Kristin**
+Hallfredsson Elvar H., Howell Daniel, Vihtakari Mikko, Windsland
+Kristin**
 
 **Maintainer: <mikko.vihtakari@hi.no>**
 
@@ -79,7 +79,7 @@ considers sexual dimorphism internally through sub-stocks.
 
 # Things to do before the benchmark
 
-*Last edited: MV, 04.10.2022.* Comments in italics.
+*Last edited: MV, 13.10.2022.* Comments in italics.
 
 1.  Move to Gadget3.
 
@@ -102,18 +102,16 @@ considers sexual dimorphism internally through sub-stocks.
 
 5.  Survey indices
 
-    -   EggaN and BESS based juvenile index done. Add: EcoSouth (\>35
-        cm, ldist, sex?), and Russian index & ldist.
+    -   EggaN and BESS based juvenile index done. Potentially add:
+        EcoSouth (\>35 cm, ldist, sex?).
 
 6.  Estimate or exact catch in tonnes?
 
     -   Try first with exact
 
-7.  Think again about the Russian survey do this one with lengthdist +
-    biomass levels (but need to keep the option of also including
-    biomass levels possible)
+7.  Add Russian survey index
 
-    -   Add (started in 1983)
+    -   Done
 
 8.  Fleet structure.
 
@@ -123,12 +121,12 @@ considers sexual dimorphism internally through sub-stocks.
 
 9.  Split M by sex (and maturity?)
 
-    -   Need to be estimated externally, or let gadget estimate the one
-        for males.
+    -   Done. Gadget now estimates M for mature males
 
 10. Let the model split to sex instead of us doing it
 
-    -   Done. Sex-split comes currently from `EggaN_mat`.
+    -   Done. Sex-split comes currently from `EggaN_mat`. Needs to be
+        improved.
 
 11. Transparency, reproducibility and documentation
 
@@ -141,11 +139,11 @@ considers sexual dimorphism internally through sub-stocks.
 
 13. Make the model extend further back in time.
 
-    -   Extend Norwegian and Russian catches to 1980.
+    -   Done. The model starts from 1980.
 
 14. Move to mature female SSB as the reporting measure instead of 45cm+
 
-    -   Done.
+    -   Done. female_mat is the SSB.
 
 15. Fix length-weight relationship
 
@@ -155,14 +153,26 @@ considers sexual dimorphism internally through sub-stocks.
 
 16. Add Russian catch and survey ldist with sex
 
+    -   Done.
+
 17. Add CPUE index
 
-18. Reference points
+    -   So far not added because Russian SI reaches back to 1984.
 
-19. Uncertainties
+18. Make the model realistic
+
+    -   Not done. Need help here.
+
+19. Reference points
 
 20. Jitter
 
-21. HCR
+    -   Make the model realistic first.
+
+21. Uncertainties
+
+    -   Make the model stable and realistic first.
+
+22. HCR
 
     -   Some time after the benchmark
