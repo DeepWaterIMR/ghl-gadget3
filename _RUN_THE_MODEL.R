@@ -111,6 +111,8 @@ source("6 initial parameters.R")
 ### Turn off age data
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
+# tmb_param %>% View
+# tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0) 
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
@@ -141,7 +143,7 @@ optim_param <- optim(
   par = g3_tmb_par(tmb_param),
   fn = model_tmb$fn,
   gr = model_tmb$gr,
-  method = 'BFGS', # for bounnded: 'L-BFGS-B'
+  method = 'BFGS', # for bounded: 'L-BFGS-B'
   # lower = g3_tmb_lower(tmb_param),
   # upper = g3_tmb_upper(tmb_param),
   control = list(trace = 2,
@@ -157,7 +159,7 @@ save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"
 
 ## Plots
 
-optim_fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, optim_param$par))
+optim_fit <- g3_fit(model, g3_tmb_relist(tmb_param, optim_param$par))
 save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
 gadget_plots(optim_fit, file.path(base_dir, "figures"))
@@ -190,7 +192,7 @@ iter_param <- g3_iterative(
   use_parscale = TRUE
 )
 
-iter_fit <- gadget3:::g3_fit(model, iter_param)
+iter_fit <- g3_fit(model, iter_param)
 save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
 
 gadget_plots(iter_fit, file.path(base_dir, "figures"))
