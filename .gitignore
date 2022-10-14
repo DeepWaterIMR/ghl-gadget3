@@ -7,4 +7,4 @@
 *.Rproj
 ~$*
 README.html
-model_files
+model_files*
