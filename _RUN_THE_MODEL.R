@@ -137,7 +137,7 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 # tmb_param %>% filter(optimise, lower >= upper)
 
-fit_opt <- optim(
+optim_param <- optim(
   par = g3_tmb_par(tmb_param),
   fn = model_tmb$fn,
   gr = model_tmb$gr,
@@ -152,20 +152,19 @@ fit_opt <- optim(
 
 ### Save the model parameters
 
-write.csv(as.data.frame(fit_opt$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
-save(fit_opt, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
+write.csv(as.data.frame(optim_param$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
+save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
 
 ## Plots
 
-fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, fit_opt$par))
-save(fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
+optim_fit <- gadget3:::g3_fit(model, g3_tmb_relist(tmb_param, optim_param$par))
+save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
-gadget_plots(fit, file.path(base_dir, "figures"))
+gadget_plots(optim_fit, file.path(base_dir, "figures"))
 
 tmppath <- file.path(getwd(), base_dir, "figures")
-gadget_plots(fit, path = tmppath, file_type = "html")
+gadget_plots(optim_fit, path = tmppath, file_type = "html")
 rm(tmppath)
-
 
 
 
@@ -173,7 +172,7 @@ rm(tmppath)
 ## Iterative reweighting and optimization                       ####
 ## Running this part takes a long time (3-6 hours on a server)  ####
 
-fit_iter <- g3_iterative(
+iter_param <- g3_iterative(
   gd = base_dir,
   wgts = "iterative_reweighting",
   r_model = model,
@@ -191,13 +190,13 @@ fit_iter <- g3_iterative(
   use_parscale = TRUE
 )
 
-fit <- gadget3:::g3_fit(model, fit_iter)
-save(fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
+iter_fit <- gadget3:::g3_fit(model, iter_param)
+save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
 
-gadget_plots(fit, file.path(base_dir, "figures"))
+gadget_plots(iter_fit, file.path(base_dir, "figures"))
 
 tmppath <- file.path(getwd(), base_dir, "figures")
-gadget_plots(fit, path = eval(file.path(getwd(), base_dir, "figures")), file_type = "html")
+make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
 rm(tmppath)
 
 ## Save workspace
