@@ -139,27 +139,27 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 # tmb_param %>% filter(optimise, lower >= upper)
 
-optim_param <- optim(
-  par = g3_tmb_par(tmb_param),
-  fn = model_tmb$fn,
-  gr = model_tmb$gr,
-  method = 'BFGS', # for bounded: 'L-BFGS-B'
-  # lower = g3_tmb_lower(tmb_param),
-  # upper = g3_tmb_upper(tmb_param),
-  control = list(trace = 2,
-                 maxit = 1000,
-                 reltol = .Machine$double.eps^2,
-                 parscale = g3_tmb_parscale(tmb_param))
-)
+## g3_optim is a wrapper for stats::optim. It returns the parameter
+## dataframe with the optimised parameters and includes an attribute with 
+## a summary of the optimisation.
+## The control argument is identical to control for optim with the following defaults:
+## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
+optim_param <- g3_optim(model = tmb_model,
+                        params = tmb_param,
+                        use_parscale = TRUE,
+                        method = 'BFGS',
+                        control = list(maxit = 5),
+                        print_status = TRUE
+                        )
 
 ### Save the model parameters
 
-write.csv(as.data.frame(optim_param$par), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
+write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
 save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
 
 ## Plots
 
-optim_fit <- g3_fit(model, g3_tmb_relist(tmb_param, optim_param$par))
+optim_fit <- g3_fit(model, optim_param)
 save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
 gadget_plots(optim_fit, file.path(base_dir, "figures"))
@@ -177,8 +177,7 @@ rm(tmppath)
 iter_param <- g3_iterative(
   gd = base_dir,
   wgts = "iterative_reweighting",
-  r_model = model,
-  tmb_model = tmb_model,
+  model = tmb_model,
   params.in = tmb_param,
   grouping = list(si_eggan = c('log_EggaN_SI_female',
                              'log_EggaN_SI_male'),
@@ -189,7 +188,9 @@ iter_param <- g3_iterative(
                                'otherrus_ldist_m'),
                   trawlrus = c('trawlrus_ldist_f',
                                'trawlrus_ldist_m')),
-  use_parscale = TRUE
+  use_parscale = TRUE,
+  control = list(maxit = 1000),
+  shortcut = FALSE
 )
 
 iter_fit <- g3_fit(model, iter_param)
