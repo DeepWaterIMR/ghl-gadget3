@@ -148,7 +148,7 @@ optim_param <- g3_optim(model = tmb_model,
                         params = tmb_param,
                         use_parscale = TRUE,
                         method = 'BFGS',
-                        control = list(maxit = 5),
+                        control = list(maxit = 1000),
                         print_status = TRUE
                         )
 
