@@ -27,27 +27,33 @@ if(reload_data) {
 
   EggaN_SI_biomass_female <- mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
-    params = list(data_source = "EggaN-index",
-                  sex = "F",
-                  length = mfdb_interval(
-                    "all", c(stock_params$minlength, stock_params$maxlength),
-                    open_ended = c("upper","lower")),
-                  # Remove 94&95 data from the SI:
-                  year = model_params$year_range[model_params$year_range >= 1996],
-                  timestep = model_params$timestep_fun
+    params = list(
+      data_source = "EggaN-index-biomass",
+      population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                     "E500-700", "E700-1000", "F500-700", "F700-1000"),
+      sex = "F",
+      length = mfdb_interval(
+        "all", c(stock_params$minlength, stock_params$maxlength),
+        open_ended = c("upper","lower")),
+      # Remove 94&95 data from the SI:
+      year = model_params$year_range[model_params$year_range >= 1996],
+      timestep = model_params$timestep_fun
     )
   )[[1]]
 
   EggaN_SI_biomass_male <- mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
-    params = list(data_source = "EggaN-index",
-                  sex = "M",
-                  length = mfdb_interval(
-                    "all", c(stock_params$minlength, stock_params$maxlength),
-                    open_ended = c("upper","lower")),
-                  # Remove 94&95 data from the SI:
-                  year = model_params$year_range[model_params$year_range >= 1996],
-                  timestep = model_params$timestep_fun
+    params = list(
+      data_source = "EggaN-index-biomass",
+      population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                     "E500-700", "E700-1000", "F500-700", "F700-1000"),
+      sex = "M",
+      length = mfdb_interval(
+        "all", c(stock_params$minlength, stock_params$maxlength),
+        open_ended = c("upper","lower")),
+      # Remove 94&95 data from the SI:
+      year = model_params$year_range[model_params$year_range >= 1996],
+      timestep = model_params$timestep_fun
     )
   )[[1]]
 
@@ -68,27 +74,38 @@ if(reload_data) {
 
   Juv_SI_1 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
-    params = list(data_source = "BESS-index",
-                  length = mfdb_interval("len", c(10,17)),
-                  timestep = model_params$timestep_fun,
-                  year = model_params$year_range[model_params$year_range != "2014"])
+    params = list(
+      data_source = "BESS-index-abundance",
+      population = grep("^O|^X",
+                        tbl(mdb$db, "population") %>% select(name) %>% pull(),
+                        invert = TRUE, value = TRUE),
+      length = mfdb_interval("len", c(10,17)),
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
-
 
   Juv_SI_2 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
-    params = list(data_source = "BESS-index",
-                  length = mfdb_interval("len", c(18,27)),
-                  timestep = model_params$timestep_fun,
-                  year = model_params$year_range[model_params$year_range != "2014"])
+    params = list(
+      data_source = "BESS-index-abundance",
+      population = grep("^O|^X",
+                        tbl(mdb$db, "population") %>% select(name) %>% pull(),
+                        invert = TRUE, value = TRUE),
+      length = mfdb_interval("len", c(18,27)),
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
 
   Juv_SI_3 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
-    params = list(data_source = "BESS-index",
-                  length = mfdb_interval("len", c(28,35)),
-                  timestep = model_params$timestep_fun,
-                  year = model_params$year_range[model_params$year_range != "2014"])
+    params = list(
+      data_source = "BESS-index-abundance",
+      population = grep("^O|^X",
+                        tbl(mdb$db, "population") %>% select(name) %>% pull(),
+                        invert = TRUE, value = TRUE),
+      length = mfdb_interval("len", c(28,35)),
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
 
 
@@ -98,7 +115,7 @@ if(reload_data) {
     ggplot(., aes(x = year, y = number/1e6)) +
     geom_col() +
     facet_wrap(~length, scales = "free_y", ncol = 1) +
-    labs(y = "Abundance\n(millions)", x = "Year") +
+    labs(y = "Abundance (millions)", x = "Year") +
     scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
     scale_y_continuous(expand = c(0, 0)) # +
   # geom_segment(ggplot2::aes(x = year-0.5, xend = year+.5,

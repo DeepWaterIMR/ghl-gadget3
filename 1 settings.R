@@ -80,13 +80,15 @@ stock_params$male_mat$minage <- 3
 stock_params$male_mat$maxage <- 20
 stock_params$male_mat$minlength <- 1
 stock_params$male_mat$maxlength <- 80
-stock_params$male_mat$min_possible_data_length <- 30 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
+stock_params$male_mat$min_possible_data_length <- 31 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$female_mat$minage <- 3
 stock_params$female_mat$maxage <- 25
 stock_params$female_mat$minlength <- 1
 stock_params$female_mat$maxlength <- 120
 stock_params$female_mat$min_possible_data_length <- 40 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
+
+stock_params$force_even_stock_distribution_length <- 31 # This parameter is used to force 50/50 stock distribution between females and males for lengths smaller than the value. Set to NA to remove the forcing. If used, it is best to set this to minimum length of mature males.
 
 stock_params$minage <- min(sapply(model_params$stock_names, function(k) stock_params[[k]]$minage))
 stock_params$maxage <- max(sapply(model_params$stock_names, function(k) stock_params[[k]]$maxage))

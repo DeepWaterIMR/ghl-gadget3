@@ -28,17 +28,17 @@
 ## Maturity ogive
 
 plot.mat <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
-  
+
   x$Length <- as.integer(gsub("len", "", x$length))
-  
+
   if(quarterly) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
   }
-  
+
   x <- x %>% arrange(Date, maturity_stage, Length)
-  
+
   ggplot(x, aes(x = Length, y = number, color = maturity_stage)) +
     geom_path() +
     facet_wrap(~as.character(Date)) +
@@ -47,32 +47,44 @@ plot.mat <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)
     theme(legend.position = "bottom")
 }
 
-plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
-  
+plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), group_by_sex = FALSE) {
+
   x <- x %>% complete(crossing(year, step, area, maturity_stage, age, length), fill = list(number = 0))
-  
+
   x$Length <- as.integer(gsub("len", "", x$length))
   x$Sex <- gsub("\\_.*$", "", x$maturity_stage)
   x$Stage <- gsub("^.*\\_", "", x$maturity_stage)
-  
+
   if(quarterly) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
   }
-  
-  x <- x %>% group_by(year, step, Date, area, Sex, Length) %>%
-    summarise(n_imm = sum(number[Stage == "imm"]), n_mat = sum(number[Stage == "mat"])) %>%
-    mutate(mat = n_mat/(n_imm + n_mat), imm = n_imm/(n_imm + n_mat)) %>%
-    #replace_na(list(mat = 0, imm = 0)) %>%
-    pivot_longer(cols = c(mat, imm)) %>%
-    mutate(maturity_stage = paste(Sex, name, sep = "_")) %>%
-    filter(!is.na(value))
-  
-  ggplot(x, aes(x = Length, y = value, color = maturity_stage)) +
-    geom_path() +
+
+  if(group_by_sex) {
+    y <- x %>% group_by(year, step, Date, area, Sex, Length) %>%
+      summarise(n_imm = sum(number[Stage == "imm"]), n_mat = sum(number[Stage == "mat"])) %>%
+      mutate(mat = n_mat/(n_imm + n_mat), imm = n_imm/(n_imm + n_mat)) %>%
+      #replace_na(list(mat = 0, imm = 0)) %>%
+      pivot_longer(cols = c(mat, imm)) %>%
+      mutate(maturity_stage = paste(Sex, name, sep = "_")) %>%
+      filter(!is.na(value))
+  } else {
+    y <- x %>% group_by(year, step, Date, area, Length) %>%
+      mutate(n_total = sum(number),
+             value = number/n_total) %>%
+      # summarise(n_imm = sum(number[Stage == "imm"]), n_mat = sum(number[Stage == "mat"])) %>%
+      # mutate(mat = n_mat/(n_imm + n_mat), imm = n_imm/(n_imm + n_mat)) %>%
+      # #replace_na(list(mat = 0, imm = 0)) %>%
+      # pivot_longer(cols = c(mat, imm)) %>%
+      # mutate(maturity_stage = paste(Sex, name, sep = "_")) %>%
+      filter(!is.na(value))
+  }
+
+  ggplot(y, aes(x = Length, y = value, color = maturity_stage)) +
+    geom_line() +
     facet_wrap(~as.character(Date)) +
-    labs(x = "Length (cm)", y = "Count", color = "Stock") +
+    labs(x = "Length (cm)", y = "Proportion", color = "Stock") +
     scale_color_manual(values = c("female_imm" = "tomato1", "female_mat" = "tomato4", "male_imm" = "dodgerblue1", "male_mat" = "dodgerblue4")) +
     theme(legend.position = "bottom")
 }
@@ -81,17 +93,17 @@ plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
 
 plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4),
                        type = "bar", free_y = FALSE) {
-  
+
   x$min_length <- unname(sapply(x$length, function(k) {
     tmp <- attributes(x)$length
     attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
   }))
-  
+
   x$max_length <- unname(sapply(x$length, function(k) {
     tmp <- attributes(x)$length
     attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
   }))
-  
+
   if(type == "bar") {
     ggplot(data = x,
            aes(xmin = .data$min_length, xmax = .data$max_length,
@@ -100,7 +112,7 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
       labs(x = "Length (cm)", y = "Number") + {
         if(free_y) {
           facet_wrap(~.data$year+.data$step, scales = "free_y",
-                     labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) 
+                     labeller = ggplot2::label_wrap_gen(multi_line=FALSE))
         } else {
           facet_wrap(~.data$year+.data$step,
                      labeller = ggplot2::label_wrap_gen(multi_line=FALSE))
@@ -108,17 +120,17 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
       } +
       coord_cartesian(expand = FALSE)
   } else {
-    
+
     x$Length <- as.integer(gsub("len", "", x$length))
-    
+
     if(quarterly) {
       x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
     } else {
       x$Date <- x$year
     }
-    
+
     x <- x %>% arrange(Date, Length)
-    
+
     ggplot(x, aes(x = Length, y = number, color = step))
     geom_path() +
       facet_wrap(~year, scales = "free_y", ncol = 4, dir = "v") +
@@ -131,18 +143,18 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 
 # x <- EggaN_adist
 plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
-  
+
   x$Length <- as.integer(gsub("len", "", x$length))
   x$Age <- as.integer(gsub("age", "", x$age))
-  
+
   if(quarterly) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
   }
-  
+
   x <- x %>% arrange(Date, Age, Length)
-  
+
   ggplot(x, aes(x = Length, y = number, fill = Age)) +
     geom_col() +
     facet_grid(Age~as.character(Date)) + # , scales = "free_y", ncol = 4, dir = "v"
@@ -154,8 +166,17 @@ plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 
 ## Landings
 
-plot.landings <- function(x) {
-  
+plot.catches <- function(x) {
+
+  if(inherits(x, "list")) {
+    x <- lapply(seq_along(x), function(i) {
+      out <- x[[i]]
+      out$name <- names(x)[i]
+      out
+    }) %>%
+      bind_rows()
+  }
+
   if(nrow(x) == 0) {
     return({
       ggplot() +
@@ -165,15 +186,25 @@ plot.landings <- function(x) {
         theme(axis.text = element_blank())
     })
   }
-  
+
   x$date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q")) # Note that this may not work for biannual data, maybe.
-  
-  ggplot(x, aes(x = date, y = total_weight)) +
-    geom_col(fill = "#449BCF") +
-    scale_x_continuous(
-      breaks = seq(min(x$year), max(x$year), 2)) +
-    coord_cartesian(expand = FALSE) +
-    labs(x = "Year", y = "Total weight (kg)")
+
+  if(is.null(x$name)) {
+    ggplot(x, aes(x = date, y = total_weight)) +
+      geom_col(fill = "#449BCF") +
+      scale_x_continuous(
+        breaks = seq(min(x$year), max(x$year), 2)) +
+      coord_cartesian(expand = FALSE) +
+      labs(x = "Year", y = "Total weight (kg)")
+  } else {
+    ggplot(x, aes(x = date, y = total_weight, fill = name)) +
+      geom_col() +
+      scale_x_continuous(
+        breaks = seq(min(x$year), max(x$year), 2)) +
+      coord_cartesian(expand = FALSE) +
+      labs(x = "Year", y = "Total weight (kg)", fill = "Fleet")
+  }
+
 }
 
 # Maturity percentage
@@ -181,7 +212,7 @@ plot.landings <- function(x) {
 #' @param filter.exp Expression to filter data. E.g. 'sampling_type == "ENS"'
 #' @param plot Logical indicated whether plot should be generated. If \code{FALSE}, L50 values will be returned instead
 plot.maturity <- function(filter.exp = NULL, plot = TRUE) {
-  
+
   if(is.null(filter.exp)) {
     dt <- mfdb_dplyr_sample(mdb) %>%
       filter(!is.na(length), !is.na(sex), !is.na(maturity_stage)) %>%
@@ -196,27 +227,27 @@ plot.maturity <- function(filter.exp = NULL, plot = TRUE) {
       collect() %>%
       mutate(maturity = as.integer(maturity_stage >= 3))
   }
-  
+
   modF <- glm(maturity ~ length, data = dt[dt$sex == "F",],
               family = binomial(link = "logit"))
   modM <- glm(maturity ~ length, data = dt[dt$sex == "M",],
               family = binomial(link = "logit"))
-  
+
   Fdat <- unlogit(0.5, modF)
   Fdat$sex <- "F"
   Fdat$intercept <- coef(modF)[1]
   Fdat$slope <- coef(modF)[2]
-  
+
   Mdat <- unlogit(0.5, modM)
   Mdat$sex <- "M"
   Mdat$intercept <- coef(modM)[1]
   Mdat$slope <- coef(modM)[2]
-  
+
   modDat <- rbind(Fdat, Mdat)
   modDat <- left_join(modDat, dt %>% group_by(sex) %>% count, by = "sex")
-  
+
   if(plot) {
-    
+
     ggplot() +
       geom_point(data = dt, aes(x = length, y = maturity, shape = sex)) +
       geom_segment(data = modDat,
@@ -244,7 +275,7 @@ plot.maturity <- function(filter.exp = NULL, plot = TRUE) {
       guides(color=guide_legend(override.aes=list(fill=NA))) +
       theme(legend.position = "none",
             legend.background = element_blank(), legend.key = element_blank())
-    
+
   } else {
     modDat
   }
@@ -269,71 +300,71 @@ plot.maturity <- function(filter.exp = NULL, plot = TRUE) {
 # Debug parameters:
 # dt = x; length = "Length"; age = "Age"; sex = "Sex"; female.sex = "F"; male.sex = "M"; length.unit = "cm"; filter.exp = NULL; split.by.sex = FALSE; growth.model = 1; force.zero.group.length = NA; force.zero.group.strength = 10
 plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.sex = "F", male.sex = "M", length.unit = "cm", filter.exp = NULL, split.by.sex = FALSE, growth.model = 1, force.zero.group.length = NA, force.zero.group.strength = 10, boxplot = TRUE, base_size = 8) {
-  
+
   # Growth model
-  
+
   if(!growth.model %in% 1:3) stop("growth.model has to be an integer between 1 and 3")
-  
+
   modName <- c("von Bertalanffy" = "vout", "Gompertz" = "gout", "Logistic" = "lout")
   mod.name <- names(modName[growth.model])
   growth.model <- unname(modName[growth.model])
-  
+
   # Add row number
-  
+
   dt$id <- rownames(dt)
-  
+
   # Fix sex column
-  
+
   if(split.by.sex) {
     if(is.null(sex)) stop("Sex column has to be specified when split.by.sex = TRUE")
     if(dt %>% dplyr::pull(!!rlang::enquo(sex)) %>% na.omit() %>% length() < 10) stop("Either invalid sex column or not enough sex data")
-    
+
     orig.nrow <- nrow(dt)
-    
+
     dt <- dt %>%
       dplyr::rename("sex" = tidyselect::all_of(sex)) %>%
       dplyr::filter(!is.na(sex))
-    
+
     sex.missing <- orig.nrow - nrow(dt)
   }
-  
+
   # Filter
-  
+
   if(is.null(filter.exp)) {
     if(!exists("orig.nrow")) orig.nrow <- nrow(dt)
-    
+
     dt <- dt %>%
       dplyr::rename("age" = tidyselect::all_of(age),
                     "length" = tidyselect::all_of(length)
       )
-    
+
     length.missing <- sum(is.na(dt$length))
     age.missing <- sum(is.na(dt$age))
-    
+
     dt <- dt %>% dplyr::filter(!is.na(age) & !is.na(length))
-    
+
   } else {
     if(!exists("orig.nrow")) orig.nrow <- nrow(dt)
-    
+
     dt <- dt %>%
       dplyr::filter(!!rlang::parse_expr(filter.exp)) %>%
       dplyr::rename("age" = tidyselect::all_of(age),
                     "length" = tidyselect::all_of(length)
       )
-    
+
     length.missing <- sum(is.na(dt$length))
     age.missing <- sum(is.na(dt$age))
-    
+
     dt <- dt %>% dplyr::filter(!is.na(age) & !is.na(length))
-    
+
   }
-  
+
   # Select columns and add zero group if requested
-  
+
   if(split.by.sex){
-    
+
     dt <- dt %>% dplyr::select(id, sex, age, length)
-    
+
     if(!is.na(force.zero.group.length)) {
       dt <- dplyr::bind_rows(
         dt,
@@ -349,9 +380,9 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
       )
     }
   } else {
-    
+
     dt <- dt %>% dplyr::select(id, age, length)
-    
+
     if(!is.na(force.zero.group.length)) {
       dt <- dplyr::bind_rows(
         dt,
@@ -362,13 +393,13 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
       )
     }
   }
-  
+
   # Plot sexed data
-  
+
   if(split.by.sex) {
-    
+
     if(any(dt %>% group_by(sex) %>% count() %>% pull(n) < 10)) {
-      
+
       Plot <- ggplot(dt, aes(x = age, y = length, color = sex)) +
         geom_point(shape = 21, alpha = 0.7) +
         annotation_custom(
@@ -381,49 +412,49 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
         coord_cartesian(expand = FALSE, clip = "off") +
         theme(legend.position = "bottom",
               text = element_text(size = base_size))
-      
+
       Text <- paste0(
         "Not enough age data:",
         "\n Number of included specimens = ", sum(dt$sex == female.sex), " females and ", sum(dt$sex == male.sex), " males"
       )
-      
+
     } else {
-      
+
       laModF <- fishmethods::growth(
         age = dt %>% dplyr::filter(sex == female.sex) %>% dplyr::pull(age),
         size = dt %>% dplyr::filter(sex == female.sex) %>% dplyr::pull(length),
         Sinf = dt %>% dplyr::filter(sex == female.sex) %>% dplyr::pull(length) %>% max,
         K = 0.1, t0 = 0, graph = FALSE)
-      
+
       laModM <- fishmethods::growth(
         age = dt %>% dplyr::filter(sex == male.sex) %>% dplyr::pull(age),
         size = dt %>% dplyr::filter(sex == male.sex) %>% dplyr::pull(length),
         Sinf = dt %>% dplyr::filter(sex == male.sex) %>% dplyr::pull(length) %>% max,
         K = 0.1, t0 = 0, graph = FALSE)
-      
+
       laModFpred <- data.frame(age = 0:max(dt$age), length = predict(eval(parse(text = paste0("laModF$", growth.model))), newdata = data.frame(age = 0:max(dt$age))))
       laModMpred <- data.frame(age = 0:max(dt$age), length = predict(eval(parse(text = paste0("laModM$", growth.model))), newdata = data.frame(age = 0:max(dt$age))))
-      
+
       tryshit <- try(broom::tidy(eval(parse(text = paste0("laModF$", growth.model))), conf.int = TRUE))
-      
+
       if(any(class(tryshit) == "try-error")) {
         laModparsF <- dplyr::bind_cols(sex = female.sex, broom::tidy(eval(parse(text = paste0("laModF$", growth.model))), conf.int = FALSE))
       } else {
         laModparsF <- dplyr::bind_cols(sex = female.sex, tryshit)
       }
-      
+
       tryshit <- try(broom::tidy(eval(parse(text = paste0("laModM$", growth.model))), conf.int = TRUE), silent = TRUE)
-      
+
       if(any(class(tryshit) == "try-error")) {
         laModparsM <- dplyr::bind_cols(sex = male.sex, broom::tidy(eval(parse(text = paste0("laModM$", growth.model))), conf.int = FALSE))
       } else {
         laModparsM <- dplyr::bind_cols(sex = male.sex, tryshit)
       }
-      
+
       laModpars <- dplyr::bind_rows(laModparsF, laModparsM)
-      
+
       ## Plot
-      
+
       Plot <-
         suppressWarnings({
           ggplot() +
@@ -442,7 +473,7 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
             theme(legend.position = "bottom",
                   text = element_text(size = base_size))
         })
-      
+
       Text <- paste0(
         mod.name, " growth function coefficients for females and males, respectively:  \n Linf (asymptotic average length) = ",
         round(laModparsF$estimate[1], 1), " ", length.unit, " +/- ",
@@ -464,15 +495,15 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
         "  \n Total number of measured = ", orig.nrow,
         "  \n Excluded (length or age missing): \n Length = ", length.missing, "; age = ", age.missing, "; sex = ", sex.missing
       )
-      
+
     }
   } else {
     # Plot non-sex split data
-    
+
     if(nrow(dt) < 30) {
-      
+
       #if(eval(parse(text = paste0("laMod$", growthModelSwitch))) == "Fit failed") {
-      
+
       Plot <- ggplot(dt, aes(x = age, y = length)) +
         geom_point(shape = 21, alpha = 0.7) +
         annotation_custom(
@@ -483,20 +514,20 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
         xlab("Age (years)") +
         coord_cartesian(expand = FALSE, clip = "off") +
         theme(text = element_text(size = base_size))
-      
+
       Text <- paste0(
         "Not enough age data:",
         "  \n Number of included specimens = ", nrow(dt)
       )
-      
+
     } else {
-      
+
       laMod <- fishmethods::growth(age = dt$age, size = dt$length, Sinf = max(dt$length), K = 0.1, t0 = 0, graph = FALSE)
-      
+
       laModpred <- data.frame(age = 0:max(dt$age), length = predict(eval(parse(text = paste0("laMod$", growth.model))), newdata = data.frame(age = 0:max(dt$age))))
-      
+
       laModpars <- broom::tidy(eval(parse(text = paste0("laMod$", growth.model))), conf.int = TRUE)
-      
+
       Plot <-
         suppressWarnings({
           ggplot() +
@@ -511,7 +542,7 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
             coord_cartesian(expand = FALSE, clip = "off") +
             theme(text = element_text(size = base_size))
         })
-      
+
       Text <- paste0(
         mod.name, " growth function coefficients:  \n Linf (asymptotic average length) = ",
         round(laModpars$estimate[1], 1), " ", length.unit, " +/- ", round(laModpars$conf.low[1], 1), " - ", round(laModpars$conf.high[1], 1), " (95% CIs)",
@@ -524,13 +555,13 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
         "  \n Total number of measured = ", orig.nrow,
         "  \n Excluded (length or age missing):  \n Length = ", length.missing, "; age = ", age.missing
       )
-      
+
     }
-    
+
   }
-  
+
   ## Return
-  
+
   return(list(plot = Plot, text = Text, params = if(exists("laModpars")) {laModpars} else {NULL}))
 }
 
@@ -556,14 +587,14 @@ plot.growth <- function(dt, length = "Length", age = "Age", sex = "Sex", female.
 # Debug parameters
 # dt = x; length = "Age"; maturity = "Mature"; sex = "Sex"; female.sex = "F"; male.sex = "M"; length.unit = "cm"; length.bin.width = 5 ;split.by.sex = TRUE; filter.exp = NULL; plot = TRUE
 plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Sex", female.sex = "F", male.sex = "M", length.unit = "cm", length.bin.width = 5, split.by.sex = FALSE, filter.exp = NULL, xlab = "Total length", plot = TRUE, base_size = 8) {
-  
+
   # Checks
-  
+
   if(split.by.sex) {
     if(is.null(sex)) stop("Sex column has to be specified when split.by.sex = TRUE")
     if(dt %>% pull(!!enquo(sex)) %>% na.omit() %>% length() < 10) stop("Either invalid sex column or not enough sex data")
   }
-  
+
   if(is.null(filter.exp)) {
     dt <- dt %>%
       dplyr::rename("maturity" = tidyselect::all_of(maturity),
@@ -580,13 +611,13 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
                       !is.na(length)) %>%
       dplyr::mutate(maturity = as.integer(maturity))
   }
-  
+
   if(split.by.sex) {
-    
+
     dt <- dt %>%
       dplyr::rename("sex" = tidyselect::all_of(sex)) %>%
       dplyr::filter(!is.na(sex))
-    
+
     if(!is.null(length.bin.width)) {
       mat.pr.dt <- dt %>%
         mutate(bin = ggplot2::cut_interval(x = length, length = length.bin.width)) %>%
@@ -598,46 +629,46 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
                                       select.element(strsplit(as.character(bin), "\\,"), 2)))
         )
     }
-    
+
     tmp <- dt %>% group_by(sex, maturity) %>% summarise(mean = mean(length), .groups = "keep")
-    
+
     if(tmp[tmp$sex == female.sex & tmp$maturity == 0, "mean"] > tmp[tmp$sex == female.sex & tmp$maturity == 1, "mean"]) {
       warning("Mean size of female immature fish larger than mature fish. Unable to calculate L50 reliably")
       Fdat <- tibble(mean = NA, ci.min = NA, ci.max = NA, sex = female.sex) %>% mutate(across(c("mean", "ci.min", "ci.max"), as.numeric))
     } else {
       modF <- glm(maturity ~ length, data = dt %>% dplyr::filter(sex == female.sex),
                   family = binomial(link = "logit"))
-      
+
       if(broom::tidy(modF)$p.value[2] > 0.05) {
         warning("The length term in the female L50 logistic model is non-siginificant. This indicates problems with the underlying data.")
       }
-      
+
       Fdat <- unlogit(0.5, modF)
       Fdat$sex <- female.sex
       Fdat$intercept <- coef(modF)[1]
       Fdat$slope <- coef(modF)[2]
     }
-    
+
     if(tmp[tmp$sex == male.sex & tmp$maturity == 0, "mean"] > tmp[tmp$sex == male.sex & tmp$maturity == 1, "mean"]) {
       warning("Mean size of male immature fish larger than mature fish. Unable to calculate L50 reliably")
       Mdat <- tibble(mean = NA, ci.min = NA, ci.max = NA, sex = male.sex) %>% mutate(across(c("mean", "ci.min", "ci.max"), as.numeric))
     } else {
       modM <- glm(maturity ~ length, data = dt %>% dplyr::filter(sex == male.sex),
                   family = binomial(link = "logit"))
-      
+
       Mdat <- unlogit(0.5, modM)
       Mdat$sex <- male.sex
       Mdat$intercept <- coef(modM)[1]
       Mdat$slope <- coef(modM)[2]
     }
-    
+
     modDat <- dplyr::bind_rows(Fdat, Mdat)
     modDat <- dplyr::left_join(modDat, dt %>% dplyr::group_by(sex) %>% count, by = "sex")
-    
+
   } else {
-    
+
     tmp <- dt %>% group_by(maturity) %>% summarise(mean = mean(length))
-    
+
     if(!is.null(length.bin.width)) {
       mat.pr.dt <- dt %>%
         mutate(bin = ggplot2::cut_interval(x = length, length = length.bin.width)) %>%
@@ -646,7 +677,7 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
         mutate(bin1 = as.numeric(gsub("\\D", "", select.element(strsplit(as.character(bin), "\\,"), 1))),
                bin2 = as.numeric(gsub("\\D", "", select.element(strsplit(as.character(bin), "\\,"), 2))))
     }
-    
+
     if(tmp[tmp$maturity == 0, "mean"] > tmp[tmp$maturity == 1, "mean"]) {
       warning("Mean size of immature fish larger than mature fish. Unable to calculate L50 reliably")
       modDat <- tibble(mean = NA, ci.min = NA, ci.max = NA, n = nrow(dt)) %>% mutate_all(., as.numeric)
@@ -657,9 +688,9 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
       modDat <- dplyr::bind_cols(modDat, n = nrow(dt))
     }
   }
-  
+
   if(plot) {
-    
+
     if(split.by.sex) {
       p <-
         ggplot() +
@@ -695,9 +726,9 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
               text = element_text(size = base_size),
               legend.background = element_blank(),
               legend.key = element_blank())
-      
+
       suppressWarnings({print(p)})
-      
+
     } else {
       p <- ggplot() +
         {if(!is.null(length.bin.width)) geom_step(data = mat.pr.dt, aes(x = bin1, y = mat.pr), alpha = 0.5)} +
@@ -726,7 +757,7 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
               text = element_text(size = base_size),
               legend.background = element_blank(),
               legend.key = element_blank())
-      
+
       suppressWarnings({print(p)})
     }
   } else {
@@ -736,7 +767,7 @@ plot.maturity2 <- function(dt, length = "Length", maturity = "Mature", sex = "Se
 
 # ldist = EggaN_ldist; mat = EggaN_mat; aldist = rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))
 compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
-  
+
   dat <- ldist %>%
     mutate(len = as.numeric(gsub("len", "", length))) %>%
     dplyr::select(-area, -age) %>%
@@ -755,7 +786,7 @@ compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
                 mutate(maxn = max(number),
                        pn = number/maxn,
                        type = "mat"))
-  
+
   if(is.null(aldist)) {
     dat %>%
       ggplot(., aes(x = len, y = pn, color = type, lty = sex)) +
@@ -765,7 +796,7 @@ compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
            lty = "Sex") +
       facet_wrap(~year)
   } else {
-    
+
     aldist %>%
       mutate(len = as.numeric(gsub("len", "", length))) %>%
       group_by(year, step, sex, length, len) %>%
@@ -780,6 +811,6 @@ compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
       # scale_color_manual(values = c("ldist" = "black", "mat" = "grey")) +
       labs(x = "Length", y = "Standardized number", color = "Data type") +
       facet_wrap(~year)
-    
+
   }
 }

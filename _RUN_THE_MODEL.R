@@ -89,7 +89,8 @@ source("1 settings.R")
 
 source("2-1 life history.R")
 source("2-2 survey indices.R")
-source("2-3 landings.R")
+source("2-3 catches.R")
+
 source("2-4 catch distribution.R")
 
 ## Setup the stocks
@@ -112,7 +113,7 @@ source("6 initial parameters.R")
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
 # tmb_param %>% View
-# tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0) 
+# tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
@@ -140,7 +141,7 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 # tmb_param %>% filter(optimise, lower >= upper)
 
 ## g3_optim is a wrapper for stats::optim. It returns the parameter
-## dataframe with the optimised parameters and includes an attribute with 
+## dataframe with the optimised parameters and includes an attribute with
 ## a summary of the optimisation.
 ## The control argument is identical to control for optim with the following defaults:
 ## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
