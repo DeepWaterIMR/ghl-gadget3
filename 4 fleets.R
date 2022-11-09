@@ -7,7 +7,7 @@
 ## ---------------------------
 ## Read data
 
-if(!exists("TrawlNor_landings")) source("2-3 landings.R")
+if(!exists("TrawlNor_catches")) source("2-3 landings.R")
 
 # load("data/out/Landings to Gadget.rda")
 
@@ -33,7 +33,7 @@ TrawlNor <- g3_fleet(c("TrawlNor", "fishery")) %>%
 OtherNor <- g3_fleet(c("OtherNor", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])
 
-# if(nrow(HistNor_landings) > 0) {
+# if(nrow(HistNor_catches) > 0) {
 #   HistNor <- g3_fleet(c("HistNor", "fishery")) %>%
 #     g3s_livesonareas(areas[c('1')])
 # }
@@ -44,7 +44,7 @@ TrawlRus <- g3_fleet(c("TrawlRus", "fishery")) %>%
 OtherRus <- g3_fleet(c("OtherRus", "fishery")) %>%
   g3s_livesonareas(areas[c('1')])
 
-# if(nrow(HistRus_landings) > 0) {
+# if(nrow(HistRus_catches) > 0) {
 #   HistRus <- g3_fleet(c("HistRus", "fishery")) %>%
 #     g3s_livesonareas(areas[c('1')])
 # }
@@ -82,8 +82,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('TrawlNor_landings',
-                            TrawlNor_landings %>%
+            g3_timeareadata('TrawlNor_catches',
+                            TrawlNor_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -114,8 +114,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('OtherNor_landings',
-                            OtherNor_landings %>%
+            g3_timeareadata('OtherNor_catches',
+                            OtherNor_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -146,8 +146,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('TrawlRus_landings',
-                            TrawlRus_landings %>%
+            g3_timeareadata('TrawlRus_catches',
+                            TrawlRus_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -178,8 +178,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('OtherRus_landings',
-                            OtherRus_landings %>%
+            g3_timeareadata('OtherRus_catches',
+                            OtherRus_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -210,8 +210,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('Internat_landings',
-                            Internat_landings %>%
+            g3_timeareadata('Internat_catches',
+                            Internat_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -234,8 +234,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('EggaN_landings',
-                            EggaN_landings %>%
+            g3_timeareadata('EggaN_catches',
+                            EggaN_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))
@@ -258,8 +258,8 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('RussianSurvey_landings',
-                            RussianSurvey_landings %>%
+            g3_timeareadata('RussianSurvey_catches',
+                            RussianSurvey_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))

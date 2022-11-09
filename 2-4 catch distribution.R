@@ -39,13 +39,13 @@ if(reload_data) {
   ### TrawlNor
 
   ## A problem for ldist data allocation to sexes: most of the data do not contain sex information! Therefore, not done in the current model. Must be solved in another way.
-  # mfdb_dplyr_sample(mdb) %>% filter(data_source == "ldist-landings-NOR") %>% group_by(sex) %>% count() %>% collect() %>% mutate(pr = 100*(n/sum(n, na.rm = TRUE)))
+  # mfdb_dplyr_sample(mdb) %>% filter(data_source == "ldist-catches-NOR") %>% group_by(sex) %>% count() %>% collect() %>% mutate(pr = 100*(n/sum(n, na.rm = TRUE)))
 
   TrawlNor_ldist <- mfdb_sample_count(
     mdb,
     cols = c("age", "length"),
     params =
-      list(data_source = "ldist-landings-NOR",
+      list(data_source = "ldist-catches-NOR",
            gear = c("BottomTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
            year = model_params$year_range,
            timestep = model_params$timestep_fun,
@@ -89,11 +89,11 @@ if(reload_data) {
   print(plot.ldist(TrawlNor_ldist))
   dev.off()
 
-  AllNorLandings_aldist <- mfdb_sample_count(
+  AllNorCatches_aldist <- mfdb_sample_count(
     mdb,
     cols = c("age", "length"),
     params =
-      list(data_source = "ldist-landings-NOR",
+      list(data_source = "ldist-catches-NOR",
            year = model_params$year_range,
            timestep = model_params$timestep_fun,
            age = mfdb_interval(
@@ -109,8 +109,8 @@ if(reload_data) {
       )
   )[[1]]
 
-  png(file.path(base_dir, "figures/AllNorLandings_aldist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-  print(plot.adist(AllNorLandings_aldist))
+  png(file.path(base_dir, "figures/AllNorCatches_aldist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
+  print(plot.adist(AllNorCatches_aldist))
   dev.off()
 
   ### OtherNor
@@ -121,7 +121,7 @@ if(reload_data) {
     mdb,
     cols = c("age", "length"),
     params =
-      list(data_source = "ldist-landings-NOR",
+      list(data_source = "ldist-catches-NOR",
            gear = c("Lines", "Gillnets"),
            year = model_params$year_range,
            timestep = model_params$timestep_fun,
@@ -319,7 +319,7 @@ if(reload_data) {
       mdb,
       cols = c("age", "length"),
       params =
-        list(data_source = "EggaN-index",
+        list(data_source = "EggaN-index-abundance",
              year = model_params$year_range[model_params$year_range >= 1996],
              timestep = model_params$timestep_fun,
              age = mfdb_interval(
@@ -553,7 +553,7 @@ if(reload_data) {
 
   # Save
 
-  save(TrawlNor_ldist, AllNorLandings_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, RussianSurvey_ldist, TrawlRus_ldist_male, TrawlRus_ldist_female, OtherRus_ldist_male, OtherRus_ldist_female, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
+  save(TrawlNor_ldist, AllNorCatches_aldist, OtherNor_ldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, RussianSurvey_ldist, TrawlRus_ldist_male, TrawlRus_ldist_female, OtherRus_ldist_male, OtherRus_ldist_female, EggaN_mat, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
 
   ## !reload_data case
 } else {
