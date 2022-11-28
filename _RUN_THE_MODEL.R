@@ -90,7 +90,6 @@ source("1 settings.R")
 source("2-1 life history.R")
 source("2-2 survey indices.R")
 source("2-3 catches.R")
-
 source("2-4 catch distribution.R")
 
 ## Setup the stocks
