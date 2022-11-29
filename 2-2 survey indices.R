@@ -33,8 +33,8 @@ if(reload_data) {
                      "E500-700", "E700-1000", "F500-700", "F700-1000"),
       sex = "F",
       length = mfdb_interval(
-        "all", c(stock_params$minlength, stock_params$maxlength),
-        open_ended = c("upper","lower")),
+        "all", c(28, stock_params$maxlength),
+        open_ended = c("upper")),
       # Remove 94&95 data from the SI:
       year = model_params$year_range[model_params$year_range >= 1996],
       timestep = model_params$timestep_fun
@@ -49,8 +49,8 @@ if(reload_data) {
                      "E500-700", "E700-1000", "F500-700", "F700-1000"),
       sex = "M",
       length = mfdb_interval(
-        "all", c(stock_params$minlength, stock_params$maxlength),
-        open_ended = c("upper","lower")),
+        "all", c(28, stock_params$maxlength),
+        open_ended = c("upper")),
       # Remove 94&95 data from the SI:
       year = model_params$year_range[model_params$year_range >= 1996],
       timestep = model_params$timestep_fun
@@ -141,7 +141,15 @@ if(reload_data) {
 
   attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
   attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
-  attributes(Russian_SI)$length <- attributes(EggaN_SI_biomass_female)$length
+  attributes(Russian_SI)$length <- attributes(mfdb_sample_totalweight(
+    mdb = mdb, cols = c("length"),
+    params = list(
+      data_source = "EggaN-index-biomass",
+      length = mfdb_interval(
+        "all", c(stock_params$minlength, stock_params$maxlength),
+        open_ended = c("upper","lower"))
+    )
+  )[[1]])$length
 
   p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
     geom_col() +

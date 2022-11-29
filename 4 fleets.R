@@ -65,20 +65,20 @@ fleet_actions <-
           stocks %>%
           set_names(.,map(.,'name')) %>%
           map(function(x)
-            g3_suitability_andersen(
-              g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('trawlnor.p1', by_stock = 'species'),
-              p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('trawlnor.p3', by_stock = 'species'),
-              p4 = g3_parameterized('trawlnor.p4', by_stock = 'species'),
-              p5 = g3_parameterized('andersen.L', by_stock = 'species')
-            )
-            # g3_suitability_exponentiall50(
-            #   g3_parameterized('trawl.alpha', by_stock = 'species',
-            #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('trawl.l50', by_stock = 'species',
-            #                    exponentiate = exponentiate_fleets)
-            #   )
+            # g3_suitability_andersen(
+            #   g3_parameterized('andersen.p0', by_stock = 'species'),
+            #   p1 = g3_parameterized('trawlnor.p1', by_stock = 'species'),
+            #   p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
+            #   p3 = g3_parameterized('trawlnor.p3', by_stock = 'species'),
+            #   p4 = g3_parameterized('trawlnor.p4', by_stock = 'species'),
+            #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
+            # )
+            g3_suitability_exponentiall50(
+              g3_parameterized('trawlnor.alpha', by_stock = 'species',
+                               exponentiate = exponentiate_fleets),
+              g3_parameterized('trawlnor.l50', by_stock = 'species',
+                               exponentiate = exponentiate_fleets)
+              )
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
@@ -129,20 +129,20 @@ fleet_actions <-
           stocks %>%
           set_names(.,map(.,'name')) %>%
           map(function(x)
-            g3_suitability_andersen(
-              g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('trawlrus.p1', by_stock = 'species'),
-              p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('trawlrus.p3', by_stock = 'species'),
-              p4 = g3_parameterized('trawlrus.p4', by_stock = 'species'),
-              p5 = g3_parameterized('andersen.L', by_stock = 'species')
+          #   g3_suitability_andersen(
+          #     g3_parameterized('andersen.p0', by_stock = 'species'),
+          #     p1 = g3_parameterized('trawlrus.p1', by_stock = 'species'),
+          #     p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
+          #     p3 = g3_parameterized('trawlrus.p3', by_stock = 'species'),
+          #     p4 = g3_parameterized('trawlrus.p4', by_stock = 'species'),
+          #     p5 = g3_parameterized('andersen.L', by_stock = 'species')
+          #   )
+            g3_suitability_exponentiall50(
+              g3_parameterized('trawlrus.alpha', by_stock = 'species',
+                               exponentiate = exponentiate_fleets),
+              g3_parameterized('trawlrus.l50', by_stock = 'species',
+                               exponentiate = exponentiate_fleets)
             )
-            # g3_suitability_exponentiall50(
-            #   g3_parameterized('trawl.alpha', by_stock = 'species',
-            #                    exponentiate = exponentiate_fleets),
-            #   g3_parameterized('trawl.l50', by_stock = 'species',
-            #                    exponentiate = exponentiate_fleets)
-            # )
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(

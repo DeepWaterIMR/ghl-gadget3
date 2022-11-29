@@ -31,8 +31,8 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 250, 0.001, 600, 1) %>% 
-  g3_init_guess('\\.init', 250, 0.001, 600, 1) %>%
+  g3_init_guess('\\.rec', 250, 0.001, 500, 1) %>% 
+  g3_init_guess('\\.init', 250, 0.001, 500, 1) %>%
   g3_init_guess('recl', 12, 5, 20, 1) %>%
   g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
   g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%
@@ -50,8 +50,9 @@ tmb_param <-
   g3_init_guess('\\.p3$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
-  g3_init_guess('\\.M', 0.15, 0.001, 1, 0) %>%
-  g3_init_guess('_male_mat.M', 0.2, 0.001, 1, 1) %>% 
+  g3_init_guess('\\.M', 0.12, 0.001, 1, 0) %>%
+  g3_init_guess('_male_imm.M', 0.24, 0.001, 1, 0) %>% 
+  g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 1) %>% 
   g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
   g3_init_guess('_female.mat_initial_a50',
                 mat_l50 %>% filter(sex == "F") %>% pull(slope), 3, 25, 0) %>%

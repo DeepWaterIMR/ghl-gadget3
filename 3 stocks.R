@@ -71,7 +71,7 @@ female_imm_actions <- model_actions(
   comp_id = c('species', 'sex'),
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('rec.sd'),
+  exp_params = c('rec.sd', 'init.f'),
   tv_params = c()
   # by_age_params = c('m')
   )
@@ -84,7 +84,7 @@ male_imm_actions <- model_actions(
   comp_id = c('species', 'sex'),
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('rec.sd'),
+  exp_params = c('rec.sd', 'init.f'),
   tv_params = c()
   # by_age_params = c('m')
   )
@@ -98,7 +98,7 @@ female_mat_actions <- model_actions(
   comp_id = c('species', 'sex'),
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('rec.sd'),
+  exp_params = c('rec.sd', 'init.f'),
   tv_params = c()
   # by_age_params = c('m')
   )
@@ -111,7 +111,7 @@ male_mat_actions <- model_actions(
   comp_id = c('species', 'sex'),
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('rec.sd'),
+  exp_params = c('rec.sd', 'init.f'),
   tv_params = c()
   # by_age_params = c('m')
   )
