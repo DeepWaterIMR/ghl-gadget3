@@ -26,10 +26,11 @@ reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and t
 previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
 bootstrap <- FALSE # Not implemented yet
 
-base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
+base_dir <- "model_files_weights" # All files and output of the currently run model will be placed in a folder with this name
 
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
-run_iterative <- TRUE # Whether or not to run iterative reweighting
+run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-6 hours)
+set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 
 ## Optimisation mode (param_opt_mode), options:
@@ -54,7 +55,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-
+  
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -69,7 +70,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-
+    
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -150,7 +151,7 @@ optim_param <- g3_optim(model = tmb_model,
                         method = 'BFGS',
                         control = list(maxit = 1000),
                         print_status = TRUE
-                        )
+)
 
 ### Save the model parameters
 
@@ -174,42 +175,37 @@ rm(tmppath)
 ## Iterative reweighting and optimization                       ####
 ## Running this part takes a long time (3-6 hours on a server)  ####
 
-iter_param <- g3_iterative(
-  gd = base_dir,
-  wgts = "iterative_reweighting",
-  model = tmb_model,
-  params.in = tmb_param,
-  grouping = list(si_eggan = c('log_EggaN_SI_female',
-                             'log_EggaN_SI_male'),
-                  si_juv = c('log_Juv_SI_1',
-                             'log_Juv_SI_2',
-                             'log_Juv_SI_3'),
-                  otherrus = c('otherrus_ldist_f',
-                               'otherrus_ldist_m'),
-                  trawlrus = c('trawlrus_ldist_f',
-                               'trawlrus_ldist_m')),
-  use_parscale = TRUE,
-  control = list(maxit = 1000),
-  shortcut = FALSE
-)
-
-iter_fit <- g3_fit(model, iter_param)
-save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-
-gadget_plots(iter_fit, file.path(base_dir, "figures"))
-
-tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
-rm(tmppath)
+if(run_iterative) {
+  iter_param <- g3_iterative(
+    gd = base_dir,
+    wgts = "iterative_reweighting",
+    model = tmb_model,
+    params.in = tmb_param,
+    grouping = list(si_eggan = c('log_EggaN_SI_female',
+                                 'log_EggaN_SI_male'),
+                    si_juv = c('log_Juv_SI_1',
+                               'log_Juv_SI_2',
+                               'log_Juv_SI_3'),
+                    otherrus = c('otherrus_ldist_f',
+                                 'otherrus_ldist_m'),
+                    trawlrus = c('trawlrus_ldist_f',
+                                 'trawlrus_ldist_m')),
+    use_parscale = TRUE,
+    control = list(maxit = 1000),
+    cv_floor = 0.2,
+    shortcut = FALSE
+  )
+  
+  iter_fit <- g3_fit(model, iter_param)
+  save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
+  
+  gadget_plots(iter_fit, file.path(base_dir, "figures"))
+  
+  tmppath <- file.path(getwd(), base_dir, "figures")
+  make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
+  rm(tmppath)
+}
 
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-
-## Scratch code under ####
-
-# Debugging tricks:
-
-## Print the environment of a g3 object:
-# ls(environment(f_init_abund))
-# ls(rlang::f_env(f_init_abund))

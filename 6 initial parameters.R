@@ -33,7 +33,7 @@ tmb_param <-
   tmb_param %>%
   g3_init_guess('\\.rec', 250, 0.001, 500, 1) %>% 
   g3_init_guess('\\.init', 250, 0.001, 500, 1) %>%
-  g3_init_guess('recl', 12, 5, 20, 1) %>%
+  g3_init_guess('recl', 12, 5, 20, 0) %>%
   g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
   g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%
   g3_init_guess('init.scalar', 50, 1, 100, 1) %>%
@@ -52,7 +52,7 @@ tmb_param <-
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   g3_init_guess('\\.M', 0.12, 0.001, 1, 0) %>%
   g3_init_guess('_male_imm.M', 0.24, 0.001, 1, 0) %>% 
-  g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 1) %>% 
+  g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 0) %>% 
   g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
   g3_init_guess('_female.mat_initial_a50',
                 mat_l50 %>% filter(sex == "F") %>% pull(slope), 3, 25, 0) %>%
@@ -106,6 +106,33 @@ tmb_param <-
                            stock_params$male_imm$maxage) %>%
                   pull(ms), 0, 20, 0)
 
+## Add likelihood component weights (control using set_weights argument)
+if(set_weights) {
+ 
+  tmp_weights <- read.table(textConnection( 
+  '                                           switch        value
+1  adist_surveyindices_log_EggaN_SI_female_weight         0.05
+2    adist_surveyindices_log_EggaN_SI_male_weight         0.05
+3         adist_surveyindices_log_Juv_SI_1_weight         0.05
+4         adist_surveyindices_log_Juv_SI_2_weight         0.05
+5         adist_surveyindices_log_Juv_SI_3_weight         0.05
+6       adist_surveyindices_log_Russian_SI_weight         0.05
+7   cdist_sumofsquares_EggaN_aldist_female_weight         44
+8     cdist_sumofsquares_EggaN_aldist_male_weight         46
+9           cdist_sumofsquares_EggaN_ldist_weight         151611
+10           cdist_sumofsquares_EggaN_matp_weight         41
+11          cdist_sumofsquares_other_ldist_weight         32031
+12     cdist_sumofsquares_otherrus_ldist_f_weight         113386
+13     cdist_sumofsquares_otherrus_ldist_m_weight         13489
+14  cdist_sumofsquares_RussianSurvey_ldist_weight         4984
+15       cdist_sumofsquares_trawlnor_ldist_weight         18647
+16     cdist_sumofsquares_trawlrus_ldist_f_weight         24412
+17     cdist_sumofsquares_trawlrus_ldist_m_weight         23729
+  '
+  ))
+  
+  tmb_param[match(tmp_weights$switch,tmb_param$switch), "value"] <- tmp_weights$value
+}
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
 
