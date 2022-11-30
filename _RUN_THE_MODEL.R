@@ -26,11 +26,11 @@ reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and t
 previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
 bootstrap <- FALSE # Not implemented yet
 
-base_dir <- "model_files_weights" # All files and output of the currently run model will be placed in a folder with this name
+base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-6 hours)
-set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 
 ## Optimisation mode (param_opt_mode), options:
@@ -176,6 +176,12 @@ rm(tmppath)
 ## Running this part takes a long time (3-6 hours on a server)  ####
 
 if(run_iterative) {
+  
+  if(set_weights) {
+    tmb_param <- tmb_param %>% 
+      g3_init_guess('weight$', 1, NA, NA, 0)
+  }
+  
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
