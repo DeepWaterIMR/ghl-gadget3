@@ -55,30 +55,42 @@ tmb_param <-
   g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 0) %>% 
   g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
   g3_init_guess('_female.mat_initial_a50',
-                mat_l50 %>% filter(sex == "F") %>% pull(slope), 3, 25, 0) %>%
+                # mat_l50 %>% filter(sex == "F") %>% pull(slope),
+                0.2211149,
+                3, 25, 0) %>%
   g3_init_guess('_male.mat_initial_a50',
-                mat_l50 %>% filter(sex == "M") %>% pull(slope), 3, 25, 0) %>%
+                # mat_l50 %>% filter(sex == "M") %>% pull(slope),
+                0.2775188,
+                3, 25, 0) %>%
   #  g3_init_guess('prop_mat0', 0.5, 0.1, 0.9, 0) %>%
   #  g3_init_guess('B0', 100, 1, 5000, 1) %>%
-  g3_init_guess('mat_alpha', 70, 10, 200, 1) %>% # these were log() before
-  g3_init_guess('_female.mat_l50', mat_l50$mean[1],
-                0.75*mat_l50$mean[1], 1.25*mat_l50$mean[1], 1) %>%
-  g3_init_guess('_male.mat_l50', mat_l50$mean[2],
-                0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2], 1) %>%
+  g3_init_guess('mat_alpha', 70, 10, 200, 1) %>% 
+  g3_init_guess('_female.mat_l50', 
+                61.33947, 0.75*61.33947, 1.25*61.33947,
+                # mat_l50$mean[1], 0.75*mat_l50$mean[1], 1.25*mat_l50$mean[1], 
+                1) %>%
+  g3_init_guess('_male.mat_l50', 
+                43.62948, 0.75*43.62948, 1.25*43.62948,
+                # mat_l50$mean[2], 0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2], 
+                1) %>%
   g3_init_guess('sigma_alpha', init_sigma_coef[['alpha']], -1, 1, 0) %>%
   g3_init_guess('sigma_beta', init_sigma_coef[['beta']], 0, 2, 0) %>%
   g3_init_guess('sigma_gamma', init_sigma_coef[['gamma']], 0, 1, 0) %>%
   g3_init_guess('_female.walpha',
-                lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate),
+                1.8267e-06,
+                # lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate),
                 1e-10, 1, 0) %>%
   g3_init_guess('_female.wbeta',
-                lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate),
+                3.4074,
+                # lw_constants %>% filter(sex == "F", term == "b") %>% pull(estimate),
                 2, 4, 0) %>%
   g3_init_guess('_male.walpha',
-                lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate),
+                6.1549e-06,
+                # lw_constants %>% filter(sex == "M", term == "a") %>% pull(estimate),
                 1e-10, 1, 0) %>%
   g3_init_guess('_male.wbeta',
-                lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate),
+                3.09421,
+                # lw_constants %>% filter(sex == "M", term == "b") %>% pull(estimate),
                 2, 4, 0) %>%
   g3_init_guess(pattern = '_female_mat\\.init\\.sd',
                 value = init_sigma %>%
