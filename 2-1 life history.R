@@ -147,7 +147,7 @@ if(reload_data) {
 
   save(lw_constants, init_sigma, mat_l50, mat_a50, von_b_params, file = file.path(base_dir, "data/Initial stock parameters.rda"))
 
-  rm(age_dat, tmp, tmp2, tmp3, p)
+  rm(age_dat)
 
 } else { ## !reload_data case
   load(file.path(base_dir, "data/Initial stock parameters.rda"))
