@@ -214,3 +214,4 @@ if(run_iterative) {
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+message("Finished ", Sys.time())
