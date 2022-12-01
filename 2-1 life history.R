@@ -86,7 +86,9 @@ if(reload_data) {
 
   ## Sigmas
 
-  init_sigma <- readr::read_csv("../ghl-gadget-data/data/out/Initial ldist data.csv")
+  init_sigma <- readr::read_csv(
+    "../ghl-gadget-data/data/out/Initial ldist data.csv",
+    col_types = cols())
 
   # png(file.path(base_dir, "figures/Initial_sigma.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
   # p <- ggplot() +
