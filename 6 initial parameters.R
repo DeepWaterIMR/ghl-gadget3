@@ -73,9 +73,6 @@ tmb_param <-
                 43.62948, 0.75*43.62948, 1.25*43.62948,
                 # mat_l50$mean[2], 0.75*mat_l50$mean[2], 1.25*mat_l50$mean[2],
                 1) %>%
-  g3_init_guess('sigma_alpha', init_sigma_coef[['alpha']], -1, 1, 0) %>%
-  g3_init_guess('sigma_beta', init_sigma_coef[['beta']], 0, 2, 0) %>%
-  g3_init_guess('sigma_gamma', init_sigma_coef[['gamma']], 0, 1, 0) %>%
   g3_init_guess('_female.walpha',
                 1.8267e-06,
                 # lw_constants %>% filter(sex == "F", term == "a") %>% pull(estimate),

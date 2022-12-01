@@ -116,8 +116,8 @@ source("6 initial parameters.R")
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
-result <- model(tmb_param$value)
-result[[1]]
+# result <- model(tmb_param$value)
+# result[[1]]
 
 # fit_init <- gadget3:::g3_fit(model,tmb_param)
 # gadget_plots(fit_init, file.path(base_dir, "figures"))
