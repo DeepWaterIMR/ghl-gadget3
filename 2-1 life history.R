@@ -84,64 +84,33 @@ if(reload_data) {
 
   rm(growth)
 
-  ## Sigmas (these need likely be split to sex)
+  ## Sigmas
 
-  mean_lengths <- age_dat %>%
-    dplyr::group_by(age) %>%
-    dplyr::summarise(ml = mean(length, na.rm = TRUE), ms = sd(length, na.rm = TRUE), n = n())
+  init_sigma <- readr::read_csv("../ghl-gadget-data/data/out/Initial ldist data.csv")
 
-  mod_sigma <- lm(ms ~ age, data = mean_lengths[mean_lengths$n > 5,])
-  mod_mean <- fishmethods::growth(size = age_dat$length, age = age_dat$age, Sinf = max(age_dat$length), K = 0.1, t0 = 0, graph = FALSE)$vout
-
-  init_sigma <- tibble(
-    age = stock_params$minage:stock_params$maxage,
-    ms = predict(mod_sigma, data.frame(age = stock_params$minage:stock_params$maxage)),
-    ml = predict(mod_mean, data.frame(age = stock_params$minage:stock_params$maxage))
-  )
-
-  init_sigma_coef <-
-    init_sigma %>%
-    filter(age > 3 & age < 20) %>%
-    lm(I(ms/ml)~I(1/age) + age, data = .) %>%
-    coefficients() %>%
-    setNames(c('alpha', 'beta', 'gamma'))
-
-  ## Control plots
-
-  tmp <- init_sigma %>%
-    rename("ms_mod" = "ms", "ml_mod" = "ml") %>%
-    full_join(mean_lengths, by = "age")
-
-  tmp2 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..4, ..5)))
-  tmp[is.na(tmp$ml),"ml"] <- tmp[is.na(tmp$ml),"ml_mod"]
-
-  tmp3 <- purrr::pmap_df(tmp, ~ tibble(length = stock_params$minlength:stock_params$maxlength, age = ..1, density = dnorm(length, ..3, ..2)))
-
-  png(file.path(base_dir, "figures/Initial_sigma.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
-  p <- ggplot() +
-    facet_wrap(~age, scales = "free_y") +
-    geom_density(data = age_dat, aes(x = length, color = "Data", fill = "Data")) +
-    geom_line(data = tmp2, aes(x = length, y = density, color = "Mean")) +
-    geom_line(data = tmp3, aes(x = length, y = density, color = "Modeled")) +
-    scale_fill_manual("Fill", values = "grey") +
-    scale_color_manual("Color", values = c("black", "red", "blue")) +
-    labs(x = "Length (cm)", y = "Density")
-
-  suppressWarnings(print(p))
-  dev.off()
-  # Density distribution of lengths for each age group in data (grey) together with normal distributions using mean values (red) and linearly modeled standard deviations (blue). Modeled standard deviations were further used in the Gadget model to set initial stock age-length distributions.
-
-  png(file.path(base_dir, "figures/Length_at_age.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
-  p <- ggplot() +
-    geom_vline(data = tmp, aes(xintercept = ml), color = "grey", size = 2) +
-    geom_errorbarh(data = tmp, aes(xmin = ml - ms_mod, xmax = ml + ms_mod, y = 0), color = "grey", size = 2) +
-    geom_freqpoly(data = age_dat, aes(x = length)) +
-    facet_wrap(~age)  +
-    labs(x = "Length (cm)", y = "Count")
-  suppressWarnings(suppressMessages(print(p)))
-  dev.off()
-
-  # Split initial sigma by sex?
+  # png(file.path(base_dir, "figures/Initial_sigma.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
+  # p <- ggplot() +
+  #   facet_wrap(~age, scales = "free_y") +
+  #   geom_density(data = age_dat, aes(x = length, color = "Data", fill = "Data")) +
+  #   geom_line(data = tmp2, aes(x = length, y = density, color = "Mean")) +
+  #   geom_line(data = tmp3, aes(x = length, y = density, color = "Modeled")) +
+  #   scale_fill_manual("Fill", values = "grey") +
+  #   scale_color_manual("Color", values = c("black", "red", "blue")) +
+  #   labs(x = "Length (cm)", y = "Density")
+  #
+  # suppressWarnings(print(p))
+  # dev.off()
+  # # Density distribution of lengths for each age group in data (grey) together with normal distributions using mean values (red) and linearly modeled standard deviations (blue). Modeled standard deviations were further used in the Gadget model to set initial stock age-length distributions.
+  #
+  # png(file.path(base_dir, "figures/Length_at_age.png"), width = pagewidth*1.5, height = pagewidth, units = "mm", res = 300)
+  # p <- ggplot() +
+  #   geom_vline(data = tmp, aes(xintercept = ml), color = "grey", size = 2) +
+  #   geom_errorbarh(data = tmp, aes(xmin = ml - ms_mod, xmax = ml + ms_mod, y = 0), color = "grey", size = 2) +
+  #   geom_freqpoly(data = age_dat, aes(x = length)) +
+  #   facet_wrap(~age)  +
+  #   labs(x = "Length (cm)", y = "Count")
+  # suppressWarnings(suppressMessages(print(p)))
+  # dev.off()
 
   ###############################
   ## Initial maturity ogives ####
