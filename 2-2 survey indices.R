@@ -79,7 +79,7 @@ if(reload_data) {
       population = grep("^O|^X",
                         tbl(mdb$db, "population") %>% select(name) %>% pull(),
                         invert = TRUE, value = TRUE),
-      length = mfdb_interval("len", c(9,17)),
+      length = mfdb_interval("len", c(9,17), open_ended = c("lower")),
       timestep = model_params$timestep_fun,
       year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]

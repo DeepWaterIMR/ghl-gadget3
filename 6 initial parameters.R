@@ -33,8 +33,8 @@ tmb_param <-
   tmb_param %>%
   g3_init_guess('\\.rec', 250, 0.001, 500, 1) %>% 
   g3_init_guess('\\.init', 250, 0.001, 500, 1) %>%
-  g3_init_guess('recl', 12, 5, 20, 0) %>%
-  g3_init_guess('rec.sd', 2, 1, 5, 1) %>%
+  g3_init_guess('recl', 15, 5, 20, 1) %>%
+  g3_init_guess('rec.sd', 4, 1, 8, 1) %>%
   g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%
   g3_init_guess('init.scalar', 50, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%

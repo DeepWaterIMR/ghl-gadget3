@@ -29,7 +29,7 @@ bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
-run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-6 hours)
+run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-6 hours)
 set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 
@@ -109,10 +109,9 @@ source("5 likelihood.R")
 
 source("6 initial parameters.R")
 
-### Turn off age data
+### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-# tmb_param %>% View
 # tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
