@@ -55,7 +55,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-  
+
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -70,7 +70,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-    
+
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -175,12 +175,12 @@ rm(tmppath)
 ## Running this part takes a long time (3-6 hours on a server)  ####
 
 if(run_iterative) {
-  
+
   if(set_weights) {
-    tmb_param <- tmb_param %>% 
+    tmb_param <- tmb_param %>%
       g3_init_guess('weight$', 1, NA, NA, 0)
   }
-  
+
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
@@ -200,12 +200,12 @@ if(run_iterative) {
     cv_floor = 0.2,
     shortcut = FALSE
   )
-  
+
   iter_fit <- g3_fit(model, iter_param)
   save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-  
+
   gadget_plots(iter_fit, file.path(base_dir, "figures"))
-  
+
   tmppath <- file.path(getwd(), base_dir, "figures")
   make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
   rm(tmppath)

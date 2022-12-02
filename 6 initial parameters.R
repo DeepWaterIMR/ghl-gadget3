@@ -117,7 +117,8 @@ tmb_param <-
                   filter(age %in%
                            stock_params$male_imm$minage:
                            stock_params$male_imm$maxage) %>%
-                  pull(ms), 0, 20, 0)
+                  pull(ms), 0, 20, 0) %>%
+  suppressWarnings()
 
 ## Add likelihood component weights (control using set_weights argument)
 if(set_weights) {

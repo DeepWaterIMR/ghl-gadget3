@@ -35,7 +35,7 @@ likelihood_actions <- list(
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
-  
+
   g3l_catchdistribution(
     'trawlrus_ldist_m',
     TrawlRus_ldist_male,
@@ -45,7 +45,7 @@ likelihood_actions <- list(
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
-  
+
   g3l_catchdistribution(
     'other_ldist',
     OtherNor_ldist,
@@ -65,7 +65,7 @@ likelihood_actions <- list(
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
-  
+
   g3l_catchdistribution(
     'otherrus_ldist_m',
     OtherRus_ldist_male,
@@ -75,7 +75,7 @@ likelihood_actions <- list(
     g3l_distribution_sumofsquares(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
-  
+
   g3l_catchdistribution(
     'EggaN_ldist',
     EggaN_ldist,
@@ -136,8 +136,11 @@ likelihood_actions <- list(
 
   g3l_abundancedistribution(
     'EggaN_SI_female',
-    EggaN_SI_biomass_female %>%
-      rename("weight" = "total_weight"), # A bug here
+    if("total_weight" %in% colnames(EggaN_SI_female)) {
+      EggaN_SI_female %>% rename("weight" = "total_weight")
+    } else {
+      EggaN_SI_female
+    },
     fleets = list(),
     stocks = list(female_imm, female_mat),
     area_group = c(all = 1),
@@ -147,8 +150,11 @@ likelihood_actions <- list(
 
   g3l_abundancedistribution(
     'EggaN_SI_male',
-    EggaN_SI_biomass_male %>%
-      rename("weight" = "total_weight"), # A bug here
+    if("total_weight" %in% colnames(EggaN_SI_male)) {
+      EggaN_SI_male %>% rename("weight" = "total_weight")
+    } else {
+      EggaN_SI_male
+    },
     fleets = list(),
     stocks = list(male_imm, male_mat),
     area_group = c(all = 1),

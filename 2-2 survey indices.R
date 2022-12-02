@@ -25,44 +25,90 @@ if(reload_data) {
 
   ## Norwegian Slope Survey in Autumn (EggaNor)
 
-  EggaN_SI_biomass_female <- mfdb_sample_totalweight(
-    mdb = mdb, cols = c("length"),
-    params = list(
-      data_source = "EggaN-index-biomass",
-      population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
-                     "E500-700", "E700-1000", "F500-700", "F700-1000"),
-      sex = "F",
-      length = mfdb_interval(
-        "all", c(28, stock_params$maxlength),
-        open_ended = c("upper")),
-      # Remove 94&95 data from the SI:
-      year = model_params$year_range[model_params$year_range >= 1996],
-      timestep = model_params$timestep_fun
-    )
-  )[[1]]
+  EggaN_SI_as_biomass_index <- TRUE # Switch to shift between abundance and biomass indices for EggaN
 
-  EggaN_SI_biomass_male <- mfdb_sample_totalweight(
-    mdb = mdb, cols = c("length"),
-    params = list(
-      data_source = "EggaN-index-biomass",
-      population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
-                     "E500-700", "E700-1000", "F500-700", "F700-1000"),
-      sex = "M",
-      length = mfdb_interval(
-        "all", c(28, stock_params$maxlength),
-        open_ended = c("upper")),
-      # Remove 94&95 data from the SI:
-      year = model_params$year_range[model_params$year_range >= 1996],
-      timestep = model_params$timestep_fun
-    )
-  )[[1]]
+  if(EggaN_SI_as_biomass_index) {
 
-  p <- bind_rows(EggaN_SI_biomass_female %>% mutate(sex = "F"),
-                 EggaN_SI_biomass_male %>% mutate(sex = "M")) %>%
-    ggplot(., aes(x = year, y = total_weight/1e6, fill = sex)) +
+    EggaN_SI_female <- mfdb_sample_totalweight(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-biomass",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        sex = "F",
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
+
+    EggaN_SI_male <- mfdb_sample_totalweight(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-biomass",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        sex = "M",
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
+
+  } else {
+
+    EggaN_SI_female <- mfdb_sample_count(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-abundance",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        sex = "F",
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
+
+    EggaN_SI_male <- mfdb_sample_count(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-abundance",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        sex = "M",
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
+
+  }
+
+
+  p <- bind_rows(EggaN_SI_female %>% mutate(sex = "F"),
+                 EggaN_SI_male %>% mutate(sex = "M")) %>%
+    mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
+    ggplot(., aes(x = year, y = value/1e6, fill = sex)) +
     geom_area(position = position_stack(reverse = TRUE)) +
     scale_x_continuous("Year", expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
-    scale_y_continuous("Survey index biomass (1000 t)", expand = c(0, 0)) +
+    scale_y_continuous(
+      if(EggaN_SI_as_biomass_index) "Survey index biomass (kt)" else {
+        "Survey index abundance (millions)"
+      },
+                       expand = c(0, 0)) +
     labs(fill = "Sex") +
     theme(legend.position = "bottom")
 
@@ -139,8 +185,8 @@ if(reload_data) {
     Russian_SI$step <- 1
   }
 
-  attributes(Russian_SI)$step <- attributes(EggaN_SI_biomass_female)$step
-  attributes(Russian_SI)$area <- attributes(EggaN_SI_biomass_female)$area
+  attributes(Russian_SI)$step <- attributes(EggaN_SI_female)$step
+  attributes(Russian_SI)$area <- attributes(EggaN_SI_female)$area
   attributes(Russian_SI)$length <- attributes(mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
     params = list(
@@ -164,7 +210,7 @@ if(reload_data) {
   rm(p)
   ## Save
 
-  save(EggaN_SI_biomass_female, EggaN_SI_biomass_male, Juv_SI_1, Juv_SI_2,
+  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2,
        Juv_SI_3, Russian_SI,
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
@@ -172,12 +218,12 @@ if(reload_data) {
   ### Plot all
 
   p <- dplyr::bind_rows(
-    EggaN_SI_biomass_female %>%
-      dplyr::mutate(index = "EggaN_SI_biomass_female",
+    EggaN_SI_female %>%
+      dplyr::mutate(index = "EggaN_SI_female",
                     p = total_weight/max(total_weight)) %>%
       dplyr::select(-total_weight),
-    EggaN_SI_biomass_male %>%
-      dplyr::mutate(index = "EggaN_SI_biomass_male",
+    EggaN_SI_male %>%
+      dplyr::mutate(index = "EggaN_SI_male",
                     p = total_weight/max(total_weight)) %>%
       dplyr::select(-total_weight),
     Juv_SI_1 %>%
