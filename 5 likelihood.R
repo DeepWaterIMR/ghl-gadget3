@@ -87,6 +87,26 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_catchdistribution(
+    'EggaS_ldist',
+    EggaS_ldist,
+    fleets = list(EggaS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
+    'EcoS_ldist',
+    EcoS_ldist,
+    fleets = list(EcoS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
     'RussianSurvey_ldist',
     RussianSurvey_ldist,
     fleets = list(RussianSurvey),
@@ -99,12 +119,22 @@ likelihood_actions <- list(
   ## Length-age distributions
 
   g3l_catchdistribution(
+    'OtherNor_aldist',
+    OtherNor_aldist %>% rename(stock_re = sex),
+    fleets = list(OtherNor),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
     'EggaN_aldist_female',
     EggaN_aldist_female,
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area','length','sex')),
+    g3l_distribution_sumofsquares(over = c('area','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -114,7 +144,79 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area','length','sex')),
+    g3l_distribution_sumofsquares(over = c('area','length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
+    'EggaS_aldist',
+    EggaS_aldist %>% rename(stock_re = sex),
+    fleets = list(EggaS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
+    'EcoS_aldist',
+    EcoS_aldist %>% rename(stock_re = sex),
+    fleets = list(EcoS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  ## Sex distributions
+
+  g3l_catchdistribution(
+    'TrawlNor_sexdist',
+    TrawlNor_sexratio %>% rename(stock_re = sex),
+    fleets = list(TrawlNor),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
+    'OtherNor_sexdist',
+    OtherNor_sexratio %>% rename(stock_re = sex),
+    fleets = list(OtherNor),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  # g3l_catchdistribution(
+  #   'EggaN_sexdist',
+  #   EggaN_sexratio %>% rename(stock_re = sex),
+  #   fleets = list(EggaN),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'length')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  #
+  # g3l_catchdistribution(
+  #   'EggaS_sexdist',
+  #   EggaS_sexratio %>% rename(stock_re = sex),
+  #   fleets = list(EggaS),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'length')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
+  g3l_catchdistribution(
+    'EcoS_sexdist',
+    EcoS_sexratio %>% rename(stock_re = sex),
+    fleets = list(EcoS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -128,7 +230,19 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = stocks,
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area','length','sex')),
+    g3l_distribution_sumofsquares(over = c('area','length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_catchdistribution(
+    'EggaS_matp',
+    EggaS_mat %>%
+      rename(stock = maturity_stage) %>%
+      mutate(stock = paste0("ghl_", stock)),
+    fleets = list(EggaS),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
