@@ -25,7 +25,7 @@ if(reload_data) {
 
   ## Norwegian Slope Survey in Autumn (EggaNor)
 
-  EggaN_SI_as_biomass_index <- TRUE # Switch to shift between abundance and biomass indices for EggaN
+  EggaN_SI_as_biomass_index <- FALSE # Switch to shift between abundance and biomass indices for EggaN
 
   if(EggaN_SI_as_biomass_index) {
 
@@ -219,13 +219,15 @@ if(reload_data) {
 
   p <- dplyr::bind_rows(
     EggaN_SI_female %>%
+      mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
       dplyr::mutate(index = "EggaN_SI_female",
-                    p = total_weight/max(total_weight)) %>%
-      dplyr::select(-total_weight),
+                    p = value/max(value)) %>%
+      dplyr::select(year, step, area, length, index, p),
     EggaN_SI_male %>%
+      mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
       dplyr::mutate(index = "EggaN_SI_male",
-                    p = total_weight/max(total_weight)) %>%
-      dplyr::select(-total_weight),
+                    p = value/max(value)) %>%
+      dplyr::select(year, step, area, length, index, p),
     Juv_SI_1 %>%
       dplyr::mutate(index = "Juv_SI_1",
                     p = number/max(number)) %>%
