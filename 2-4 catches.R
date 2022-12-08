@@ -179,22 +179,38 @@ if(reload_data) {
 
   ## Survey dummy catches
 
-  if(!exists("EggaN_SI_female")) source("2-2 survey indices.R")
+  if(!exists("EggaN_ldist")) source("2-3 catch distribution.R")
 
   EggaN_catches <- structure(
     data.frame(
-      year = unique(EggaN_SI_female$year), step = 1, area = 1, total_weight = 1),
+      year = unique(EggaN_ldist$year), step = 1, area = 1, total_weight = 1),
     area_group = mfdb_group(`1` = 1))
 
   png(file.path(base_dir, "figures/EggaN_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
   print(plot.catches(EggaN_catches))
   dev.off()
 
-  if(!exists("Russian_SI")) source("2-2 survey indices.R")
+  EggaS_catches <- structure(
+    data.frame(
+      year = unique(EggaS_ldist$year), step = 1, area = 1, total_weight = 1),
+    area_group = mfdb_group(`1` = 1))
+
+  png(file.path(base_dir, "figures/EggaS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(plot.catches(EggaS_catches))
+  dev.off()
+
+  EcoS_catches <- structure(
+    data.frame(
+      year = unique(EcoS_ldist$year), step = 1, area = 1, total_weight = 1),
+    area_group = mfdb_group(`1` = 1))
+
+  png(file.path(base_dir, "figures/EcoS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(plot.catches(EcoS_catches))
+  dev.off()
 
   RussianSurvey_catches <- structure(
     data.frame(
-      year = unique(Russian_SI$year), step = 1, area = 1, total_weight = 1),
+      year = unique(RussianSurvey_ldist$year), step = 1, area = 1, total_weight = 1),
     area_group = mfdb_group(`1` = 1))
 
   png(file.path(base_dir, "figures/RussianSurvey_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
@@ -215,7 +231,7 @@ if(reload_data) {
 
   # Save
 
-  save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, RussianSurvey_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
+  save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, EggaS_catches, EcoS_catches, RussianSurvey_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
 
 
   # !reload_data case

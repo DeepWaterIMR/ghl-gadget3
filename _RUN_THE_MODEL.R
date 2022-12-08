@@ -13,7 +13,7 @@
 
 ## Source the run first script
 
-if(exists("mdb")) mfdb:: mfdb_disconnect(mdb)
+if(exists("mdb")) mfdb::mfdb_disconnect(mdb)
 
 rm(list = ls())
 
@@ -90,8 +90,8 @@ source("1 settings.R")
 
 source("2-1 life history.R")
 source("2-2 survey indices.R")
-source("2-3 catches.R")
-source("2-4 catch distribution.R")
+source("2-3 catch distribution.R")
+source("2-4 catches.R")
 
 ## Setup the stocks
 
@@ -112,7 +112,7 @@ source("6 initial parameters.R")
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-# tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
+tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 

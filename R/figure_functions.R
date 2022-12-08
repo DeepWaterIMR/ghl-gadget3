@@ -25,6 +25,66 @@
 
 ## ---------------------------
 
+## Repeat color palette
+
+repeat_palette <- function(n, pal = color_palette) {
+  if(inherits(
+    tryCatch(pal(n), error=function(e) e, warning=function(w) w),
+    "character")
+  ) {
+    pal(n)
+  } else {
+    tmp <- suppressWarnings(pal(1e5))
+    tmp <- tmp[!is.na(tmp)]
+    rep(tmp, length.out = n)
+  }
+}
+
+
+## Sex ratio
+
+plot.sexr <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), ncol = NULL) {
+
+  x$min_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+  }))
+
+  x$max_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  if(quarterly) {
+    x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
+  } else {
+    x$Date <- x$year
+  }
+
+  ggplot(
+    data =
+      x %>%
+      group_by(Date, step, area, min_length, max_length) %>%
+      summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
+      rowwise() %>%
+      mutate(length = mean(c(min_length, max_length))),
+    ) +
+    geom_rect(aes(xmin = .data$min_length, xmax = .data$max_length,
+                  ymin = 0, ymax = .data$ratio),
+              fill = "#FF5F68", color = "black") +
+    geom_rect(aes(xmin = .data$min_length, xmax = .data$max_length,
+                  ymin = .data$ratio, ymax = 1),
+              fill = "#449BCF", color = "black") +
+    geom_text(aes(x = length, y = 1.1, label = n),
+              size = FS(6), angle = 270) +
+    labs(x = "Length (cm)", y = "Sex ratio") +
+    facet_wrap(~.data$Date, dir = "v", ncol = ncol,
+               labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
+    scale_y_continuous(breaks = seq(0,1,0.25), expand = c(0,0)) +
+    expand_limits(y = 1.2)
+}
+
+
 ## Maturity ogive
 
 plot.mat <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
@@ -131,7 +191,7 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 
     x <- x %>% arrange(Date, Length)
 
-    ggplot(x, aes(x = Length, y = number, color = step))
+    ggplot(x, aes(x = Length, y = number, color = step)) +
     geom_path() +
       facet_wrap(~year, scales = "free_y", ncol = 4, dir = "v") +
       labs(x = "Length (cm)", y = "Count", color = "Timestep") +
@@ -142,10 +202,24 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 ## Age-Length distributions
 
 # x <- EggaN_adist
-plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
+# quarterly = all(names(model_params$timestep_fun) == 1:4); type = "bar"; facet_age = TRUE; free_y = FALSE
+plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), type = "bar", facet_age = FALSE, scales = "fixed", ncol = NULL, color_palette = scales::brewer_pal(palette = "Set1")) {
 
-  x$Length <- as.integer(gsub("len", "", x$length))
+  x$min_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+  }))
+
+  x$max_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  width <- unique(x$max_length - x$min_length)
+
+  x$Length <- rowMeans(x[c("min_length", "max_length")])
   x$Age <- as.integer(gsub("age", "", x$age))
+  x$year_class <- factor(x$year - x$Age)
 
   if(quarterly) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
@@ -153,18 +227,80 @@ plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
     x$Date <- x$year
   }
 
-  x <- x %>% arrange(Date, Age, Length)
+  if(type == "bar") {
 
-  ggplot(x, aes(x = Length, y = number, fill = Age)) +
-    geom_col() +
-    facet_grid(Age~as.character(Date)) + # , scales = "free_y", ncol = 4, dir = "v"
-    labs(x = "Length (cm)", y = "Count", fill = "Age") +
-    scale_fill_viridis_c() +
-    theme(legend.position = "bottom")
+    if(facet_age) {
+
+      ggplot(data = x,
+             aes(xmin = .data$min_length, xmax = .data$max_length,
+                 ymin = 0, ymax = .data$number, fill = factor(.data$year_class))) +
+        geom_rect(color = "black") +
+        labs(x = "Length (cm)", y = "Number") +
+        facet_grid(.data$Age~.data$Date, scales = scales,
+                   labeller = ggplot2::label_wrap_gen(multi_line=FALSE))+
+        scale_fill_manual(values = repeat_palette(nlevels(x$year_class),
+                                                  pal = color_palette)) +
+        coord_cartesian(expand = FALSE) +
+        theme(legend.position = "none")
+
+    } else {
+
+      ggplot(data = x, aes(x = .data$Length, y = .data$number, fill = .data$Age)) +
+        geom_col(color = "black") +
+        labs(x = "Length (cm)", y = "Number") +
+        facet_wrap(~.data$Date, scales = scales, dir = "v", ncol = ncol,
+                   labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
+        scale_fill_viridis_c() +
+        coord_cartesian(expand = FALSE) +
+        theme(legend.position = "bottom")
+    }
+  } else {
+
+    ggplot(data = x, aes(x = .data$Length, y = .data$number, fill = .data$Age,
+                         group = .data$Age)) +
+      geom_area(color = "black") +
+      labs(x = "Length (cm)", y = "Number") +
+      facet_wrap(~.data$Date, scales = scales, dir = "v", ncol = ncol,
+                 labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
+      scale_fill_viridis_c() +
+      coord_cartesian(expand = FALSE) +
+      theme(legend.position = "bottom")
+  }
 }
 
+## Age distributions
 
-## Landings
+plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), type = "bar", color_palette = scales::brewer_pal(palette = "Set1"), scales = "fixed", ncol = NULL) {
+
+  x$Age <- as.integer(gsub("age", "", x$age))
+
+  x <- x %>%
+    group_by(year,step,area,age,Age) %>%
+    summarise(value = sum(number)) %>%
+    arrange(year,step,area,Age) %>%
+    mutate(year_class = factor(year - Age))
+
+  if(type == "bar") {
+    ggplot(x, aes(x = Age, y = value, fill = year_class)) +
+      geom_col() +
+      facet_wrap(~year, dir = "v", scales = scales, ncol = ncol) +
+      scale_fill_manual(values = repeat_palette(nlevels(x$year_class),
+                                                pal = color_palette)) +
+      coord_cartesian(expand = FALSE) +
+      labs(x = "Age", y = "Number") +
+      theme(legend.position = "none")
+  } else {
+    ggplot(x %>% group_by(year) %>% mutate(p = value/sum(value)),
+           aes(x = Age, y = year, height = 10*p, group = year)) +
+      ggridges::geom_ridgeline(alpha = 0.5, fill = 'darkblue') +
+      scale_fill_viridis_c() +
+      coord_cartesian(expand = FALSE) +
+      scale_y_reverse(breaks = seq(1980,2030,2)) +
+      labs(x = "Age", y = "Year")
+  }
+}
+
+## Catches
 
 plot.catches <- function(x) {
 
