@@ -27,7 +27,7 @@ previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_o
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
-run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-6 hours)
+run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature increasing crash rate but making it easier to control the model.
@@ -113,6 +113,8 @@ source("6 initial parameters.R")
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
 tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
 
+### Force parameter bounds (experimental)
+
 if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
@@ -177,9 +179,9 @@ rm(tmppath)
 
 
 
-####################################################################
-## Iterative reweighting and optimization                       ####
-## Running this part takes a long time (3-6 hours on a server)  ####
+#####################################################################
+## Iterative reweighting and optimization                        ####
+## Running this part takes a long time (3-10 hours on a server)  ####
 
 if(run_iterative) {
   
