@@ -31,12 +31,12 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 250, 0.001, 500, 1) %>%
-  g3_init_guess('\\.init', 250, 0.001, 500, 1) %>%
-  g3_init_guess('recl', 15, 5, 20, 1) %>%
-  g3_init_guess('rec.sd', 4, 1, 8, 1) %>%
-  g3_init_guess('rec.scalar', 50, 1, 100, 1) %>%
-  g3_init_guess('init.scalar', 50, 1, 100, 1) %>%
+  g3_init_guess('\\.rec', 1e6, 0.1, 1e9, 1) %>%
+  g3_init_guess('\\.init', 1e6, 0.1, 1e9, 1) %>%
+  g3_init_guess('recl', 15, 5, 20, 0) %>%
+  g3_init_guess('rec.sd', 4, 1, 8, 0) %>%
+  g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
+  g3_init_guess('init.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 80, 1) %>%
   g3_init_guess('\\.K', 20, 5, 60, 1) %>%
