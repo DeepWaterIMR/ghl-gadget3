@@ -122,9 +122,9 @@ tmb_param <-
 
 ## Add likelihood component weights (control using set_weights argument)
 if(set_weights) {
-# Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
+  # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
-  '                                           comp approx_weight       weight
+    '                                           comp approx_weight       weight
            cdist_sumofsquares_EggaN_matp_weight  2.169076e+03 3.067063e+01
   cdist_sumofsquares_RussianSurvey_ldist_weight  8.133667e+02 3.026468e+03
           cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1.953934e+04
@@ -153,7 +153,7 @@ if(set_weights) {
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28     5.000000
   '
   ), header = TRUE)
-
+  
   tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
 }
 
@@ -161,6 +161,19 @@ if(set_weights) {
 
 if(exists("prev_param")) {
   tmb_param[match(names(prev_param),tmb_param$switch), "value"] <- unname(prev_param)
+}
+
+### Force parameter bounds (experimental)
+
+if(force_bound_params) {
+  if(curl::has_internet()) {
+    remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
+  }
+  
+  actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
+  
+  model <- g3_to_r(actions)
+  tmb_model <- g3_to_tmb(actions)
 }
 
 ## Write the parameters to a csv file

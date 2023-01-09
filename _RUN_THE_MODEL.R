@@ -25,12 +25,12 @@ reset_model <- TRUE # Change to TRUE to reset the model (delete all model files)
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
 bootstrap <- FALSE # Not implemented yet
-base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
+base_dir <- "model_files3" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
-force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature increasing crash rate but making it easier to control the model.
+force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 
 ## Optimisation mode (param_opt_mode), options:
 # (1) parameters are bounded internally (ie using the bounded function) works with 'BFGS' optim method
@@ -113,16 +113,6 @@ source("6 initial parameters.R")
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
 tmb_param <- tmb_param %>% g3_init_guess('Russian_SI', 0, NA, NA, 0)
 
-### Force parameter bounds (experimental)
-
-if(force_bound_params) {
-  if(curl::has_internet()) {
-    remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
-  }
-  
-  actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-}
-
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
 # result <- model(tmb_param$value)
@@ -148,6 +138,7 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
+message("Optimization started ", Sys.time())
 ## g3_optim is a wrapper for stats::optim. It returns the parameter
 ## dataframe with the optimised parameters and includes an attribute with
 ## a summary of the optimisation.
@@ -160,6 +151,7 @@ optim_param <- g3_optim(model = tmb_model,
                         control = list(maxit = 1000),
                         print_status = TRUE
 )
+message("Optimization finished ", Sys.time())
 
 ### Save the model parameters
 
@@ -190,6 +182,8 @@ if(run_iterative) {
       g3_init_guess('weight$', 1, NA, NA, 0)
   }
   
+  message("Iteration started ", Sys.time())
+  
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
@@ -209,6 +203,8 @@ if(run_iterative) {
     cv_floor = 0.2,
     shortcut = FALSE
   )
+  
+  message("Iteration finished ", Sys.time())
   
   ### Save the model parameters
   
@@ -230,4 +226,4 @@ if(run_iterative) {
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-message("Finished ", Sys.time())
+message("Script finished ", Sys.time())
