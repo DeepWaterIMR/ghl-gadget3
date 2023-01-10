@@ -111,13 +111,13 @@ source("6 initial parameters.R")
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-tmb_param <- tmb_param %>%
-  g3_init_guess('RussianSurvey', 0, NA, NA, 0) %>%
-  g3_init_guess('Juv_SI', 0, NA, NA, 0) %>%
-  g3_init_guess('EcoS', 0, NA, NA, 0) %>%
-  g3_init_guess('EggaS', 0, NA, NA, 0) %>%
-  g3_init_guess('aldist', 0, NA, NA, 0) %>%
-  g3_init_guess('sexdist', 0, NA, NA, 0)
+# tmb_param <- tmb_param %>%
+#   g3_init_guess('RussianSurvey', 0, NA, NA, 0) %>%
+#   g3_init_guess('Juv_SI', 0, NA, NA, 0) %>%
+#   g3_init_guess('EcoS', 0, NA, NA, 0) %>%
+#   g3_init_guess('EggaS', 0, NA, NA, 0) %>%
+#   g3_init_guess('aldist', 0, NA, NA, 0) %>%
+#   g3_init_guess('sexdist', 0, NA, NA, 0)
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
