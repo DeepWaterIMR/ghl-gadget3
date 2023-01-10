@@ -33,8 +33,9 @@ tmb_param <-
   tmb_param %>%
   g3_init_guess('\\.rec', 1e6, 0.1, 1e9, 1) %>%
   g3_init_guess('\\.init', 1e6, 0.1, 1e9, 1) %>%
-  g3_init_guess('recl', 15, 5, 20, 1) %>%
-  g3_init_guess('rec.sd', 4, 1, 8, 1) %>%
+  g3_init_guess('recl', 14, 5, 20, 0) %>%
+  g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
+  g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
@@ -153,7 +154,7 @@ if(set_weights) {
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28     5.000000
   '
   ), header = TRUE)
-  
+
   tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
 }
 
@@ -169,9 +170,9 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-  
+
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-  
+
   model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }

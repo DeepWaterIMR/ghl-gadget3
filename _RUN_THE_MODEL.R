@@ -28,7 +28,7 @@ bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
-set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 force_bound_params <- FALSE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 
@@ -54,7 +54,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-  
+
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -69,7 +69,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-    
+
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -112,11 +112,10 @@ source("6 initial parameters.R")
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
 tmb_param <- tmb_param %>%
-  g3_init_guess('Russian_SI', 0, NA, NA, 0) %>%
+  g3_init_guess('RussianSurvey', 0, NA, NA, 0) %>%
   g3_init_guess('Juv_SI', 0, NA, NA, 0) %>%
   g3_init_guess('EcoS', 0, NA, NA, 0) %>%
   g3_init_guess('EggaS', 0, NA, NA, 0) %>%
-  g3_init_guess('RussianSurvey', 0, NA, NA, 0) %>%
   g3_init_guess('aldist', 0, NA, NA, 0) %>%
   g3_init_guess('sexdist', 0, NA, NA, 0)
 
@@ -183,14 +182,14 @@ rm(tmppath)
 ## Running this part takes a long time (3-10 hours on a server)  ####
 
 if(run_iterative) {
-  
+
   if(set_weights) {
-    tmb_param <- tmb_param %>%
-      g3_init_guess('weight$', 1, NA, NA, 0)
+    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
+      data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
-  
+
   message("Iteration started ", Sys.time())
-  
+
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
@@ -210,21 +209,21 @@ if(run_iterative) {
     cv_floor = 0.2,
     shortcut = FALSE
   )
-  
+
   message("Iteration finished ", Sys.time())
-  
+
   ### Save the model parameters
-  
+
   write.csv(as.data.frame(iter_param), file = file.path(base_dir, "data/Iterated TMB parameters.csv"))
   save(iter_param, file = file.path(base_dir, "data/Iterated TMB parameters.rda"), compress = "xz")
-  
+
   ### Plots
-  
+
   iter_fit <- g3_fit(model, iter_param)
   save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-  
+
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
-  
+
   tmppath <- file.path(getwd(), base_dir, "figures")
   make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
   rm(tmppath)
