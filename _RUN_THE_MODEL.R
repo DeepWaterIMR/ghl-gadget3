@@ -111,9 +111,9 @@ source("6 initial parameters.R")
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-# tmb_param <- tmb_param %>%
-#   g3_init_guess('RussianSurvey', 0, NA, NA, 0) %>%
-#   g3_init_guess('Juv_SI', 0, NA, NA, 0) %>%
+tmb_param <- tmb_param %>%
+  g3_init_guess('RussianSurvey_SI', 0, NA, NA, 0) %>%
+  g3_init_guess('Juv_SI_3', 0, NA, NA, 0)
 #   g3_init_guess('EcoS', 0, NA, NA, 0) %>%
 #   g3_init_guess('EggaS', 0, NA, NA, 0) %>%
 #   g3_init_guess('aldist', 0, NA, NA, 0) %>%
@@ -198,8 +198,7 @@ if(run_iterative) {
     grouping = list(si_eggan = c('log_EggaN_SI_female',
                                  'log_EggaN_SI_male'),
                     si_juv = c('log_Juv_SI_1',
-                               'log_Juv_SI_2',
-                               'log_Juv_SI_3')),
+                               'log_Juv_SI_2')),
     use_parscale = TRUE,
     control = list(maxit = 1000),
     cv_floor = 0.2,
