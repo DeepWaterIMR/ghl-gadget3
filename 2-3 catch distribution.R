@@ -23,6 +23,7 @@ source("R/figure_functions.R")
 # Data to by-pass MFDB
 
 nor_survey_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for surveys.rds")
+nor_survey_aldist <- readRDS("../ghl-gadget-data/data/out/Age length data for surveys.rds")
 nor_catch_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for catches.rds")
 
 ##############
@@ -680,7 +681,7 @@ dev.off()
 # )[[1]]
 
 EggaN_aldist_female <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
       gear == "BottomTrawls",
@@ -703,8 +704,9 @@ EggaN_aldist_female <- g3_data(
         open_ended = c("upper","lower")
       )
     ),
+  method = "est_n",
   verbose = FALSE
-) %>% filter(year != 2007)
+) %>% rename("number" = "est_n") %>% filter(year != 2007)
 
 png(file.path(base_dir, "figures/EggaN_aldist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
 print(plot.aldist(EggaN_aldist_female))
@@ -737,7 +739,7 @@ dev.off()
 # )[[1]]
 
 EggaN_aldist_male <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
       gear == "BottomTrawls",
@@ -760,8 +762,9 @@ EggaN_aldist_male <- g3_data(
         open_ended = c("upper","lower")
       )
     ),
+  method = "est_n",
   verbose = FALSE
-)
+) %>% rename("number" = "est_n")
 
 
 png(file.path(base_dir, "figures/EggaN_aldist_male.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)

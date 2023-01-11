@@ -111,9 +111,9 @@ source("6 initial parameters.R")
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-tmb_param <- tmb_param %>%
-  g3_init_guess('RussianSurvey_SI', 0, NA, NA, 0) %>%
-  g3_init_guess('Juv_SI_3', 0, NA, NA, 0)
+# tmb_param <- tmb_param %>%
+#   g3_init_guess('RussianSurvey_SI', 0, NA, NA, 0) %>%
+#   g3_init_guess('Juv_SI_3', 0, NA, NA, 0)
 #   g3_init_guess('EcoS', 0, NA, NA, 0) %>%
 #   g3_init_guess('EggaS', 0, NA, NA, 0) %>%
 #   g3_init_guess('aldist', 0, NA, NA, 0) %>%

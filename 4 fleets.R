@@ -80,9 +80,9 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = 'species')
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('trawlnor.alpha', by_stock = 'species',
+              g3_parameterized('trawlnor.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('trawlnor.l50', by_stock = 'species',
+              g3_parameterized('trawlnor.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
               )
           ),
@@ -104,12 +104,12 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_andersen(
-              g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('other.p1', by_stock = 'species'),
-              p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('other.p3', by_stock = 'species'),
-              p4 = g3_parameterized('other.p4', by_stock = 'species'),
-              p5 = g3_parameterized('andersen.L', by_stock = 'species')
+              g3_parameterized('andersen.p0', by_stock = c('species', 'sex')),
+              p1 = g3_parameterized('other.p1', by_stock = c('species', 'sex')),
+              p2 = g3_parameterized('andersen.p2', by_stock = c('species', 'sex')),
+              p3 = g3_parameterized('other.p3', by_stock = c('species', 'sex')),
+              p4 = g3_parameterized('other.p4', by_stock = c('species', 'sex')),
+              p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             )
             # g3_suitability_exponentiall50(
             #   g3_parameterized('other.alpha', by_stock = 'species',
@@ -144,9 +144,9 @@ fleet_actions <-
           #     p5 = g3_parameterized('andersen.L', by_stock = 'species')
           #   )
             g3_suitability_exponentiall50(
-              g3_parameterized('trawlrus.alpha', by_stock = 'species',
+              g3_parameterized('trawlrus.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('trawlrus.l50', by_stock = 'species',
+              g3_parameterized('trawlrus.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -168,12 +168,12 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_andersen(
-              g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('otherrus.p1', by_stock = 'species'),
-              p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('otherrus.p3', by_stock = 'species'),
-              p4 = g3_parameterized('otherrus.p4', by_stock = 'species'),
-              p5 = g3_parameterized('andersen.L', by_stock = 'species')
+              g3_parameterized('andersen.p0', by_stock = c('species', 'sex')),
+              p1 = g3_parameterized('otherrus.p1', by_stock = c('species', 'sex')),
+              p2 = g3_parameterized('andersen.p2', by_stock = c('species', 'sex')),
+              p3 = g3_parameterized('otherrus.p3', by_stock = c('species', 'sex')),
+              p4 = g3_parameterized('otherrus.p4', by_stock = c('species', 'sex')),
+              p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             )
             # g3_suitability_exponentiall50(
             #   g3_parameterized('other.alpha', by_stock = 'species',
@@ -200,12 +200,12 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_andersen(
-              g3_parameterized('andersen.p0', by_stock = 'species'),
-              p1 = g3_parameterized('other.p1', by_stock = 'species'),
-              p2 = g3_parameterized('andersen.p2', by_stock = 'species'),
-              p3 = g3_parameterized('other.p3', by_stock = 'species'),
-              p4 = g3_parameterized('other.p4', by_stock = 'species'),
-              p5 = g3_parameterized('andersen.L', by_stock = 'species')
+              g3_parameterized('andersen.p0', by_stock = c('species', 'sex')),
+              p1 = g3_parameterized('other.p1', by_stock = c('species', 'sex')),
+              p2 = g3_parameterized('andersen.p2', by_stock = c('species', 'sex')),
+              p3 = g3_parameterized('other.p3', by_stock = c('species', 'sex')),
+              p4 = g3_parameterized('other.p4', by_stock = c('species', 'sex')),
+              p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             )
             # g3_suitability_exponentiall50(
             #   g3_parameterized('other.alpha', by_stock = 'species',
@@ -232,9 +232,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('eggan.survey.alpha', by_stock = 'species',
+              g3_parameterized('eggan.survey.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('eggan.survey.l50', by_stock = 'species',
+              g3_parameterized('eggan.survey.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -256,9 +256,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('eggan.survey.alpha', by_stock = 'species',
+              g3_parameterized('eggan.survey.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('eggan.survey.l50', by_stock = 'species',
+              g3_parameterized('eggan.survey.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -280,9 +280,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('eco.survey.alpha', by_stock = 'species',
+              g3_parameterized('eco.survey.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('eco.survey.l50', by_stock = 'species',
+              g3_parameterized('eco.survey.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -304,9 +304,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('rus.survey.alpha', by_stock = 'species',
+              g3_parameterized('rus.survey.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('rus.survey.l50', by_stock = 'species',
+              g3_parameterized('rus.survey.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),

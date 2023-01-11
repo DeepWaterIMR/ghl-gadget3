@@ -43,7 +43,7 @@ tmb_param <-
   g3_init_guess('\\.K', 20, 5, 60, 1) %>%
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
-  g3_init_guess('l50', 50, 40, 100, 1) %>%
+  g3_init_guess('l50', 40, 20, 80, 1) %>%
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
