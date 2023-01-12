@@ -68,7 +68,7 @@ TrawlNor_ldist <- mfdb::mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -197,7 +197,7 @@ OtherNor_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -344,7 +344,7 @@ TrawlRus_ldist <- gadgetutils::g3_data(
       length = mfdb_interval(
         "len",
         seq(stock_params$minlength, stock_params$maxlength,
-            by = stock_params$dl),
+            by = 2*stock_params$dl),
         open_ended = c("upper","lower")
       )
     ),
@@ -498,7 +498,7 @@ OtherRus_ldist <- gadgetutils::g3_data(
       length = mfdb_interval(
         "len",
         seq(stock_params$minlength, stock_params$maxlength,
-            by = stock_params$dl),
+            by = 2*stock_params$dl),
         open_ended = c("upper","lower")
       )
     ),
@@ -648,7 +648,7 @@ EggaN_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -684,8 +684,6 @@ EggaN_aldist_female <- g3_data(
   nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
-      gear == "BottomTrawls",
-      year >= 1994,
       sex == "F",
       !is.na(age),
       readingtype %in% c("new_other_reader", "new_qualified_reader")
@@ -742,8 +740,6 @@ EggaN_aldist_male <- g3_data(
   nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
-      gear == "BottomTrawls",
-      year >= 1994,
       sex == "M",
       !is.na(age),
       readingtype %in% c("new_other_reader", "new_qualified_reader")
@@ -848,7 +844,7 @@ EggaS_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -861,17 +857,14 @@ dev.off()
 ## Age-length
 
 EggaS_aldist <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ESS",
-      gear == "BottomTrawls",
       !is.na(age),
-      grepl("new", readingtype),
-      !is.na(sex)
+      readingtype %in% c("new_other_reader", "new_qualified_reader")
     ),
   params =
     list(
-      year = model_params$year_range,
       timestep = model_params$timestep_fun,
       age = mfdb_interval(
         "age", stock_params$minage:stock_params$maxage,
@@ -879,12 +872,15 @@ EggaS_aldist <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength, by = 5),
+        seq(stock_params$minlength, stock_params$maxlength,
+            by = 5),
         open_ended = c("upper","lower")
       ),
       sex = mfdb_group(female = 'F', male = 'M')
     ),
-  verbose = FALSE)
+  method = "est_n",
+  verbose = FALSE
+) %>% rename("number" = "est_n")
 
 png(file.path(base_dir, "figures/EggaS_aldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
 p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom") + expand_limits(x = c(attributes(EggaS_aldist)$age %>% last %>% attributes %>% .$max))
@@ -977,6 +973,32 @@ print(plot.ldist(EcoS_ldist, free_y = TRUE))
 dev.off()
 
 ## Age-length
+
+EcoS_aldist <- g3_data(
+  nor_survey_aldist %>%
+    filter(
+      sampling_type == "ECS",
+      !is.na(age),
+      readingtype %in% c("new_other_reader", "new_qualified_reader")
+    ),
+  params =
+    list(
+      timestep = model_params$timestep_fun,
+      age = mfdb_interval(
+        "age", stock_params$minage:stock_params$maxage,
+        open_ended = c("upper")
+      ),
+      length = mfdb_interval(
+        "len",
+        seq(stock_params$minlength, stock_params$maxlength,
+            by = 5),
+        open_ended = c("upper","lower")
+      ),
+      sex = mfdb_group(female = 'F', male = 'M')
+    ),
+  method = "est_n",
+  verbose = FALSE
+) %>% rename("number" = "est_n")
 
 EcoS_aldist <- g3_data(
   nor_survey_ldist %>%

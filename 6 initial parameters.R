@@ -125,33 +125,33 @@ tmb_param <-
 if(set_weights) {
   # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
-    '                                           comp approx_weight       weight
-           cdist_sumofsquares_EggaN_matp_weight  2.169076e+03 3.067063e+01
-  cdist_sumofsquares_RussianSurvey_ldist_weight  8.133667e+02 3.026468e+03
-          cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1.953934e+04
-           cdist_sumofsquares_EggaS_matp_weight  2.342207e+03 2.802315e+01
-           cdist_sumofsquares_EcoS_ldist_weight  6.871618e+03 1.287650e+04
-          cdist_sumofsquares_EcoS_aldist_weight  9.937233e+03 9.540868e+01
-     cdist_sumofsquares_TrawlNor_sexdist_weight  3.577350e+02     5.684920
-         cdist_sumofsquares_EcoS_sexdist_weight  1.016031e+03 4.297829e+01
-     cdist_sumofsquares_OtherNor_sexdist_weight  3.677104e+02     4.164605
-    cdist_sumofsquares_EggaN_aldist_male_weight  8.732552e+03 3.000535e+01
-          cdist_sumofsquares_other_ldist_weight  2.163332e+04 3.127082e+04
-      cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04 1.033920e+02
-     cdist_sumofsquares_trawlrus_ldist_f_weight  1.282099e+04 2.722565e+04
-     cdist_sumofsquares_trawlrus_ldist_m_weight  1.005126e+04 2.405456e+04
-          cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04 1.039428e+05
-         cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04 1.000324e+02
-       cdist_sumofsquares_trawlnor_ldist_weight  1.217407e+04 1.460197e+04
-  cdist_sumofsquares_EggaN_aldist_female_weight  2.479229e+04 2.479229e+04
-     cdist_sumofsquares_otherrus_ldist_f_weight  1.167413e+05 9.517467e+04
-     cdist_sumofsquares_otherrus_ldist_m_weight  1.504549e+04 6.553563e+04
-   adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02     5.000000
- adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02     5.000000
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28     4.664130
-        adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28     4.984585
-      adist_surveyindices_log_Russian_SI_weight  4.720994e+01     0.000000
-        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28     5.000000
+    '                                            comp approx_weight       weight
+            cdist_sumofsquares_EggaN_matp_weight  2.169076e+03     2.857687
+   cdist_sumofsquares_RussianSurvey_ldist_weight  8.133667e+02  156.6579972
+      cdist_sumofsquares_OtherRus_sexdist_weight  4.800372e+02    1.8846844
+        cdist_sumofsquares_TrawlRus_ldist_weight  1.948335e+04 2898.3738394
+           cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1357.8051012
+            cdist_sumofsquares_EggaS_matp_weight  2.571764e+03    3.2399384
+            cdist_sumofsquares_EcoS_ldist_weight  6.871618e+03 1004.9290389
+           cdist_sumofsquares_EcoS_aldist_weight  9.937233e+03    45.605548
+      cdist_sumofsquares_TrawlNor_sexdist_weight  2.801587e+02    0.8506735
+          cdist_sumofsquares_EcoS_sexdist_weight  8.781064e+02    3.6595778
+      cdist_sumofsquares_OtherNor_sexdist_weight  3.193361e+02    1.1572215
+     cdist_sumofsquares_EggaN_aldist_male_weight  8.732552e+03   21.6202662
+       cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04   51.5328161
+           cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04 4806.0988995
+          cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04   84.1434913
+        cdist_sumofsquares_OtherRus_ldist_weight  4.035618e+04 1104.2867422
+   cdist_sumofsquares_EggaN_aldist_female_weight  2.479229e+04   21.9512872
+      cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02    1.7797058
+        cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
+        cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
+ adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01            0
+    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           10
+  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           10
+         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28            4
+         adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
+         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28            2
   '
   ), header = TRUE)
 

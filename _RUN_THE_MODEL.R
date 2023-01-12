@@ -28,9 +28,9 @@ bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
-set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
-force_bound_params <- FALSE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
+force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 
 ## Optimisation mode (param_opt_mode), options:
 # (1) parameters are bounded internally (ie using the bounded function) works with 'BFGS' optim method
