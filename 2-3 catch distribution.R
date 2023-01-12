@@ -118,7 +118,7 @@ TrawlNor_sexratio <- mfdb_sample_count(
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]] %>%
-  filter(!year %in% c(1988, 1992, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+  filter(!year %in% c(1986, 1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
 remove <- TrawlNor_sexratio %>%
   group_by(year, step, length) %>%

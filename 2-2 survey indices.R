@@ -210,8 +210,7 @@ if(reload_data) {
   rm(p)
   ## Save
 
-  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2,
-       Juv_SI_3, Russian_SI,
+  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3, Russian_SI,
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
