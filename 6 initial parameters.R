@@ -154,7 +154,7 @@ if(set_weights) {
          adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           30
   '
   ), header = TRUE)
-
+  
   tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
 }
 
@@ -170,9 +170,9 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-
+  
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-
+  
   model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }
