@@ -39,7 +39,7 @@ tmb_param <-
   g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
   g3_init_guess('init.scalar', 10, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
-  g3_init_guess('_male.Linf', 60, 40, 80, 1) %>%
+  g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
   g3_init_guess('\\.K', 20, 5, 60, 1) %>%
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
@@ -143,15 +143,15 @@ if(set_weights) {
           cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04   84.1434913
         cdist_sumofsquares_OtherRus_ldist_weight  4.035618e+04 1104.2867422
    cdist_sumofsquares_EggaN_aldist_female_weight  2.479229e+04   21.9512872
-      cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02    1.7797058
+      cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02            1
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
- adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01            1
-    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           15
-  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           15
-         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           15
+ adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01           10
+    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           30
+  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           30
+         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           30
          adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
-         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28            4
+         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           30
   '
   ), header = TRUE)
 

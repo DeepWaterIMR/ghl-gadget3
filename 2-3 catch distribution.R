@@ -118,19 +118,20 @@ TrawlNor_sexratio <- mfdb_sample_count(
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]] %>%
-  filter(!year %in% c(1986, 1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+  filter(!year %in% c(1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
 remove <- TrawlNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length <= 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
-TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length")) 
 
 png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(TrawlNor_sexratio))
+
 dev.off()
 
 # AllNorCatches_aldist <- mfdb_sample_count(
@@ -241,7 +242,8 @@ remove <- OtherNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 OtherNor_sexratio <- anti_join(OtherNor_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -446,7 +448,8 @@ remove <- TrawlRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 TrawlRus_sexratio <- anti_join(TrawlRus_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -535,7 +538,8 @@ remove <- OtherRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 OtherRus_sexratio <- anti_join(OtherRus_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5) %>%
@@ -793,7 +797,8 @@ remove <- EggaN_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 EggaN_sexratio <- anti_join(EggaN_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)

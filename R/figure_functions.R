@@ -950,3 +950,67 @@ compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
 
   }
 }
+
+## To gadgetplots one day
+
+# From: https://github.com/gadget-framework/gadget3/blob/2521e3ad4925a48d3f39d5a6e86c99f93afcdb3d/R/aab_env.R
+
+# NB: We have to have avoid_zero in our namespace so CMD check doesn't complain about it's use
+#     in surveyindices_linreg(). Maybe g3_env should just go away and use the package
+#     namespace instead?
+avoid_zero <- g3_native(r = function (a) {
+  # https://github.com/kaskr/adcomp/issues/7#issuecomment-642559660
+  ( pmax(a * 1000, 0) + log1p(exp(pmin(a * 1000, 0) - pmax(a * 1000, 0))) ) / 1000
+}, cpp = '[](Type a) -> Type {
+    return logspace_add(a * 1000.0, (Type)0.0) / 1000.0;
+}')
+
+avoid_zero_vec <- g3_native(r = function (a) {
+  # https://github.com/kaskr/adcomp/issues/7#issuecomment-642559660
+  ( pmax(a * 1000, 0) + log1p(exp(pmin(a * 1000, 0) - pmax(a * 1000, 0))) ) / 1000
+}, cpp = '[](vector<Type> a) -> vector<Type> {
+    vector<Type> res(a.size());
+    for(int i = 0; i < a.size(); i++) {
+        res[i] = logspace_add(a[i] * 1000.0, (Type)0.0) / 1000.0;
+    }
+    return res;
+}')
+
+# Return scalar (x) bounded between (a) and (b)
+bounded <- g3_native(r = function (x, a, b) {
+  a + (b-a)/(1+exp(x))
+}, cpp = '[](Type x, Type a, Type b) -> Type {
+    return a + (b-a)/(1+exp(x));
+}')
+
+# Return vector (x) bounded between (a) and (b)
+bounded_vec <- g3_native(r = function (x, a, b) {
+  a + (b-a)/(1+exp(x))
+}, cpp = '[](vector<Type> x, Type a, Type b) -> vector<Type> {
+    return a + (b-a)/(1+exp(x));
+}')
+
+
+
+plot_exponentiall50 <- function(length, alpha, l50, base_size = 8) {
+  tibble(l=length, 
+         y=eval(gadget3::g3_suitability_exponentiall50(alpha,l50)[[2]], list(stock__midlen=l))) %>% 
+    ggplot(aes(l,y)) + 
+    geom_line() +
+    labs(x = "Length", y = "Suitability") +
+    ggplot2::theme_classic(base_size = base_size)
+}
+
+# plot_exponentiall50(1:120, 0.5, 40)
+
+plot_andersen <- function(length, p0, p1, p2, p3, p4, p5, base_size = 8) {
+  tibble(l=length, 
+         y=eval(gadget3::g3_suitability_andersen(p0, p1, p2, p3, p4, p5)[[2]], list(stock__midlen=length))) %>% 
+    ggplot(aes(l,y)) + 
+    geom_line() +
+    labs(x = "Length", y = "Suitability") +
+    ggplot2::theme_classic(base_size = base_size)
+}
+
+# plot_andersen(length=1:120, p0=0, p1=0.58, p2=1, p3=50, p4=50, p5=120)
+

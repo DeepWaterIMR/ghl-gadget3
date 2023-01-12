@@ -201,7 +201,7 @@ if(run_iterative) {
                                'log_Juv_SI_2')),
     use_parscale = TRUE,
     control = list(maxit = 1000),
-    cv_floor = 0.2,
+    cv_floor = 0.4,
     shortcut = FALSE
   )
 
