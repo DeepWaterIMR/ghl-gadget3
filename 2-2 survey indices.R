@@ -192,8 +192,8 @@ if(reload_data) {
     params = list(
       data_source = "EggaN-index-biomass",
       length = mfdb_interval(
-        "all", c(stock_params$minlength, stock_params$maxlength),
-        open_ended = c("upper","lower"))
+        "all", c(40, stock_params$maxlength),
+        open_ended = c("upper"))
     )
   )[[1]])$length
 
