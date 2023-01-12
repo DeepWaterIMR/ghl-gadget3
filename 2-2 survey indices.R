@@ -187,7 +187,7 @@ if(reload_data) {
 
   attributes(Russian_SI)$step <- attributes(EggaN_SI_female)$step
   attributes(Russian_SI)$area <- attributes(EggaN_SI_female)$area
-  attributes(Russian_SI)$length <- attributes(mfdb_sample_totalweight(
+  tmp <- attributes(mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
     params = list(
       data_source = "EggaN-index-biomass",
@@ -196,6 +196,9 @@ if(reload_data) {
         open_ended = c("upper"))
     )
   )[[1]])$length
+  names(tmp) <- unique(Russian_SI$length)
+  
+  attributes(Russian_SI)$length <- tmp
 
   p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
     geom_col() +
