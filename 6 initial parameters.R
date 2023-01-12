@@ -146,7 +146,7 @@ if(set_weights) {
       cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02    1.7797058
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
- adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01            0
+ adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01            1
     adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           15
   adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           15
          adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           15
