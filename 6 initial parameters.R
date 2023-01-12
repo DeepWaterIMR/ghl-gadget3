@@ -54,15 +54,10 @@ tmb_param <-
   g3_init_guess('\\.M', 0.12, 0.001, 1, 0) %>%
   g3_init_guess('_male_imm.M', 0.24, 0.001, 1, 0) %>%
   g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 0) %>%
-  g3_init_guess('mat_initial_alpha', 1, 0.001, 3, 1) %>%
-  g3_init_guess('_female.mat_initial_a50',
-                # mat_l50 %>% filter(sex == "F") %>% pull(slope),
-                0.2211149,
-                3, 25, 0) %>%
-  g3_init_guess('_male.mat_initial_a50',
-                # mat_l50 %>% filter(sex == "M") %>% pull(slope),
-                0.2775188,
-                3, 25, 0) %>%
+  g3_init_guess('_female.mat_initial_alpha', 0.260, 0.001, 3, 1) %>%
+  g3_init_guess('_male.mat_initial_alpha', 0.376, 0.001, 3, 1) %>%
+  g3_init_guess('_female.mat_initial_a50', 12.98, 3, 25, 0) %>%
+  g3_init_guess('_male.mat_initial_a50', 5.64, 3, 25, 0) %>%
   #  g3_init_guess('prop_mat0', 0.5, 0.1, 0.9, 0) %>%
   #  g3_init_guess('B0', 100, 1, 5000, 1) %>%
   g3_init_guess('mat_alpha', 70, 10, 200, 1) %>%
@@ -154,7 +149,7 @@ if(set_weights) {
          adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           30
   '
   ), header = TRUE)
-  
+
   tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
 }
 
@@ -170,9 +165,9 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-  
+
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-  
+
   model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }
