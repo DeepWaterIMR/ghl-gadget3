@@ -23,6 +23,7 @@ source("R/figure_functions.R")
 # Data to by-pass MFDB
 
 nor_survey_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for surveys.rds")
+nor_survey_aldist <- readRDS("../ghl-gadget-data/data/out/Age length data for surveys.rds")
 nor_catch_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for catches.rds")
 
 ##############
@@ -67,7 +68,7 @@ TrawlNor_ldist <- mfdb::mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -117,19 +118,20 @@ TrawlNor_sexratio <- mfdb_sample_count(
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]] %>%
-  filter(!year %in% c(1988, 1992, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+  filter(!year %in% c(1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
 remove <- TrawlNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length <= 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
-TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length")) 
 
 png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(TrawlNor_sexratio))
+
 dev.off()
 
 # AllNorCatches_aldist <- mfdb_sample_count(
@@ -196,7 +198,7 @@ OtherNor_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -240,7 +242,8 @@ remove <- OtherNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 OtherNor_sexratio <- anti_join(OtherNor_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -343,7 +346,7 @@ TrawlRus_ldist <- gadgetutils::g3_data(
       length = mfdb_interval(
         "len",
         seq(stock_params$minlength, stock_params$maxlength,
-            by = stock_params$dl),
+            by = 2*stock_params$dl),
         open_ended = c("upper","lower")
       )
     ),
@@ -445,7 +448,8 @@ remove <- TrawlRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 TrawlRus_sexratio <- anti_join(TrawlRus_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -497,7 +501,7 @@ OtherRus_ldist <- gadgetutils::g3_data(
       length = mfdb_interval(
         "len",
         seq(stock_params$minlength, stock_params$maxlength,
-            by = stock_params$dl),
+            by = 2*stock_params$dl),
         open_ended = c("upper","lower")
       )
     ),
@@ -534,7 +538,8 @@ remove <- OtherRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 OtherRus_sexratio <- anti_join(OtherRus_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5) %>%
@@ -647,7 +652,7 @@ EggaN_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -680,11 +685,9 @@ dev.off()
 # )[[1]]
 
 EggaN_aldist_female <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
-      gear == "BottomTrawls",
-      year >= 1994,
       sex == "F",
       !is.na(age),
       readingtype %in% c("new_other_reader", "new_qualified_reader")
@@ -703,8 +706,9 @@ EggaN_aldist_female <- g3_data(
         open_ended = c("upper","lower")
       )
     ),
+  method = "est_n",
   verbose = FALSE
-) %>% filter(year != 2007)
+) %>% rename("number" = "est_n") %>% filter(year != 2007)
 
 png(file.path(base_dir, "figures/EggaN_aldist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
 print(plot.aldist(EggaN_aldist_female))
@@ -737,11 +741,9 @@ dev.off()
 # )[[1]]
 
 EggaN_aldist_male <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ENS",
-      gear == "BottomTrawls",
-      year >= 1994,
       sex == "M",
       !is.na(age),
       readingtype %in% c("new_other_reader", "new_qualified_reader")
@@ -760,8 +762,9 @@ EggaN_aldist_male <- g3_data(
         open_ended = c("upper","lower")
       )
     ),
+  method = "est_n",
   verbose = FALSE
-)
+) %>% rename("number" = "est_n")
 
 
 png(file.path(base_dir, "figures/EggaN_aldist_male.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
@@ -794,7 +797,8 @@ remove <- EggaN_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  ungroup()
 
 EggaN_sexratio <- anti_join(EggaN_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -845,7 +849,7 @@ EggaS_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
@@ -858,17 +862,14 @@ dev.off()
 ## Age-length
 
 EggaS_aldist <- g3_data(
-  nor_survey_ldist %>%
+  nor_survey_aldist %>%
     filter(
       sampling_type == "ESS",
-      gear == "BottomTrawls",
       !is.na(age),
-      grepl("new", readingtype),
-      !is.na(sex)
+      readingtype %in% c("new_other_reader", "new_qualified_reader")
     ),
   params =
     list(
-      year = model_params$year_range,
       timestep = model_params$timestep_fun,
       age = mfdb_interval(
         "age", stock_params$minage:stock_params$maxage,
@@ -876,12 +877,15 @@ EggaS_aldist <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength, by = 5),
+        seq(stock_params$minlength, stock_params$maxlength,
+            by = 5),
         open_ended = c("upper","lower")
       ),
       sex = mfdb_group(female = 'F', male = 'M')
     ),
-  verbose = FALSE)
+  method = "est_n",
+  verbose = FALSE
+) %>% rename("number" = "est_n")
 
 png(file.path(base_dir, "figures/EggaS_aldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
 p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom") + expand_limits(x = c(attributes(EggaS_aldist)$age %>% last %>% attributes %>% .$max))
@@ -974,6 +978,32 @@ print(plot.ldist(EcoS_ldist, free_y = TRUE))
 dev.off()
 
 ## Age-length
+
+EcoS_aldist <- g3_data(
+  nor_survey_aldist %>%
+    filter(
+      sampling_type == "ECS",
+      !is.na(age),
+      readingtype %in% c("new_other_reader", "new_qualified_reader")
+    ),
+  params =
+    list(
+      timestep = model_params$timestep_fun,
+      age = mfdb_interval(
+        "age", stock_params$minage:stock_params$maxage,
+        open_ended = c("upper")
+      ),
+      length = mfdb_interval(
+        "len",
+        seq(stock_params$minlength, stock_params$maxlength,
+            by = 5),
+        open_ended = c("upper","lower")
+      ),
+      sex = mfdb_group(female = 'F', male = 'M')
+    ),
+  method = "est_n",
+  verbose = FALSE
+) %>% rename("number" = "est_n")
 
 EcoS_aldist <- g3_data(
   nor_survey_ldist %>%

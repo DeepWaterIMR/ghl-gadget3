@@ -28,9 +28,9 @@ bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
-set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
-force_bound_params <- FALSE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
+force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 
 ## Optimisation mode (param_opt_mode), options:
 # (1) parameters are bounded internally (ie using the bounded function) works with 'BFGS' optim method
@@ -111,9 +111,9 @@ source("6 initial parameters.R")
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)
 # tmb_param$value$cdist_sumofsquares_EggaN_aldist_female_weight <- 1
-tmb_param <- tmb_param %>%
-  g3_init_guess('RussianSurvey_SI', 0, NA, NA, 0) %>%
-  g3_init_guess('Juv_SI_3', 0, NA, NA, 0)
+# tmb_param <- tmb_param %>%
+#   g3_init_guess('RussianSurvey_SI', 0, NA, NA, 0) %>%
+#   g3_init_guess('Juv_SI_3', 0, NA, NA, 0)
 #   g3_init_guess('EcoS', 0, NA, NA, 0) %>%
 #   g3_init_guess('EggaS', 0, NA, NA, 0) %>%
 #   g3_init_guess('aldist', 0, NA, NA, 0) %>%
@@ -154,7 +154,7 @@ optim_param <- g3_optim(model = tmb_model,
                         params = tmb_param,
                         use_parscale = TRUE,
                         method = 'BFGS',
-                        control = list(maxit = 1000),
+                        control = list(maxit = 1000), #,reltol = 1e-5
                         print_status = TRUE
 )
 message("Optimization finished ", Sys.time())
@@ -201,7 +201,7 @@ if(run_iterative) {
                                'log_Juv_SI_2')),
     use_parscale = TRUE,
     control = list(maxit = 1000),
-    cv_floor = 0.2,
+    cv_floor = 0.4,
     shortcut = FALSE
   )
 

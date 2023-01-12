@@ -187,15 +187,18 @@ if(reload_data) {
 
   attributes(Russian_SI)$step <- attributes(EggaN_SI_female)$step
   attributes(Russian_SI)$area <- attributes(EggaN_SI_female)$area
-  attributes(Russian_SI)$length <- attributes(mfdb_sample_totalweight(
+  tmp <- attributes(mfdb_sample_totalweight(
     mdb = mdb, cols = c("length"),
     params = list(
       data_source = "EggaN-index-biomass",
       length = mfdb_interval(
-        "all", c(stock_params$minlength, stock_params$maxlength),
-        open_ended = c("upper","lower"))
+        "all", c(40, stock_params$maxlength),
+        open_ended = c("upper"))
     )
   )[[1]])$length
+  names(tmp) <- unique(Russian_SI$length)
+  
+  attributes(Russian_SI)$length <- tmp
 
   p <- ggplot(Russian_SI, aes(x = year, y = total_weight/1e6)) +
     geom_col() +
@@ -210,8 +213,7 @@ if(reload_data) {
   rm(p)
   ## Save
 
-  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2,
-       Juv_SI_3, Russian_SI,
+  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3, Russian_SI,
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 

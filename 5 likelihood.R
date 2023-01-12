@@ -114,7 +114,7 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area','length')),
+    g3l_distribution_sumofsquares(over = c('area')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -124,7 +124,7 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area','length')),
+    g3l_distribution_sumofsquares(over = c('area')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -134,7 +134,7 @@ likelihood_actions <- list(
     fleets = list(EggaS),
     stocks = stocks,
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
+    g3l_distribution_sumofsquares(over = c('area', 'sex')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 

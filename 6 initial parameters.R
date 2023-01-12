@@ -39,11 +39,11 @@ tmb_param <-
   g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
   g3_init_guess('init.scalar', 10, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
-  g3_init_guess('_male.Linf', 60, 40, 80, 1) %>%
+  g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
   g3_init_guess('\\.K', 20, 5, 60, 1) %>%
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
-  g3_init_guess('l50', 50, 20, 80, 1) %>%
+  g3_init_guess('l50', 40, 20, 80, 1) %>%
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
@@ -125,37 +125,36 @@ tmb_param <-
 if(set_weights) {
   # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
-    '                                           comp approx_weight       weight
-      adist_surveyindices_log_EggaN_SI_female_weight	0.06	0.06
-      adist_surveyindices_log_EggaN_SI_male_weight	0.06	0.06
-      adist_surveyindices_log_Juv_SI_1_weight	2	2
-      adist_surveyindices_log_Juv_SI_2_weight	0.2	0.2
-      adist_surveyindices_log_Juv_SI_3_weight	0	0
-      adist_surveyindices_log_RussianSurvey_SI_weight	0	0
-      cdist_sumofsquares_EcoS_aldist_weight	0	0
-      cdist_sumofsquares_EcoS_ldist_weight	0	0
-      cdist_sumofsquares_EcoS_sexdist_weight	0	0
-      cdist_sumofsquares_EggaN_aldist_female_weight	0	0
-      cdist_sumofsquares_EggaN_aldist_male_weight	0	0
-      cdist_sumofsquares_EggaN_ldist_weight	6	6
-      cdist_sumofsquares_EggaN_matp_weight	0.04	0.04
-      cdist_sumofsquares_EggaS_aldist_weight	0	0
-      cdist_sumofsquares_EggaS_ldist_weight	0	0
-      cdist_sumofsquares_EggaS_matp_weight	0	0
-      cdist_sumofsquares_OtherNor_aldist_weight	0	0
-      cdist_sumofsquares_OtherNor_ldist_weight	2	2
-      cdist_sumofsquares_OtherNor_sexdist_weight	0.01 0.01
-      cdist_sumofsquares_OtherRus_ldist_weight	5	5
-      cdist_sumofsquares_OtherRus_sexdist_weight	0	0
-      cdist_sumofsquares_RussianSurvey_ldist_weight	0	0
-      cdist_sumofsquares_TrawlNor_ldist_weight	1.2	1.2
-      cdist_sumofsquares_TrawlNor_sexdist_weight	0	0
-      cdist_sumofsquares_TrawlRus_ldist_weight	1	1
-      cdist_sumofsquares_TrawlRus_sexdist_weight	0	0
-
+    '                                            comp approx_weight       weight
+            cdist_sumofsquares_EggaN_matp_weight  2.169076e+03     2.857687
+   cdist_sumofsquares_RussianSurvey_ldist_weight  8.133667e+02  156.6579972
+      cdist_sumofsquares_OtherRus_sexdist_weight  4.800372e+02    1.8846844
+        cdist_sumofsquares_TrawlRus_ldist_weight  1.948335e+04         1400
+           cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1357.8051012
+            cdist_sumofsquares_EggaS_matp_weight  2.571764e+03    3.2399384
+            cdist_sumofsquares_EcoS_ldist_weight  6.871618e+03 1004.9290389
+           cdist_sumofsquares_EcoS_aldist_weight  9.937233e+03           20
+      cdist_sumofsquares_TrawlNor_sexdist_weight  2.801587e+02    0.8506735
+          cdist_sumofsquares_EcoS_sexdist_weight  8.781064e+02    3.6595778
+      cdist_sumofsquares_OtherNor_sexdist_weight  3.193361e+02    1.1572215
+     cdist_sumofsquares_EggaN_aldist_male_weight  8.732552e+03   21.6202662
+       cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04   51.5328161
+           cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04 4806.0988995
+          cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04   84.1434913
+        cdist_sumofsquares_OtherRus_ldist_weight  4.035618e+04 1104.2867422
+   cdist_sumofsquares_EggaN_aldist_female_weight  2.479229e+04   21.9512872
+      cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02            1
+        cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
+        cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
+ adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01           10
+    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           30
+  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           30
+         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           30
+         adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
+         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           30
   '
   ), header = TRUE)
-
+  
   tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
 }
 
@@ -171,9 +170,9 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-
+  
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-
+  
   model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }
