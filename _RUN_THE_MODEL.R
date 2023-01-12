@@ -44,7 +44,7 @@ force_bound_params <- TRUE # Whether parameters should be forced to their bounds
 ## 2 - parameter for each age group of each stock
 
 setup_options <- list(param_opt_mode = 1,
-                      initial_abund_mode = 2)
+                      initial_abund_mode = 1)
 
 ## Whether or not to bound parameters internally
 setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FALSE)
