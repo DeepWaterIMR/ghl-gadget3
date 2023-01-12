@@ -124,10 +124,10 @@ remove <- TrawlNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length <= 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  filter((Length <= 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
   ungroup()
 
-TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length")) 
+TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length"))
 
 png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(TrawlNor_sexratio))
@@ -236,13 +236,13 @@ OtherNor_sexratio <- mfdb_sample_count(
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
-  ))[[1]]
+  ))[[1]] %>% filter(!year %in% c(1985,1991,1992,1994,1995,2011,2012,2013))
 
 remove <- OtherNor_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  filter((Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
   ungroup()
 
 OtherNor_sexratio <- anti_join(OtherNor_sexratio, remove, by = c("year", "step", "length")) %>%
@@ -448,7 +448,7 @@ remove <- TrawlRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  filter((Length < 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
   ungroup()
 
 TrawlRus_sexratio <- anti_join(TrawlRus_sexratio, remove, by = c("year", "step", "length")) %>%
@@ -538,7 +538,7 @@ remove <- OtherRus_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
   ungroup()
 
 OtherRus_sexratio <- anti_join(OtherRus_sexratio, remove, by = c("year", "step", "length")) %>%
@@ -797,7 +797,7 @@ remove <- EggaN_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9)) %>% 
+  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
   ungroup()
 
 EggaN_sexratio <- anti_join(EggaN_sexratio, remove, by = c("year", "step", "length")) %>%
@@ -940,7 +940,7 @@ remove <- EggaS_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 50 & ratio > 0.65) | (n <= 5 & Length > 70 & ratio < 0.9))
 
 EggaS_sexratio <- anti_join(EggaS_sexratio, remove, by = c("year", "step", "length")) %>%
   filter(number > 5)
@@ -1062,10 +1062,9 @@ remove <- EcoS_sexratio %>%
   group_by(year, step, length) %>%
   summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
   mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 40 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9))
+  filter((Length < 25 & ratio > 0.6) | (Length < 40 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9))
 
-EcoS_sexratio <- anti_join(EcoS_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+EcoS_sexratio <- anti_join(EcoS_sexratio, remove, by = c("year", "step", "length"))
 
 png(file.path(base_dir, "figures/EcoS_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(EcoS_sexratio))
