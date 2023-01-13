@@ -77,7 +77,7 @@ stock_params$female_imm$maxlength <- 90
 stock_params$female_imm$max_possible_data_length <- 75 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$male_mat$minage <- 3
-stock_params$male_mat$maxage <- 20
+stock_params$male_mat$maxage <- 25
 stock_params$male_mat$minlength <- 1
 stock_params$male_mat$maxlength <- 80
 stock_params$male_mat$min_possible_data_length <- 31 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.

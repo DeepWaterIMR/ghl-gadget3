@@ -87,9 +87,9 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_catchdistribution(
-    'RussianSurvey_ldist',
+    'RussianS_ldist',
     RussianSurvey_ldist,
-    fleets = list(RussianSurvey),
+    fleets = list(RussianS),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
@@ -307,7 +307,7 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_abundancedistribution(
-    'RussianSurvey_SI',
+    'Russian_SI',
     Russian_SI %>%
       rename("weight" = "total_weight"), # A bug here
     fleets = list(),

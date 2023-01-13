@@ -28,7 +28,7 @@ EggaS <- g3_fleet(c("EggaS", "survey")) %>%
 EcoS <- g3_fleet(c("EcoS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
-RussianSurvey <- g3_fleet(c("RussianSurvey", "survey")) %>%
+RussianS <- g3_fleet(c("RussianS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
 ## Commercial
@@ -296,7 +296,7 @@ fleet_actions <-
             )
           )
       ),
-    RussianSurvey %>%
+    RussianS %>%
       g3a_predate_fleet(
         stocks,
         suitabilities =
@@ -312,7 +312,7 @@ fleet_actions <-
           ),
         catchability_f =
           g3a_predate_catchability_totalfleet(
-            g3_timeareadata('RussianSurvey_catches',
+            g3_timeareadata('RussianS_catches',
                             RussianSurvey_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),

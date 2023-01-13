@@ -43,7 +43,7 @@ tmb_param <-
   g3_init_guess('\\.K', 20, 5, 60, 1) %>%
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
-  g3_init_guess('l50', 40, 20, 80, 1) %>%
+  g3_init_guess('l50', 40, 15, 80, 1) %>%
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
@@ -122,7 +122,7 @@ if(set_weights) {
   tmp_weights <- read.table(textConnection(
     '                                            comp approx_weight       weight
             cdist_sumofsquares_EggaN_matp_weight  2.169076e+03     2.857687
-   cdist_sumofsquares_RussianSurvey_ldist_weight  8.133667e+02  156.6579972
+   cdist_sumofsquares_RussianS_ldist_weight       8.133667e+02  156.6579972
       cdist_sumofsquares_OtherRus_sexdist_weight  4.800372e+02    1.8846844
         cdist_sumofsquares_TrawlRus_ldist_weight  1.948335e+04         1400
            cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1357.8051012
@@ -141,7 +141,7 @@ if(set_weights) {
       cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02            1
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
- adist_surveyindices_log_RussianSurvey_SI_weight  4.720994e+01           10
+ adist_surveyindices_log_Russian_SI_weight        4.720994e+01           10
     adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           30
   adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           30
          adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           30
