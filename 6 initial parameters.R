@@ -141,12 +141,12 @@ if(set_weights) {
       cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02            1
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
- adist_surveyindices_log_Russian_SI_weight        4.720994e+01           10
+ adist_surveyindices_log_Russian_SI_weight        4.720994e+01           20
     adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           30
   adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           30
-         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           30
+         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           50
          adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
-         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           30
+         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           50
   '
   ), header = TRUE)
 
