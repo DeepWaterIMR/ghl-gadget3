@@ -967,7 +967,7 @@ EcoS_ldist <- mfdb_sample_count(
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
-               by = stock_params$dl),
+               by = 2*stock_params$dl),
            open_ended = c("upper","lower")
          )
     )
