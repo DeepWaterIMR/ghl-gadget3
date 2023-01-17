@@ -125,15 +125,15 @@ if(set_weights) {
    cdist_sumofsquares_RussianS_ldist_weight       8.133667e+02  156.6579972
       cdist_sumofsquares_OtherRus_sexdist_weight  4.800372e+02    1.8846844
         cdist_sumofsquares_TrawlRus_ldist_weight  1.948335e+04         1400
-           cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04 1357.8051012
-            cdist_sumofsquares_EggaS_matp_weight  2.571764e+03    3.2399384
-            cdist_sumofsquares_EcoS_ldist_weight  6.871618e+03 1004.9290389
-           cdist_sumofsquares_EcoS_aldist_weight  9.937233e+03           20
+           cdist_sumofsquares_EggaS_ldist_weight  1.292751e+04          600
+            cdist_sumofsquares_EggaS_matp_weight  2.571764e+03            2
+            cdist_sumofsquares_EcoS_ldist_weight  6.871618e+03          500
+           cdist_sumofsquares_EcoS_aldist_weight  9.937233e+03           10
       cdist_sumofsquares_TrawlNor_sexdist_weight  2.801587e+02    0.8506735
           cdist_sumofsquares_EcoS_sexdist_weight  8.781064e+02    3.6595778
       cdist_sumofsquares_OtherNor_sexdist_weight  3.193361e+02    1.1572215
      cdist_sumofsquares_EggaN_aldist_male_weight  8.732552e+03   21.6202662
-       cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04   51.5328161
+       cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04           25
            cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04 4806.0988995
           cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04   84.1434913
         cdist_sumofsquares_OtherRus_ldist_weight  4.035618e+04 1104.2867422
@@ -142,8 +142,8 @@ if(set_weights) {
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
  adist_surveyindices_log_Russian_SI_weight        4.720994e+01           20
-    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           30
-  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           30
+    adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           40
+  adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           40
          adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           50
          adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
          adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28           50

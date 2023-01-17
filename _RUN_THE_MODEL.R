@@ -154,7 +154,7 @@ optim_param <- g3_optim(model = tmb_model,
                         params = tmb_param,
                         use_parscale = TRUE,
                         method = 'BFGS',
-                        control = list(maxit = 1000), #,reltol = 1e-5
+                        control = list(maxit = 2000), #,reltol = 1e-5
                         print_status = TRUE
 )
 message("Optimization finished ", Sys.time())
@@ -176,6 +176,10 @@ gadget_plots(optim_fit, path = tmppath, file_type = "html")
 rm(tmppath)
 
 
+## Copy the R scripts used to compile the model
+
+## Save workspace
+save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
 
 #####################################################################
 ## Iterative reweighting and optimization                        ####
