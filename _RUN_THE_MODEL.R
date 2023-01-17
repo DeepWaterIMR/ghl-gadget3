@@ -144,7 +144,8 @@ save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz
 
 if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
-message("Optimization started ", Sys.time())
+time_optim_start <- Sys.time()
+message("Optimization started ", time_optim_start)
 ## g3_optim is a wrapper for stats::optim. It returns the parameter
 ## dataframe with the optimised parameters and includes an attribute with
 ## a summary of the optimisation.
@@ -157,7 +158,19 @@ optim_param <- g3_optim(model = tmb_model,
                         control = list(maxit = 2000), #,reltol = 1e-5
                         print_status = TRUE
 )
-message("Optimization finished ", Sys.time())
+time_optim_end <- Sys.time()
+time_optim <- round(as.numeric(time_optim_end - time_optim_start, units = "mins"), 1)
+message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
+
+## Write the times to a file
+info_file <- file(file.path(base_dir, "run_times.txt"))
+close(info_file)
+cat(
+  c("Optimization:\n",
+    "   started ", as.character(time_optim_start), "\n",
+    "   finished ", as.character(time_optim_end), "\n",
+    "   time ", time_optim, " min", "\n\n"),
+  file = file.path(base_dir, "run_times.txt"), sep = "")
 
 ### Save the model parameters
 
@@ -175,11 +188,16 @@ tmppath <- file.path(getwd(), base_dir, "figures")
 gadget_plots(optim_fit, path = tmppath, file_type = "html")
 rm(tmppath)
 
-
 ## Copy the R scripts used to compile the model
+file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
 
 ## Save workspace
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+
+
+
+
+
 
 #####################################################################
 ## Iterative reweighting and optimization                        ####
@@ -192,7 +210,8 @@ if(run_iterative) {
       data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
 
-  message("Iteration started ", Sys.time())
+  time_iter_start <- Sys.time()
+  message("Iteration started ", time_iter_start)
 
   iter_param <- g3_iterative(
     gd = base_dir,
@@ -209,7 +228,16 @@ if(run_iterative) {
     shortcut = FALSE
   )
 
-  message("Iteration finished ", Sys.time())
+  time_iter_end <- Sys.time()
+  time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
+  message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
+
+  cat(
+    c("Iteration:\n",
+      "   started ", as.character(time_iter_start), "\n",
+      "   finished ", as.character(time_iter_end), "\n",
+      "   time ", time_iter, " min", "\n\n"),
+    file = file.path(base_dir, "run_times.txt"), sep = "", append = TRUE)
 
   ### Save the model parameters
 

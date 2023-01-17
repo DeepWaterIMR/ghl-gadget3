@@ -24,6 +24,7 @@ if(reset_model & dir.exists(base_dir)) {
 if(!dir.exists(base_dir)) {
   dir.create(file.path(base_dir, "data"), recursive = TRUE)
   dir.create(file.path(base_dir, "figures"))
+  dir.create(file.path(base_dir, "scripts"))
   # dir.create(file.path(base_dir, "iterative_reweighting"))
 }
 
