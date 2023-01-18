@@ -134,14 +134,14 @@ if(set_weights) {
       cdist_sumofsquares_OtherNor_sexdist_weight  3.193361e+02    1.1572215
      cdist_sumofsquares_EggaN_aldist_male_weight  8.732552e+03   21.6202662
        cdist_sumofsquares_OtherNor_aldist_weight  1.973580e+04           25
-           cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04 4806.0988995
+           cdist_sumofsquares_EggaN_ldist_weight  2.037149e+04         2400
           cdist_sumofsquares_EggaS_aldist_weight  3.394815e+04   84.1434913
         cdist_sumofsquares_OtherRus_ldist_weight  4.035618e+04 1104.2867422
    cdist_sumofsquares_EggaN_aldist_female_weight  2.479229e+04   21.9512872
       cdist_sumofsquares_TrawlRus_sexdist_weight  4.324776e+02            1
         cdist_sumofsquares_OtherNor_ldist_weight  2.163332e+04  898.2523937
         cdist_sumofsquares_TrawlNor_ldist_weight  1.217407e+04 1426.1293823
- adist_surveyindices_log_Russian_SI_weight        4.720994e+01           20
+ adist_surveyindices_log_RussianS_SI_weight        4.720994e+01           20
     adist_surveyindices_log_EggaN_SI_male_weight  6.489285e+02           40
   adist_surveyindices_log_EggaN_SI_female_weight  6.668592e+02           40
          adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28           50

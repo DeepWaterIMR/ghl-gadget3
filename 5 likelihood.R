@@ -307,13 +307,13 @@ likelihood_actions <- list(
     report = lik_report),
 
   g3l_abundancedistribution(
-    'Russian_SI',
+    'RussianS_SI',
     Russian_SI %>%
       rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = stocks,
     area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(),
+    g3l_distribution_surveyindices_log(beta = 1),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
