@@ -107,13 +107,34 @@ plot.sexr <- function(x, ncol = NULL) {
 }
 
 
-## Maturity ogive
+## Maturity / stock proportions
 
-plot.mat <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)) {
+plot.mat <- function(x, scales = "free_y") {
 
-  x$Length <- as.integer(gsub("len", "", x$length))
+  length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
 
-  if(quarterly) {
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
+
+  if(attr(first_length_group[[1]], "min_open_ended")) {
+    length_groups <- length_groups[-1]
+  }
+
+  step <- attributes(x)$step
+
+  x$min_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+  }))
+
+  x$max_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  x$Length <- rowMeans(x[c("min_length", "max_length")])
+
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
@@ -122,26 +143,61 @@ plot.mat <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4)
   x <- x %>% arrange(Date, maturity_stage, Length)
 
   ggplot(x, aes(x = Length, y = number, color = maturity_stage)) +
+    geom_vline(xintercept = length_groups, color = "grey") +
+    geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+               color = "grey",
+               linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                 "dotted", "solid")) +
+    geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+               color = "grey",
+               linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                 "dotted", "solid")) +
     geom_path() +
-    facet_wrap(~as.character(Date)) +
-    labs(x = "Length (cm)", y = "Count", color = "Stock") +
-    scale_color_manual(values = c("female_imm" = "tomato1", "female_mat" = "tomato4", "male_imm" = "dodgerblue1", "male_mat" = "dodgerblue4")) +
+    facet_wrap(~as.character(Date), scales = scales) +
+    labs(x = "Length (cm)", y = "Number", color = "Stock") +
+    scale_color_manual(
+      values = c("female_imm" = "tomato1", "female_mat" = "tomato4",
+                 "male_imm" = "dodgerblue1", "male_mat" = "dodgerblue4")) +
+    scale_x_continuous(expand = c(0,0.5), n.breaks = 8) +
+    scale_y_continuous(expand = c(0, 0)) +
     theme(legend.position = "bottom")
 }
 
 plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), group_by_sex = FALSE) {
 
-  x <- x %>% complete(crossing(year, step, area, maturity_stage, age, length), fill = list(number = 0))
+  length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
 
-  x$Length <- as.integer(gsub("len", "", x$length))
-  x$Sex <- gsub("\\_.*$", "", x$maturity_stage)
-  x$Stage <- gsub("^.*\\_", "", x$maturity_stage)
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
 
-  if(quarterly) {
+  if(attr(first_length_group[[1]], "min_open_ended")) {
+    length_groups <- length_groups[-1]
+  }
+
+  step <- attributes(x)$step
+
+  x$min_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+  }))
+
+  x$max_length <- unname(sapply(x$length, function(k) {
+    tmp <- attributes(x)$length
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  x$Length <- rowMeans(x[c("min_length", "max_length")])
+
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
   }
+
+  x$Sex <- gsub("\\_.*$", "", x$maturity_stage)
+  x$Stage <- gsub("^.*\\_", "", x$maturity_stage)
+
+  x <- x %>% arrange(Date, maturity_stage, Length)
 
   if(group_by_sex) {
     y <- x %>% group_by(year, step, Date, area, Sex, Length) %>%
@@ -164,10 +220,21 @@ plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
   }
 
   ggplot(y, aes(x = Length, y = value, color = maturity_stage)) +
+    geom_vline(xintercept = length_groups, color = "grey") +
+    geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+               color = "grey",
+               linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                 "dotted", "solid")) +
+    geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+               color = "grey",
+               linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                 "dotted", "solid")) +
     geom_line() +
     facet_wrap(~as.character(Date)) +
     labs(x = "Length (cm)", y = "Proportion", color = "Stock") +
-    scale_color_manual(values = c("female_imm" = "tomato1", "female_mat" = "tomato4", "male_imm" = "dodgerblue1", "male_mat" = "dodgerblue4")) +
+    scale_color_manual(
+      values = c("female_imm" = "tomato1", "female_mat" = "tomato4",
+                 "male_imm" = "dodgerblue1", "male_mat" = "dodgerblue4")) +
     theme(legend.position = "bottom")
 }
 

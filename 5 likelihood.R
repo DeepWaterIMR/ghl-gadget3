@@ -114,7 +114,7 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = list(female_imm, female_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area')),
+    g3l_distribution_sumofsquares(over = c('area','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -124,7 +124,7 @@ likelihood_actions <- list(
     fleets = list(EggaN),
     stocks = list(male_imm, male_mat),
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area')),
+    g3l_distribution_sumofsquares(over = c('area','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -134,7 +134,7 @@ likelihood_actions <- list(
     fleets = list(EggaS),
     stocks = stocks,
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area', 'sex')),
+    g3l_distribution_sumofsquares(over = c('area', 'sex','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
@@ -233,6 +233,32 @@ likelihood_actions <- list(
     g3l_distribution_sumofsquares(over = c('area','length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
+
+  # g3l_catchdistribution(
+  #   'EggaN_matp_females',
+  #   EggaN_mat %>%
+  #     filter(maturity_stage %in% c("female_imm", "female_mat")) %>%
+  #     rename(stock = maturity_stage) %>%
+  #     mutate(stock = paste0("ghl_", stock)),
+  #   fleets = list(EggaN),
+  #   stocks = list(female_imm, female_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area','length')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  #
+  # g3l_catchdistribution(
+  #   'EggaN_matp_males',
+  #   EggaN_mat %>%
+  #     filter(maturity_stage %in% c("male_imm", "male_mat")) %>%
+  #     rename(stock = maturity_stage) %>%
+  #     mutate(stock = paste0("ghl_", stock)),
+  #   fleets = list(EggaN),
+  #   stocks = list(male_imm, male_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area','length')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
 
   g3l_catchdistribution(
     'EggaS_matp',
