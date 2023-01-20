@@ -265,7 +265,27 @@ plot.ldist <- function(x, type = "bar", scales = "free_y") {
 
 # x <- EggaN_adist
 # quarterly = all(names(model_params$timestep_fun) == 1:4); type = "bar"; facet_age = TRUE; free_y = FALSE
-plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), type = "bar", facet_age = FALSE, scales = "fixed", ncol = NULL, color_palette = scales::brewer_pal(palette = "Set1")) {
+plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", ncol = NULL, color_palette = scales::brewer_pal(palette = "Set1")) {
+
+  length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
+
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
+
+  if(attr(first_length_group[[1]], "min_open_ended")) {
+    length_groups <- length_groups[-1]
+  }
+
+  age_groups <- sapply(attributes(x)$age, function(k) attr(k, "min"))
+
+  first_age_group <- attributes(x)$age[1]
+  last_age_group <- attributes(x)$age[length(age_groups)]
+
+  if(!is.null(attr(first_age_group[[1]], "min_open_ended"))) {
+    age_groups <- age_groups[-1]
+  }
+
+  step <- attributes(x)$step
 
   x$min_length <- unname(sapply(x$length, function(k) {
     tmp <- attributes(x)$length
@@ -277,17 +297,21 @@ plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1
     attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
   }))
 
-  width <- unique(x$max_length - x$min_length)
-
   x$Length <- rowMeans(x[c("min_length", "max_length")])
-  x$Age <- as.integer(gsub("age", "", x$age))
-  x$year_class <- factor(x$year - x$Age)
 
-  if(quarterly) {
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
   }
+
+  width <- unique(x$max_length - x$min_length)
+
+  x$Age <- as.integer(gsub("age", "", x$age))
+  x$year_class <- factor(x$year - x$Age)
+
+  x <- x %>% arrange(Date, Age, Length)
+
 
   if(type == "bar") {
 
@@ -296,6 +320,15 @@ plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1
       ggplot(data = x,
              aes(xmin = .data$min_length, xmax = .data$max_length,
                  ymin = 0, ymax = .data$number, fill = factor(.data$year_class))) +
+        geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
+        geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+                   color = "grey",
+                   linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                     "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+                   color = "grey",
+                   linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                     "dotted", "solid"), linewidth = 1/2.13) +
         geom_rect(color = "black") +
         labs(x = "Length (cm)", y = "Number") +
         facet_grid(.data$Age~.data$Date, scales = scales,
@@ -307,19 +340,39 @@ plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1
 
     } else {
 
-      ggplot(data = x, aes(x = .data$Length, y = .data$number, fill = .data$Age)) +
-        geom_col(color = "black") +
-        labs(x = "Length (cm)", y = "Number") +
+      ggplot(data = x,
+             aes(x = .data$Length, y = .data$number, fill = .data$Age)) +
         facet_wrap(~.data$Date, scales = scales, dir = "v", ncol = ncol,
                    labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
+        geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
+        geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+                   color = "grey",
+                   linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                     "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+                   color = "grey",
+                   linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                     "dotted", "solid"), linewidth = 1/2.13) +
+        scale_x_continuous(expand = c(0,0.5), n.breaks = 8) +
+        scale_y_continuous(expand = c(0, 0)) +
+        geom_col(color = "black") +
+        labs(x = "Length (cm)", y = "Number") +
         scale_fill_viridis_c() +
-        coord_cartesian(expand = FALSE) +
         theme(legend.position = "bottom")
     }
   } else {
 
     ggplot(data = x, aes(x = .data$Length, y = .data$number, fill = .data$Age,
                          group = .data$Age)) +
+      geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
+      geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+                 color = "grey",
+                 linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
+      geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+                 color = "grey",
+                 linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
       geom_area(color = "black") +
       labs(x = "Length (cm)", y = "Number") +
       facet_wrap(~.data$Date, scales = scales, dir = "v", ncol = ncol,
@@ -332,9 +385,36 @@ plot.aldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1
 
 ## Age distributions
 
-plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), type = "bar", color_palette = scales::brewer_pal(palette = "Set1"), scales = "fixed", ncol = NULL) {
+plot.adist <- function(x, type = "bar", color_palette = scales::brewer_pal(palette = "Set1"), scales = "fixed", ncol = NULL) {
 
-  x$Age <- as.integer(gsub("age", "", x$age))
+  age_groups <- sapply(attributes(x)$age, function(k) attr(k, "min"))
+
+  first_age_group <- attributes(x)$age[1]
+  last_age_group <- attributes(x)$age[length(age_groups)]
+
+  if(!is.null(attr(first_age_group[[1]], "min_open_ended"))) {
+    age_groups <- age_groups[-1]
+  }
+
+  step <- attributes(x)$step
+
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
+    x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
+  } else {
+    x$Date <- x$year
+  }
+
+  x$min_age <- unname(sapply(x$age, function(k) {
+    tmp <- attributes(x)$age
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "min")
+  }))
+
+  x$max_age <- unname(sapply(x$age, function(k) {
+    tmp <- attributes(x)$age
+    attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
+  }))
+
+  x$Age <- rowMeans(x[c("min_age", "max_age")])
 
   x <- x %>%
     group_by(year,step,area,age,Age) %>%
@@ -344,20 +424,41 @@ plot.adist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
 
   if(type == "bar") {
     ggplot(x, aes(x = Age, y = value, fill = year_class)) +
+      geom_vline(xintercept = age_groups, color = "grey", linewidth = 0.5/2.13) +
+      geom_vline(xintercept = attr(first_age_group[[1]], "min"),
+                 color = "grey",
+                 linetype = ifelse(!is.null(attr(first_age_group[[1]], "min_open_ended")),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
+      geom_vline(xintercept = attr(last_age_group[[1]], "max"),
+                 color = "grey",
+                 linetype = ifelse(attr(last_age_group[[1]], "max_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
       geom_col() +
       facet_wrap(~year, dir = "v", scales = scales, ncol = ncol) +
       scale_fill_manual(values = repeat_palette(nlevels(x$year_class),
                                                 pal = color_palette)) +
-      coord_cartesian(expand = FALSE) +
+      scale_x_continuous(expand = c(0,0.1), n.breaks = 8) +
+      scale_y_continuous(expand = c(0, 0)) +
+      expand_limits(x = 0) +
       labs(x = "Age", y = "Number") +
       theme(legend.position = "none")
   } else {
     ggplot(x %>% group_by(year) %>% mutate(p = value/sum(value)),
            aes(x = Age, y = year, height = 10*p, group = year)) +
+      geom_vline(xintercept = age_groups, color = "grey", linewidth = 0.5/2.13) +
+      geom_vline(xintercept = attr(first_age_group[[1]], "min"),
+                 color = "grey",
+                 linetype = ifelse(!is.null(attr(first_age_group[[1]], "min_open_ended")),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
+      geom_vline(xintercept = attr(last_age_group[[1]], "max"),
+                 color = "grey",
+                 linetype = ifelse(attr(last_age_group[[1]], "max_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
       ggridges::geom_ridgeline(alpha = 0.5, fill = 'darkblue') +
       scale_fill_viridis_c() +
-      coord_cartesian(expand = FALSE) +
-      scale_y_reverse(breaks = seq(1980,2030,2)) +
+      scale_y_reverse(breaks = seq(1980,2030,2), expand = c(0,0)) +
+      scale_x_continuous(expand = c(0,0.1), n.breaks = 8) +
+      expand_limits(x = 0) +
       labs(x = "Age", y = "Year")
   }
 }

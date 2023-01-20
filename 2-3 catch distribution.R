@@ -351,7 +351,7 @@ OtherNor_aldist <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength, by = 5),
+        seq(41, stock_params$male_mat$max_possible_data_length+6, by = 5),
         open_ended = c("upper","lower")
       ),
       sex = mfdb_group(female = 'F', male = 'M')
@@ -380,8 +380,8 @@ OtherNor_aldist <- g3_data(
 # )[[1]]
 #
 png(file.path(base_dir, "figures/OtherNor_aldist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-p1 <- OtherNor_aldist %>% filter(sex == "female") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom") + expand_limits(x = c(attributes(OtherNor_aldist)$age %>% last %>% attributes %>% .$max))
-p2 <- OtherNor_aldist %>% filter(sex == "male") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none") + expand_limits(x = c(attributes(OtherNor_aldist)$age %>% last %>% attributes %>% .$max))
+p1 <- OtherNor_aldist %>% filter(sex == "female") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom")
+p2 <- OtherNor_aldist %>% filter(sex == "male") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none")
 cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), p2), cowplot::get_legend(p1), ncol = 1, rel_heights = c(10,1)) %>% print
 dev.off()
 
@@ -597,28 +597,6 @@ png(file.path(base_dir, "figures/EggaN_ldist.png"), width = pagewidth, height = 
 print(plot.ldist(EggaN_ldist, type = "ggridges"))
 dev.off()
 
-# EggaN_aldist_female <- mfdb_sample_count(
-#   mdb,
-#   cols = c("age", "length"),
-#   params =
-#     list(sampling_type = "ENS",
-#          gear = "BottomTrawls",
-#          year = model_params$year_range[model_params$year_range >= 1996],
-#          sex = "F",
-#          timestep = model_params$timestep_fun,
-#          age = mfdb_interval(
-#            "age", stock_params$minage:stock_params$maxage,
-#            open_ended = c("upper")
-#          ),
-#          length = mfdb_interval(
-#            "len",
-#            seq(stock_params$minlength, stock_params$maxlength,
-#                by = 5),
-#            open_ended = c("upper","lower")
-#          )
-#     )
-# )[[1]]
-
 EggaN_aldist_female <- g3_data(
   nor_survey_aldist %>%
     filter(
@@ -636,8 +614,7 @@ EggaN_aldist_female <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength,
-            by = 5),
+        seq(31, 87, by = 5),
         open_ended = c("upper","lower")
       )
     ),
@@ -646,34 +623,12 @@ EggaN_aldist_female <- g3_data(
 ) %>% rename("number" = "est_n") %>% filter(year != 2007)
 
 png(file.path(base_dir, "figures/EggaN_aldist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-print(plot.aldist(EggaN_aldist_female))
+print(plot.aldist(EggaN_aldist_female, scales = "free_y"))
 dev.off()
 
 png(file.path(base_dir, "figures/EggaN_adist_female.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
 print(plot.adist(EggaN_aldist_female, scales = "free_y", ncol = 1))
 dev.off()
-
-# EggaN_aldist_male <- mfdb_sample_count(
-#   mdb,
-#   cols = c("age", "length"),
-#   params =
-#     list(sampling_type = "ENS",
-#          gear = "BottomTrawls",
-#          year = model_params$year_range[model_params$year_range >= 1996],
-#          sex = "M",
-#          timestep = model_params$timestep_fun,
-#          age = mfdb_interval(
-#            "age", stock_params$minage:stock_params$maxage,
-#            open_ended = c("upper")
-#          ),
-#          length = mfdb_interval(
-#            "len",
-#            seq(stock_params$minlength, stock_params$maxlength,
-#                by = 5),
-#            open_ended = c("upper","lower")
-#          )
-#     )
-# )[[1]]
 
 EggaN_aldist_male <- g3_data(
   nor_survey_aldist %>%
@@ -692,8 +647,7 @@ EggaN_aldist_male <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength,
-            by = 5),
+        seq(31,66, by = 5),
         open_ended = c("upper","lower")
       )
     ),
@@ -801,8 +755,7 @@ EggaS_aldist <- g3_data(
       ),
       length = mfdb_interval(
         "len",
-        seq(stock_params$minlength, stock_params$maxlength,
-            by = 5),
+        seq(31, 87, by = 5),
         open_ended = c("upper","lower")
       ),
       sex = mfdb_group(female = 'F', male = 'M')
@@ -812,8 +765,8 @@ EggaS_aldist <- g3_data(
 ) %>% rename("number" = "est_n")
 
 png(file.path(base_dir, "figures/EggaS_aldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom") + expand_limits(x = c(attributes(EggaS_aldist)$age %>% last %>% attributes %>% .$max))
-p2 <- EggaS_aldist %>% filter(sex == "male") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none") + expand_limits(x = c(attributes(EggaS_aldist)$age %>% last %>% attributes %>% .$max))
+p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom")
+p2 <- EggaS_aldist %>% filter(sex == "male") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none")
 cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), p2), cowplot::get_legend(p1), ncol = 1, rel_heights = c(10,1)) %>% print
 dev.off()
 
@@ -898,6 +851,7 @@ EcoS_aldist <- g3_data(
     filter(
       sampling_type == "ECS",
       !is.na(age),
+      # grepl("new", readingtype)
       readingtype %in% c("new_other_reader", "new_qualified_reader")
     ),
   params =
@@ -908,47 +862,20 @@ EcoS_aldist <- g3_data(
         open_ended = c("upper")
       ),
       length = mfdb_interval(
-        "len",
-        seq(stock_params$minlength, stock_params$maxlength,
-            by = 5),
+        "len", seq(11, 76, by = 5),
         open_ended = c("upper","lower")
       ),
       sex = mfdb_group(female = 'F', male = 'M')
     ),
   method = "est_n",
   verbose = FALSE
-) %>% rename("number" = "est_n")
-
-EcoS_aldist <- g3_data(
-  nor_survey_ldist %>%
-    filter(
-      sampling_type == "ECS",
-      gear %in% c("ShrimpTrawls", "BottomTrawls"),
-      !is.na(age),
-      grepl("new", readingtype),
-      !is.na(sex)
-    ),
-  params =
-    list(
-      year = model_params$year_range,
-      timestep = model_params$timestep_fun,
-      age = mfdb_interval(
-        "age", stock_params$minage:stock_params$maxage,
-        open_ended = c("upper")
-      ),
-      length = mfdb_interval(
-        "len",
-        seq(stock_params$minlength, stock_params$maxlength, by = 5),
-        open_ended = c("upper","lower")
-      ),
-      sex = mfdb_group(female = 'F', male = 'M')
-    ),
-  verbose = FALSE) %>%
+) %>%
+  rename("number" = "est_n") %>%
   filter(!year %in% c(2013, 2014, 2015, 2016, 2017, 2019))
 
-png(file.path(base_dir, "figures/EcoS_aldist.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
-p1 <- EcoS_aldist %>% filter(sex == "female") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom") + expand_limits(x = c(attributes(EcoS_aldist)$age %>% last %>% attributes %>% .$max))
-p2 <- EcoS_aldist %>% filter(sex == "male") %>% plot.aldist(., quarterly = FALSE, facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none") + expand_limits(x = c(attributes(EcoS_aldist)$age %>% last %>% attributes %>% .$max))
+png(file.path(base_dir, "figures/EcoS_aldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
+p1 <- EcoS_aldist %>% filter(sex == "female") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom")
+p2 <- EcoS_aldist %>% filter(sex == "male") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none")
 cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), p2), cowplot::get_legend(p1), ncol = 1, rel_heights = c(10,1)) %>% print
 dev.off()
 
