@@ -313,7 +313,7 @@ fleet_actions <-
         catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('RussianS_catches',
-                            RussianSurvey_catches %>%
+                            RussianS_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))

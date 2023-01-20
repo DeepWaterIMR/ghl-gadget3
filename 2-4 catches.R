@@ -208,13 +208,13 @@ if(reload_data) {
   print(plot.catches(EcoS_catches))
   dev.off()
 
-  RussianSurvey_catches <- structure(
+  RussianS_catches <- structure(
     data.frame(
-      year = unique(RussianSurvey_ldist$year), step = 1, area = 1, total_weight = 1),
+      year = unique(RussianS_ldist$year), step = 1, area = 1, total_weight = 1),
     area_group = mfdb_group(`1` = 1))
 
-  png(file.path(base_dir, "figures/RussianSurvey_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-  print(plot.catches(RussianSurvey_catches))
+  png(file.path(base_dir, "figures/RussianS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(plot.catches(RussianS_catches))
   dev.off()
 
   ## All catches
@@ -231,7 +231,7 @@ if(reload_data) {
 
   # Save
 
-  save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, EggaS_catches, EcoS_catches, RussianSurvey_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
+  save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, EggaS_catches, EcoS_catches, RussianS_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
 
 
   # !reload_data case

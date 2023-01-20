@@ -88,7 +88,7 @@ likelihood_actions <- list(
 
   g3l_catchdistribution(
     'RussianS_ldist',
-    RussianSurvey_ldist,
+    RussianS_ldist,
     fleets = list(RussianS),
     stocks = stocks,
     area_group = c(all = 1),

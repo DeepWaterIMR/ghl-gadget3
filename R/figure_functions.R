@@ -43,7 +43,20 @@ repeat_palette <- function(n, pal = color_palette) {
 
 ## Sex ratio
 
-plot.sexr <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4), ncol = NULL) {
+plot.sexr <- function(x, ncol = NULL) {
+
+  length_groups <- names(attributes(x)$length) %>%
+    gsub("[^0-9.-]", "", .) %>%
+    as.numeric()
+
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
+
+  if(attr(first_length_group[[1]], "min_open_ended")) {
+    length_groups <- length_groups[-1]
+  }
+
+  step <- attributes(x)$step
 
   x$min_length <- unname(sapply(x$length, function(k) {
     tmp <- attributes(x)$length
@@ -55,7 +68,7 @@ plot.sexr <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
     attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
   }))
 
-  if(quarterly) {
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
     x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
   } else {
     x$Date <- x$year
@@ -68,7 +81,16 @@ plot.sexr <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
       summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
       rowwise() %>%
       mutate(length = mean(c(min_length, max_length))),
-    ) +
+  ) +
+    geom_vline(xintercept = length_groups, color = "grey") +
+    geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+               color = "grey",
+               linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                 "dotted", "solid")) +
+    geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+               color = "grey",
+               linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                 "dotted", "solid")) +
     geom_rect(aes(xmin = .data$min_length, xmax = .data$max_length,
                   ymin = 0, ymax = .data$ratio),
               fill = "#FF5F68", color = "black") +
@@ -151,8 +173,18 @@ plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
 
 ## Length distributions
 
-plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4),
-                       type = "bar", free_y = FALSE) {
+plot.ldist <- function(x, type = "bar", scales = "free_y") {
+
+  length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
+
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
+
+  if(attr(first_length_group[[1]], "min_open_ended")) {
+    length_groups <- length_groups[-1]
+  }
+
+  step <- attributes(x)$step
 
   x$min_length <- unname(sapply(x$length, function(k) {
     tmp <- attributes(x)$length
@@ -164,36 +196,66 @@ plot.ldist <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:
     attr(tmp[names(tmp) == gsub("\\+", "", k)][[1]], "max")
   }))
 
+  x$Length <- rowMeans(x[c("min_length", "max_length")])
+
+  if(!length(step) == 1 & all(1:12 %in% step[[1]])) {
+    x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
+  } else {
+    x$Date <- x$year
+  }
+
+  x <- x %>% arrange(Date, Length)
+
   if(type == "bar") {
+
     ggplot(data = x,
            aes(xmin = .data$min_length, xmax = .data$max_length,
                ymin = 0, ymax = .data$number)) +
+      geom_vline(xintercept = length_groups, color = "grey") +
+      geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+                 color = "grey",
+                 linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                   "dotted", "solid")) +
+      geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+                 color = "grey",
+                 linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                   "dotted", "solid")) +
       geom_rect(fill = "grey", color = "black") +
-      labs(x = "Length (cm)", y = "Number") + {
-        if(free_y) {
-          facet_wrap(~.data$year+.data$step, scales = "free_y",
-                     labeller = ggplot2::label_wrap_gen(multi_line=FALSE))
-        } else {
-          facet_wrap(~.data$year+.data$step,
-                     labeller = ggplot2::label_wrap_gen(multi_line=FALSE))
-        }
-      } +
+      labs(x = "Length (cm)", y = "Number") +
+      facet_wrap(~.data$year+.data$step, scales = scales,
+                 labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
       coord_cartesian(expand = FALSE)
+
+  } else if(type == "ggridges") {
+    ggplot2::ggplot(
+      x %>%
+        dplyr::group_by(.data$Date) %>%
+        dplyr::mutate(p = .data$number/sum(.data$number)),
+      ggplot2::aes(x = .data$Length, y = .data$Date, height = 10*.data$p,
+                   group = .data$Date)
+    ) +
+      geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
+      geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+                 color = "grey",
+                 linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
+      geom_vline(xintercept = attr(last_length_group[[1]], "max"),
+                 color = "grey",
+                 linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                                   "dotted", "solid"), linewidth = 1/2.13) +
+      ggridges::geom_ridgeline(fill = 'darkblue', alpha = 0.5, size = 0.5/2.13) +
+      ggplot2::scale_y_reverse(breaks = seq(1900,2050,2), expand = c(0,0.5)) +
+      ggplot2::scale_x_continuous(limits = c(0, attr(last_length_group[[1]], "max")),
+                                  expand = c(0,0.5), n.breaks = 8) +
+      ggplot2::labs(x = "Length", y = "Year", fill = "Stock") +
+      ggplot2::theme_bw() +
+      theme(panel.grid.major.x = element_blank(),
+            panel.grid.minor.x = element_blank())
   } else {
 
-    x$Length <- as.integer(gsub("len", "", x$length))
-
-    if(quarterly) {
-      x$Date <- zoo::as.yearqtr(paste(x$year, x$step, sep = "Q"))
-    } else {
-      x$Date <- x$year
-    }
-
-    x <- x %>% arrange(Date, Length)
-
     ggplot(x, aes(x = Length, y = number, color = step)) +
-    geom_path() +
-      facet_wrap(~year, scales = "free_y", ncol = 4, dir = "v") +
+      geom_path() +
+      facet_wrap(~year, scales = scales, dir = "v") +
       labs(x = "Length (cm)", y = "Count", color = "Timestep") +
       theme(legend.position = "bottom")
   }
@@ -906,7 +968,7 @@ compare_mat_ldist <- function(ldist, mat, aldist = NULL) {
 
   dat <- ldist %>%
     mutate(len = as.numeric(gsub("len", "", length))) %>%
-    dplyr::select(-area, -age) %>%
+    dplyr::select(-area) %>%
     group_by(year, step) %>%
     mutate(maxn = max(number),
            pn = number/maxn,
@@ -993,9 +1055,9 @@ bounded_vec <- g3_native(r = function (x, a, b) {
 
 
 plot_exponentiall50 <- function(length, alpha, l50, base_size = 8) {
-  tibble(l=length, 
-         y=eval(gadget3::g3_suitability_exponentiall50(alpha,l50)[[2]], list(stock__midlen=l))) %>% 
-    ggplot(aes(l,y)) + 
+  tibble(l=length,
+         y=eval(gadget3::g3_suitability_exponentiall50(alpha,l50)[[2]], list(stock__midlen=l))) %>%
+    ggplot(aes(l,y)) +
     geom_line() +
     labs(x = "Length", y = "Suitability") +
     ggplot2::theme_classic(base_size = base_size)
@@ -1004,9 +1066,9 @@ plot_exponentiall50 <- function(length, alpha, l50, base_size = 8) {
 # plot_exponentiall50(1:120, 0.5, 40)
 
 plot_andersen <- function(length, p0, p1, p2, p3, p4, p5, base_size = 8) {
-  tibble(l=length, 
-         y=eval(gadget3::g3_suitability_andersen(p0, p1, p2, p3, p4, p5)[[2]], list(stock__midlen=length))) %>% 
-    ggplot(aes(l,y)) + 
+  tibble(l=length,
+         y=eval(gadget3::g3_suitability_andersen(p0, p1, p2, p3, p4, p5)[[2]], list(stock__midlen=length))) %>%
+    ggplot(aes(l,y)) +
     geom_line() +
     labs(x = "Length", y = "Suitability") +
     ggplot2::theme_classic(base_size = base_size)

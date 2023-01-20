@@ -20,6 +20,111 @@ if(reload_data) {
 # source("R/gadget_data_functions.R")
 source("R/figure_functions.R")
 
+## Function to clean up sex ratio data. Many assumptions...
+clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
+
+  length_groups <- names(attributes(x)$length) %>%
+    gsub("[^0-9.-]", "", .) %>%
+    as.numeric()
+
+  remove <- x %>%
+    group_by(year, step, area) %>%
+    complete(sex, length, fill = list(number = 0)) %>%
+    group_by(year, step, length) %>%
+    summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
+    mutate(Length = as.integer(gsub("len", "", length))) %>%
+    filter((Length <= 50 & ratio > 0.65) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
+    ungroup()
+
+  nasse <- anti_join(x, remove, by = c("year", "step", "length")) %>%
+    mutate(len = as.numeric(gsub("len", "", length)))
+
+  length_groups <- length_groups[length_groups>=nasse %>% filter(number>0) %>% pull(len) %>% min()]
+
+  nasse <- nasse %>%
+    filter(len <= stock_params$male_mat$max_possible_data_length,
+           len >= min(length_groups)) %>%
+    bind_rows(
+      tibble(year = unique(x$year),
+             step = unique(x$step),
+             area = unique(x$area)) %>%
+        tidyr::expand(nesting(year, step, area),
+                      sex = c("female", "male")) %>%
+        tidyr::expand(
+          nesting(year, step, area, sex),
+          length = names(attributes(x)$length)
+          [as.numeric(gsub("[^0-9.-]", "",
+                           names(attributes(x)$length))) >
+              stock_params$male_mat$max_possible_data_length]
+        ) %>%
+        mutate(number = ifelse(sex == "female", 10, 0),
+               len = as.numeric(gsub("len", "", length)))
+    ) %>%
+    group_by(year, step, area) %>%
+    complete(sex, nesting(length, len), fill = list(number = 0)) %>%
+    arrange(year, step, area, sex, len) %>%
+    group_by(year, step, area, length) %>%
+    mutate(n = sum(number), ratio = number[sex == "female"]/n) %>%
+    ungroup()
+
+  nasse <- lapply(nasse %>% split(.$year, .$step, .$area), function(k) {
+    mod <- stats::loess(ratio~len, span= 0.75, data = k, na.action = "na.omit",
+                        control=loess.control(surface="direct"))
+    tmp <- data.frame(
+      year = unique(k$year),
+      step = unique(k$step),
+      area = unique(k$area),
+      sex = c("female", "male")) %>%
+      full_join(
+        data.frame(year = unique(k$year),
+                   len = length_groups),
+        by = "year") %>%
+      arrange(year, step, area, sex, len) %>%
+      mutate(length = paste0("len", len), .before = "len")
+
+    tmp2 <- stats::predict(mod, tmp %>% filter(sex == "female"))
+    tmp2[tmp2 < 0] <- 0
+    tmp2[tmp2 > 1] <- 1
+
+    tmp$pred.ratio <- c(tmp2, 1-tmp2)
+
+    full_join(
+      k, tmp,
+      by = c("year", "step", "area", "sex", "length", "len")) %>%
+      arrange(year, step, area, sex, len) %>%
+      mutate(ratio = ifelse(sex == "male", 1 - ratio, ratio))
+  }) %>%
+    bind_rows() %>%
+    replace_na(list(n = 10)) %>%
+    mutate(pred.number = round(pred.ratio * n, 0))
+
+  if(plot) {
+    print(
+      ggplot(nasse) +
+        geom_point(aes(x = len, y = ratio, color = sex)) +
+        geom_path(aes(x = len, y = pred.ratio, color = sex)) +
+        labs(x = "Length (cm)", y = "Sex ratio (points = data, lines = smoothed)") +
+        facet_wrap(~year)
+    )
+  }
+
+  if(!return_gadget_compatible) {
+    return(nasse)
+  } else {
+    nasse <- nasse %>%
+      dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
+      rename("number" = "pred.number") %>%
+      as.data.frame()
+
+    attributes(nasse) <- c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
+                           attributes(x)[!names(attributes(x)) %in% c("class", "row.names", "names")])
+
+    attributes(nasse)$length <- attributes(nasse)$length[sapply(attributes(nasse)$length, function(k) attributes(k)$min %in% length_groups)]
+
+    return(nasse)
+  }
+}
+
 # Data to by-pass MFDB
 
 nor_survey_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for surveys.rds")
@@ -55,16 +160,12 @@ nor_catch_ldist <- readRDS("../ghl-gadget-data/data/out/Length data for catches.
 
 TrawlNor_ldist <- mfdb::mfdb_sample_count(
   mdb,
-  cols = c("age", "length"),
+  cols = c("length"),
   params =
     list(data_source = "ldist-catches-NOR",
          gear = c("BottomTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "all", c(stock_params$minage, stock_params$maxage),
-           open_ended = c("upper","lower")
-         ),
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
@@ -98,7 +199,7 @@ if(nrow(test) > 0) {
 }
 
 png(file.path(base_dir, "figures/TrawlNor_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
-print(plot.ldist(TrawlNor_ldist, free_y = T))
+print(plot.ldist(TrawlNor_ldist, type = "ggridges"))
 dev.off()
 
 #### Sex ratio
@@ -110,28 +211,21 @@ TrawlNor_sexratio <- mfdb_sample_count(
     data_source = "ldist-catches-NOR",
     gear = c("BottomTrawls", "ShrimpTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
     length =
-      mfdb_interval('len',
-                    seq(stock_params$minlength, stock_params$maxlength,
-                        by = 5*stock_params$dl),
-                    open_ended = c('lower','upper')),
+      mfdb_interval(
+        'len',
+        seq(41, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('lower','upper')),
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]] %>%
   filter(!year %in% c(1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
-remove <- TrawlNor_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length <= 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
-  ungroup()
-
-TrawlNor_sexratio <- anti_join(TrawlNor_sexratio, remove, by = c("year", "step", "length"))
+TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio)
 
 png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(TrawlNor_sexratio))
-
 dev.off()
 
 # AllNorCatches_aldist <- mfdb_sample_count(
@@ -185,16 +279,12 @@ dev.off()
 
 OtherNor_ldist <- mfdb_sample_count(
   mdb,
-  cols = c("age", "length"),
+  cols = c("length"),
   params =
     list(data_source = "ldist-catches-NOR",
          gear = c("Lines", "Gillnets"),
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "all", c(stock_params$minage, stock_params$maxage),
-           open_ended = c("upper","lower")
-         ),
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
@@ -217,7 +307,7 @@ if(nrow(test) > 0) {
 }
 
 png(file.path(base_dir, "figures/OtherNor_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
-print(plot.ldist(OtherNor_ldist, free_y = TRUE))
+print(plot.ldist(OtherNor_ldist, type = "ggridges"))
 dev.off()
 
 #### Sex ratio
@@ -229,24 +319,17 @@ OtherNor_sexratio <- mfdb_sample_count(
     data_source = "ldist-catches-NOR",
     gear = c("Lines", "Gillnets"),
     length =
-      mfdb_interval('len',
-                    seq(stock_params$minlength, stock_params$maxlength,
-                        by = 5*stock_params$dl),
-                    open_ended = c('lower','upper')),
+      mfdb_interval(
+        'len',
+        seq(41, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('lower','upper')),
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
-  ))[[1]] %>% filter(!year %in% c(1985,1991,1992,1994,1995,2011,2012,2013))
+  ))[[1]] %>% filter(!year %in% c(1985,1991,1994,2011,2012)) # add 1992,1995?
 
-remove <- OtherNor_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
-  ungroup()
-
-OtherNor_sexratio <- anti_join(OtherNor_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+OtherNor_sexratio <- clean_sexratio_data(OtherNor_sexratio)
 
 png(file.path(base_dir, "figures/OtherNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(OtherNor_sexratio))
@@ -339,10 +422,6 @@ TrawlRus_ldist <- gadgetutils::g3_data(
     list(
       year = model_params$year_range,
       timestep = model_params$timestep_fun,
-      age = mfdb_interval(
-        "all", c(stock_params$minage, stock_params$maxage),
-        open_ended = c("upper","lower")
-      ),
       length = mfdb_interval(
         "len",
         seq(stock_params$minlength, stock_params$maxlength,
@@ -354,87 +433,25 @@ TrawlRus_ldist <- gadgetutils::g3_data(
   column_names = c(year = "year", step = "step", area = "area"),
   verbose = FALSE) %>%
   filter(!year %in% c(1991, 1993))
-#
-#
-#   tmp <- full_join(
-#     tmp_f %>% rename("f" = "number"),
-#     tmp_m %>% rename("m" = "number")) %>%
-#
-#     group_by(year, step, area, age, length) %>%
-#     summarise(f = sum(f, na.rm = T), m = sum(m, na.rm = T)) %>%
-#     mutate(total)
-#
-#
-#   tmp2 <- attributes(tmp)$length
-#
-#   tmp <- tmp %>%
-#     group_by(year, step, area, age, length) %>%
-#     summarise(number = sum(number)) %>%
-#     ungroup()
-#
-#   attributes(tmp)$length <- tmp2
-#   attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
-#   attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
-#   attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
-#
-#   TrawlRus_ldist_female <- tmp %>%
-#     filter(!year %in% c(1991, 1993))
 
 png(file.path(base_dir, "figures/TrawlRus_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.ldist(TrawlRus_ldist, free_y = T))
+print(plot.ldist(TrawlRus_ldist, type = "ggridges"))
 dev.off()
 
-# png(file.path(base_dir, "figures/TrawlRus_ldist_female.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.ldist(TrawlRus_ldist_female, free_y = T))
-# dev.off()
-
-# test <- TrawlRus_ldist_female %>%
-#   group_by(year, step) %>%
-#   summarise(n = sum(number)) %>%
-#   filter(n < 50)
-
-### Males (combine eventually with females?)
-#
-#
-#   if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
-#     tmp$step <- 1
-#   }
-#
-#   tmp2 <- attributes(tmp)$length
-#
-#   tmp <- tmp %>%
-#     group_by(year, step, area, age, length) %>%
-#     summarise(number = sum(number)) %>%
-#     ungroup()
-#
-#   attributes(tmp)$length <- tmp2
-#   attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
-#   attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
-#   attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
-#
-#   TrawlRus_ldist_male <- tmp %>%
-#     filter(!year %in% c(1991, 1993))
-#
-#   png(file.path(base_dir, "figures/TrawlRus_ldist_male.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-#   print(plot.ldist(TrawlRus_ldist_male, free_y = T))
-#   dev.off()
-
-# test <- TrawlRus_ldist_male %>%
-#   group_by(year, step) %>%
-#   summarise(n = sum(number)) %>%
-#   filter(n < 50)
-
 ### Sex ratio
+
+# tmp <- tmp %>% filter(length >= tmp %>% filter(number>0) %>% pull(length) %>% min())
 
 TrawlRus_sexratio <- g3_data(
   tmp,
   params =
     list(
       length =
-        mfdb_interval('len',
-                      seq(stock_params$minlength, stock_params$maxlength,
-                          by = 5*stock_params$dl),
-                      open_ended = c('lower','upper')),
+        mfdb_interval(
+          'len',
+          seq(41, stock_params$male_mat$max_possible_data_length+6,
+              by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
       sex = mfdb_group(female = 'female', male = 'male'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
@@ -444,20 +461,11 @@ TrawlRus_sexratio <- g3_data(
   verbose = FALSE
 )
 
-remove <- TrawlRus_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.75) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
-  ungroup()
-
-TrawlRus_sexratio <- anti_join(TrawlRus_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+TrawlRus_sexratio <- clean_sexratio_data(TrawlRus_sexratio)
 
 png(file.path(base_dir, "figures/TrawlRus_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(TrawlRus_sexratio))
 dev.off()
-
 
 ## Russian other catches ####
 
@@ -494,37 +502,34 @@ OtherRus_ldist <- gadgetutils::g3_data(
     list(
       year = model_params$year_range,
       timestep = model_params$timestep_fun,
-      age = mfdb_interval(
-        "all", c(stock_params$minage, stock_params$maxage),
-        open_ended = c("upper","lower")
-      ),
-      length = mfdb_interval(
-        "len",
-        seq(stock_params$minlength, stock_params$maxlength,
-            by = 2*stock_params$dl),
-        open_ended = c("upper","lower")
-      )
+      length =
+        mfdb_interval(
+          "len",
+          seq(stock_params$minlength, stock_params$maxlength,
+              by = 2*stock_params$dl),
+          open_ended = c("upper","lower")
+        )
     ),
   method = "number",
   column_names = c(year = "year", step = "step", area = "area"),
   verbose = FALSE) %>%
-   filter(!year %in% c(1995))
+  filter(!year %in% c(1995, 2005))
 
 png(file.path(base_dir, "figures/OtherRus_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.ldist(OtherRus_ldist, free_y = T))
+print(plot.ldist(OtherRus_ldist, type = "ggridges"))
 dev.off()
 
 ### Sex ratio
-
 OtherRus_sexratio <- g3_data(
   tmp,
   params =
     list(
       length =
-        mfdb_interval('len',
-                      seq(stock_params$minlength, stock_params$maxlength,
-                          by = 5*stock_params$dl),
-                      open_ended = c('lower','upper')),
+        mfdb_interval(
+          'len',
+          seq(41, stock_params$male_mat$max_possible_data_length+6,
+              by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
       sex = mfdb_group(female = 'female', male = 'male'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
@@ -532,80 +537,14 @@ OtherRus_sexratio <- g3_data(
   method = "number",
   column_names = c(year = "year", step = "step", area = "area"),
   verbose = FALSE
-)
+) %>%
+  filter(!year %in% c(1995, 2005))
 
-remove <- OtherRus_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((n <= 5 & Length < 50 & ratio > 0.6) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
-  ungroup()
-
-OtherRus_sexratio <- anti_join(OtherRus_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5) %>%
-  filter(year != "2005")
+OtherRus_sexratio <- clean_sexratio_data(OtherRus_sexratio)
 
 png(file.path(base_dir, "figures/OtherRus_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(OtherRus_sexratio))
 dev.off()
-
-### Females (combine eventually with males?)
-#
-# tmp <- readRDS("../ghl-gadget-data/data/out/Russian other ldist female from gadget2.rds")
-#
-# if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
-#   tmp$step <- 1
-# }
-#
-# tmp2 <- attributes(tmp)$length
-#
-# tmp <- tmp %>%
-#   group_by(year, step, area, age, length) %>%
-#   summarise(number = sum(number)) %>%
-#   ungroup()
-#
-# attributes(tmp)$length <- tmp2
-# attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
-# attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
-# attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
-#
-# # plot.ldist(tmp, free_y = T)
-# OtherRus_ldist_female <- tmp %>%
-#   filter(!year %in% c(1995, 2005))
-#
-# png(file.path(base_dir, "figures/OtherRus_ldist_female.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.ldist(OtherRus_ldist_female, free_y = T))
-# dev.off()
-#
-# ### Males (combine eventually with females?)
-#
-# tmp <- readRDS("../ghl-gadget-data/data/out/Russian other ldist male from gadget2.rds")
-#
-# if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
-#   tmp$step <- 1
-# }
-#
-# tmp2 <- attributes(tmp)$length
-#
-# tmp <- tmp %>%
-#   group_by(year, step, area, age, length) %>%
-#   summarise(number = sum(number)) %>%
-#   ungroup()
-#
-# attributes(tmp)$length <- tmp2
-# attributes(tmp)$step <- attributes(TrawlNor_ldist)$step
-# attributes(tmp)$area <- attributes(TrawlNor_ldist)$area
-# attributes(tmp)$age <- attributes(TrawlNor_ldist)$age
-#
-# # plot.ldist(tmp, free_y = T)
-# OtherRus_ldist_male <- tmp %>%
-#   filter(!year %in% c(1995, 2005))
-#
-# png(file.path(base_dir, "figures/OtherRus_ldist_male.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.ldist(OtherRus_ldist_male, free_y = T))
-# dev.off()
-#
-# rm(tmp, tmp2)
 
 ##############
 # Surveys ####
@@ -639,16 +578,12 @@ dev.off()
 
 EggaN_ldist <- mfdb_sample_count(
   mdb,
-  cols = c("age", "length"),
+  cols = c("length"),
   params =
     list(sampling_type = "ENS",
          gear = "BottomTrawls",
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "all", c(stock_params$minage, stock_params$maxage),
-           open_ended = c("upper","lower")
-         ),
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
@@ -659,7 +594,7 @@ EggaN_ldist <- mfdb_sample_count(
 )[[1]] # The Biotic data
 
 png(file.path(base_dir, "figures/EggaN_ldist.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
-print(plot.ldist(EggaN_ldist, free_y = TRUE))
+print(plot.ldist(EggaN_ldist, type = "ggridges"))
 dev.off()
 
 # EggaN_aldist_female <- mfdb_sample_count(
@@ -784,24 +719,17 @@ EggaN_sexratio <- mfdb_sample_count(
     sampling_type = "ENS",
     gear = "BottomTrawls",
     length =
-      mfdb_interval('len',
-                    seq(stock_params$minlength, stock_params$maxlength,
-                        by = 5*stock_params$dl),
-                    open_ended = c('lower','upper')),
+      mfdb_interval(
+        'len',
+        seq(31, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('lower','upper')),
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]]
 
-remove <- EggaN_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9)) %>%
-  ungroup()
-
-EggaN_sexratio <- anti_join(EggaN_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+EggaN_sexratio <- clean_sexratio_data(EggaN_sexratio)
 
 png(file.path(base_dir, "figures/EggaN_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(EggaN_sexratio))
@@ -836,16 +764,12 @@ dev.off()
 
 EggaS_ldist <- mfdb_sample_count(
   mdb,
-  cols = c("age", "length"),
+  cols = c("length"),
   params =
     list(sampling_type = "ESS",
          gear = "BottomTrawls",
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "all", c(stock_params$minage, stock_params$maxage),
-           open_ended = c("upper","lower")
-         ),
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
@@ -856,7 +780,7 @@ EggaS_ldist <- mfdb_sample_count(
 )[[1]]
 
 png(file.path(base_dir, "figures/EggaS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.ldist(EggaS_ldist))
+print(plot.ldist(EggaS_ldist, type = "ggridges"))
 dev.off()
 
 ## Age-length
@@ -927,23 +851,17 @@ EggaS_sexratio <- mfdb_sample_count(
     sampling_type = "ESS",
     gear = "BottomTrawls",
     length =
-      mfdb_interval('len',
-                    seq(stock_params$minlength, stock_params$maxlength,
-                        by = 5*stock_params$dl),
-                    open_ended = c('lower','upper')),
+      mfdb_interval(
+        'len',
+        seq(41, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('lower','upper')),
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]]
 
-remove <- EggaS_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 50 & ratio > 0.65) | (n <= 5 & Length > 70 & ratio < 0.9))
-
-EggaS_sexratio <- anti_join(EggaS_sexratio, remove, by = c("year", "step", "length")) %>%
-  filter(number > 5)
+EggaS_sexratio <- clean_sexratio_data(EggaS_sexratio)
 
 png(file.path(base_dir, "figures/EggaS_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(EggaS_sexratio))
@@ -960,10 +878,6 @@ EcoS_ldist <- mfdb_sample_count(
          gear = "ShrimpTrawls",
          year = model_params$year_range,
          timestep = model_params$timestep_fun,
-         age = mfdb_interval(
-           "all", c(stock_params$minage, stock_params$maxage),
-           open_ended = c("upper","lower")
-         ),
          length = mfdb_interval(
            "len",
            seq(stock_params$minlength, stock_params$maxlength,
@@ -974,7 +888,7 @@ EcoS_ldist <- mfdb_sample_count(
 )[[1]]
 
 png(file.path(base_dir, "figures/EcoS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.ldist(EcoS_ldist, free_y = TRUE))
+print(plot.ldist(EcoS_ldist, type = "ggridges"))
 dev.off()
 
 ## Age-length
@@ -1049,22 +963,18 @@ EcoS_sexratio <- mfdb_sample_count(
     sampling_type = "ECS",
     gear = "ShrimpTrawls",
     length =
-      mfdb_interval('len',
-                    seq(stock_params$minlength, stock_params$maxlength,
-                        by = 5*stock_params$dl),
-                    open_ended = c('lower','upper')),
+      mfdb_interval(
+        'len',
+        seq(21, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('lower','upper')),
     sex = mfdb_group(female = 'F', male = 'M'),
     timestep = model_params$timestep_fun,
     year = model_params$year_range
   ))[[1]]
 
-remove <- EcoS_sexratio %>%
-  group_by(year, step, length) %>%
-  summarise(n = sum(number), ratio = number[sex == "female"]/n) %>%
-  mutate(Length = as.integer(gsub("len", "", length))) %>%
-  filter((Length < 25 & ratio > 0.6) | (Length < 40 & ratio > 0.7) | (n <= 5 & Length > 70 & ratio < 0.9))
 
-EcoS_sexratio <- anti_join(EcoS_sexratio, remove, by = c("year", "step", "length"))
+EcoS_sexratio <- clean_sexratio_data(EcoS_sexratio)
 
 png(file.path(base_dir, "figures/EcoS_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
 print(plot.sexr(EcoS_sexratio))
@@ -1073,27 +983,28 @@ dev.off()
 ######################
 ## Russian survey ####
 
-RussianSurvey_ldist <- readRDS("../ghl-gadget-data/data/out/Russian survey ldist from gadget2.rds")
+RussianS_ldist <- readRDS("../ghl-gadget-data/data/out/Russian survey ldist from gadget2.rds")
 
 if(identical(model_params$timestep_fun, mfdb::mfdb_timestep_yearly)) {
-  RussianSurvey_ldist$step <- 1
+  RussianS_ldist$step <- 1
 }
 
-tmp <- attributes(RussianSurvey_ldist)$length
+tmp <- attributes(RussianS_ldist)$length
 
-RussianSurvey_ldist <- RussianSurvey_ldist %>%
-  group_by(year, step, area, age, length) %>%
+RussianS_ldist <- RussianS_ldist %>%
+  dplyr::select(-age) %>%
+  group_by(year, step, area, length) %>%
   summarise(number = sum(number))
 
-attributes(RussianSurvey_ldist)$length <- tmp
-attributes(RussianSurvey_ldist)$step <- attributes(EggaN_ldist)$step
-attributes(RussianSurvey_ldist)$area <- attributes(EggaN_ldist)$area
-attributes(RussianSurvey_ldist)$age <- attributes(EggaN_ldist)$age
+attributes(RussianS_ldist)$length <- tmp
+attributes(RussianS_ldist)$step <- attributes(EggaN_ldist)$step
+attributes(RussianS_ldist)$area <- attributes(EggaN_ldist)$area
+attributes(RussianS_ldist)$age <- attributes(EggaN_ldist)$age
 
 rm(tmp)
 
-png(file.path(base_dir, "figures/RussianSurvey_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.ldist(RussianSurvey_ldist))
+png(file.path(base_dir, "figures/RussianS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.ldist(RussianS_ldist))
 dev.off()
 
 ############################
@@ -1163,7 +1074,7 @@ EggaN_mat <- EggaN_mat %>%
     (grepl("^female_mat", maturity_stage) &
        len > stock_params$female_mat$min_possible_data_length) |
       (grepl("^female_imm", maturity_stage) &
-         len <stock_params$female_imm$max_possible_data_length) |
+         len < stock_params$female_imm$max_possible_data_length) |
       (grepl("^male_mat", maturity_stage) &
          len > stock_params$male_mat$min_possible_data_length) |
       (grepl("^male_imm", maturity_stage) &
@@ -1182,7 +1093,7 @@ if(!is.na(stock_params$force_even_stock_distribution_length)) {
                       maturity_stage = c("female_imm", "male_imm")) %>%
         mutate(age = unique(EggaN_mat$age)) %>%
         tidyr::expand(
-          nesting(year, step, area, maturity_stage, age),
+          nesting(year, step, area, maturity_stage),
           length =
             names(
               mfdb_interval(
@@ -1193,7 +1104,7 @@ if(!is.na(stock_params$force_even_stock_distribution_length)) {
         mutate(number = 1,
                len = as.numeric(gsub("len", "", length)))
     ) %>%
-    arrange(year, step, area, maturity_stage, age, len)
+    arrange(year, step, area, maturity_stage, len)
 }
 
 EggaN_mat <- EggaN_mat %>% dplyr::select(-len)
@@ -1324,7 +1235,7 @@ dev.off()
 ###########
 # Save ####
 
-save(TrawlNor_ldist, TrawlNor_sexratio, OtherNor_ldist, OtherNor_sexratio, OtherNor_aldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, EggaN_mat, EggaS_ldist, EggaS_aldist, EggaS_sexratio, EggaS_mat, EcoS_ldist, EcoS_aldist, EcoS_sexratio, RussianSurvey_ldist, TrawlRus_ldist, TrawlRus_sexratio, OtherRus_ldist, OtherRus_sexratio, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
+save(TrawlNor_ldist, TrawlNor_sexratio, OtherNor_ldist, OtherNor_sexratio, OtherNor_aldist, EggaN_ldist, EggaN_aldist_female, EggaN_aldist_male, EggaN_mat, EggaS_ldist, EggaS_aldist, EggaS_sexratio, EggaS_mat, EcoS_ldist, EcoS_aldist, EcoS_sexratio, RussianS_ldist, TrawlRus_ldist, TrawlRus_sexratio, OtherRus_ldist, OtherRus_sexratio, file = file.path(base_dir, "data/Catch distributions to Gadget.rda"))
 
 ## !reload_data case
 } else {
