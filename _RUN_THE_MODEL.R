@@ -233,7 +233,7 @@ if(run_iterative) {
       ),
     use_parscale = TRUE,
     control = list(maxit = 1000),
-    cv_floor = 0.05,
+    cv_floor = 1/4e-3, 
     shortcut = FALSE
   )
   

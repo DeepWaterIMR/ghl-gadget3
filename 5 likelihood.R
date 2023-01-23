@@ -328,7 +328,7 @@ likelihood_actions <- list(
     fleets = list(),
     stocks = list(male_imm, female_imm),
     area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(beta = 1),
+    g3l_distribution_surveyindices_log(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
