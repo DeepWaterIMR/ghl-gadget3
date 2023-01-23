@@ -302,6 +302,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_abundancedistribution(
+  #   'EcoS_SI',
+  #   EcoS_SI,
+  #   fleets = list(),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_surveyindices_log(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   g3l_abundancedistribution(
     'Juv_SI_1',
     Juv_SI_1,
