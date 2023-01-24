@@ -169,7 +169,11 @@ cat(
   c("Optimization:\n",
     "   started ", as.character(time_optim_start), "\n",
     "   finished ", as.character(time_optim_end), "\n",
-    "   time ", time_optim, " min", "\n\n"),
+    "   time ", time_optim, " min", "\n",
+    "   method: ", attributes(optim_param)$summary$method, "\n",
+    "   convergence: ", attributes(optim_param)$summary$convergence, "\n",
+    "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
+    "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
   file = file.path(base_dir, "run_times.txt"), sep = "")
 
 ### Save the model parameters
