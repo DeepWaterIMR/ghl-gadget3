@@ -239,6 +239,8 @@ if(reload_data) {
     Russian_SI$step <- 1
   }
 
+  Russian_SI <- Russian_SI %>% filter(year %in% model_params$year_range)
+  
   attributes(Russian_SI)$step <- attributes(EggaN_SI_female)$step
   attributes(Russian_SI)$area <- attributes(EggaN_SI_female)$area
   attributes(Russian_SI)$year <- stats::setNames(
