@@ -28,6 +28,9 @@ EggaS <- g3_fleet(c("EggaS", "survey")) %>%
 EcoS <- g3_fleet(c("EcoS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
+# WinterS <- g3_fleet(c("WinterS", "survey")) %>%
+#   g3s_livesonareas(areas[c('1')])
+
 RussianS <- g3_fleet(c("RussianS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
