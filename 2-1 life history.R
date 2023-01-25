@@ -29,6 +29,11 @@ if(reload_data) {
     "../ghl-gadget-data/data/out/Initial ldist data.csv",
     col_types = cols())
 
+  init_sigma$ms <- init_sigma$ms*0.4
+  # init_sigma[init_sigma$age == 1, "ms"] <- 2
+  # init_sigma[init_sigma$age == 2, "ms"] <- 3
+  
+  
   #############################
   # Save the required data ####
 
