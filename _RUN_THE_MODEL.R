@@ -121,7 +121,7 @@ source("6 initial parameters.R")
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
-# result <- model(tmb_param$value)
+result <- model(tmb_param$value)
 # result[[1]]
 
 # fit_init <- gadget3:::g3_fit(model,tmb_param)
@@ -139,6 +139,7 @@ source("6 initial parameters.R")
 model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
+save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
 
 ## Optimize model parameters
 
@@ -237,7 +238,7 @@ if(run_iterative) {
       ),
     use_parscale = TRUE,
     control = list(maxit = 1000),
-    cv_floor = 1/4e-3, 
+    cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
     shortcut = FALSE
   )
   
