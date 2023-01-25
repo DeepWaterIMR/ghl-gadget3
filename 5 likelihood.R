@@ -86,6 +86,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_catchdistribution(
+  #   'WinterS_ldist',
+  #   WinterS_ldist,
+  #   fleets = list(WinterS),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   g3l_catchdistribution(
     'RussianS_ldist',
     RussianS_ldist,

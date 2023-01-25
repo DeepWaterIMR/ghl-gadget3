@@ -802,6 +802,32 @@ if(reload_data) {
   print(plot.sexr(EcoS_sexratio))
   dev.off()
 
+  #####################
+  ## Winter survey ####
+
+  WinterS_ldist <- mfdb_sample_count(
+    mdb,
+    cols = c("length"),
+    params =
+      list(sampling_type = "WNS",
+           gear = "ShrimpTrawls",
+           population = c("H100-300","H300-400","I100-300","I300-400","I400-500",
+                          "J100-300","J300-400","L100-300","L300-400"),
+           year = model_params$year_range[!model_params$year_range %in% "1980"],
+           timestep = model_params$timestep_fun,
+           length = mfdb_interval(
+             "len",
+             seq(stock_params$minlength, stock_params$maxlength,
+                 by = 2*stock_params$dl),
+             open_ended = c("upper","lower")
+           )
+      )
+  )[[1]]
+
+  png(file.path(base_dir, "figures/WinterS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(WinterS_ldist, type = "ggridges"))
+  dev.off()
+
   ######################
   ## Russian survey ####
 
