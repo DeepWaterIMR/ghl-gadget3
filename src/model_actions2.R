@@ -58,9 +58,9 @@ init_abund2 <- function(imm,
       
       ## Proportion mature at age
       p_age <- g3a_initial_ageprop(gadget3::g3_parameterized('mat_initial_alpha',
-                                                             by_stock = allstocks),
+                                                             by_stock = comp_id),
                                    gadget3::g3_parameterized('mat_initial_a50',
-                                                             by_stock = allstocks))
+                                                             by_stock = comp_id))
       
       ## Invert for immature stock
       if(!mature){
