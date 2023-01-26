@@ -28,8 +28,8 @@ EggaS <- g3_fleet(c("EggaS", "survey")) %>%
 EcoS <- g3_fleet(c("EcoS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
-# WinterS <- g3_fleet(c("WinterS", "survey")) %>%
-#   g3s_livesonareas(areas[c('1')])
+WinterS <- g3_fleet(c("WinterS", "survey")) %>%
+  g3s_livesonareas(areas[c('1')])
 
 RussianS <- g3_fleet(c("RussianS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
@@ -293,6 +293,30 @@ fleet_actions <-
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('EcoS_catches',
                             EcoS_catches %>%
+                              mutate(area = 1, # Check this hack out
+                                     step = as.numeric(step),
+                                     year = as.numeric(year))
+            )
+          )
+      ),
+    WinterS %>%
+      g3a_predate_fleet(
+        stocks,
+        suitabilities =
+          stocks %>%
+          set_names(.,map(.,'name')) %>%
+          map(function(x)
+            g3_suitability_exponentiall50(
+              g3_parameterized('winter.survey.alpha', by_stock = c('species', 'sex'),
+                               exponentiate = exponentiate_fleets),
+              g3_parameterized('winter.survey.l50', by_stock = c('species', 'sex'),
+                               exponentiate = exponentiate_fleets)
+            )
+          ),
+        catchability_f =
+          g3a_predate_catchability_totalfleet(
+            g3_timeareadata('WinterS_catches',
+                            WinterS_catches %>%
                               mutate(area = 1, # Check this hack out
                                      step = as.numeric(step),
                                      year = as.numeric(year))

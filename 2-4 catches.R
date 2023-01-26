@@ -208,6 +208,15 @@ if(reload_data) {
   print(plot.catches(EcoS_catches))
   dev.off()
 
+  WinterS_catches <- structure(
+    data.frame(
+      year = unique(WinterS_ldist$year), step = 1, area = 1, total_weight = 1),
+    area_group = mfdb_group(`1` = 1))
+  
+  png(file.path(base_dir, "figures/WinterS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(plot.catches(WinterS_catches))
+  dev.off()
+  
   RussianS_catches <- structure(
     data.frame(
       year = unique(RussianS_ldist$year), step = 1, area = 1, total_weight = 1),
