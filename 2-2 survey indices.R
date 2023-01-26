@@ -233,30 +233,30 @@ if(reload_data) {
 
   ## Winter survey index ####
 
-  WinterS_SI <- read.csv('../ghl-gadget-data/data/out/Winter survey index.csv') %>%
-    dplyr::select(startyear, bm) %>%
-    rename("year" = "startyear", "weight" = "bm") %>%
-    add_g3_attributes(
-      params = list(
-        year = model_params$year_range,
-        step = model_params$timestep_fun,
-        length = mfdb_interval(
-          "all", c(40, stock_params$maxlength),
-          open_ended = c("upper"))
-      )
-    )
-
-  p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
-    geom_col() +
-    labs(y = "Survey index biomass (1000 t)", x = "Year") +
-    scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
-    scale_y_continuous(expand = c(0, 0))
-
-  ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
-         plot = print(p), width = pagewidth, height = pagewidth*0.7,
-         units = "mm", bg = "white")
-
-  rm(p)
+  # WinterS_SI <- read.csv('../ghl-gadget-data/data/out/Winter survey index.csv') %>%
+  #   dplyr::select(startyear, bm) %>%
+  #   rename("year" = "startyear", "weight" = "bm") %>%
+  #   add_g3_attributes(
+  #     params = list(
+  #       year = model_params$year_range,
+  #       step = model_params$timestep_fun,
+  #       length = mfdb_interval(
+  #         "all", c(40, stock_params$maxlength),
+  #         open_ended = c("upper"))
+  #     )
+  #   )
+  # 
+  # p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
+  #   geom_col() +
+  #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
+  #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+  #   scale_y_continuous(expand = c(0, 0))
+  # 
+  # ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
+  #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
+  #        units = "mm", bg = "white")
+  # 
+  # rm(p)
 
   ## Russian survey index ####
 
