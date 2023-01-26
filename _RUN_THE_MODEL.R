@@ -54,7 +54,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-  
+
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -69,7 +69,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-    
+
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -209,21 +209,21 @@ save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress =
 ## Running this part takes a long time (3-10 hours on a server)  ####
 
 if(run_iterative) {
-  
+
   if(set_weights) {
     tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
       data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
-  
+
   time_iter_start <- Sys.time()
   message("Iteration started ", time_iter_start)
-  
+
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
     model = tmb_model,
     params.in = tmb_param,
-    grouping = 
+    grouping =
       list(SI_EggaN = c('log_EggaN_SI_female',
                         'log_EggaN_SI_male'),
            SI_Juv = c('log_Juv_SI_1',
@@ -241,30 +241,30 @@ if(run_iterative) {
     cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
     shortcut = FALSE
   )
-  
+
   time_iter_end <- Sys.time()
   time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
   message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
-  
+
   cat(
     c("Iteration:\n",
       "   started ", as.character(time_iter_start), "\n",
       "   finished ", as.character(time_iter_end), "\n",
       "   time ", time_iter, " min", "\n\n"),
     file = file.path(base_dir, "run_times.txt"), sep = "", append = TRUE)
-  
+
   ### Save the model parameters
-  
+
   write.csv(as.data.frame(iter_param), file = file.path(base_dir, "data/Iterated TMB parameters.csv"))
   save(iter_param, file = file.path(base_dir, "data/Iterated TMB parameters.rda"), compress = "xz")
-  
+
   ### Plots
-  
+
   iter_fit <- g3_fit(model, iter_param)
   save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-  
+
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
-  
+
   tmppath <- file.path(getwd(), base_dir, "figures")
   make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
   rm(tmppath)

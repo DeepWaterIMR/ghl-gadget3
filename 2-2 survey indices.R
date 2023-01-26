@@ -23,7 +23,7 @@
 
 if(reload_data) {
 
-  ## Norwegian Slope Survey in Autumn (EggaNor)
+  ## Norwegian Slope Survey in Autumn (EggaNor) ####
 
   EggaN_SI_as_biomass_index <- TRUE # Switch to shift between abundance and biomass indices for EggaN
 
@@ -116,7 +116,7 @@ if(reload_data) {
   print(p)
   dev.off()
 
-  # Barents Sea Ecosystem Survey (BESS) index excluding the juvenile indices below
+  # Barents Sea Ecosystem Survey (BESS) index excluding the juvenile indices below ####
 
   EcoS_SI_as_biomass_index <- TRUE # Switch to shift between abundance and biomass indices for EggaN
 
@@ -162,7 +162,7 @@ if(reload_data) {
       y = ifelse(EcoS_SI_as_biomass_index,
                  "Survey index biomass (kt)",
                  "Survey index abundance (millions)"),
-         x = "Year") +
+      x = "Year") +
     scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
     scale_y_continuous(expand = c(0, 0))
 
@@ -170,7 +170,7 @@ if(reload_data) {
   print(p)
   dev.off()
 
-  ## Juvenile indices from Barents Sea Ecosystem Survey data (BESS)
+  ## Juvenile indices from Barents Sea Ecosystem Survey data (BESS) ####
 
   Juv_SI_1 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
@@ -231,7 +231,34 @@ if(reload_data) {
   print(p)
   dev.off()
 
-  ## Russian survey index
+  ## Winter survey index ####
+
+  WinterS_SI <- read.csv('../ghl-gadget-data/data/out/Winter survey index.csv') %>%
+    dplyr::select(startyear, bm) %>%
+    rename("year" = "startyear", "weight" = "bm") %>%
+    add_g3_attributes(
+      params = list(
+        year = model_params$year_range,
+        step = model_params$timestep_fun,
+        length = mfdb_interval(
+          "all", c(40, stock_params$maxlength),
+          open_ended = c("upper"))
+      )
+    )
+
+  p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
+    geom_col() +
+    labs(y = "Survey index biomass (1000 t)", x = "Year") +
+    scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+    scale_y_continuous(expand = c(0, 0))
+
+  ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
+         plot = print(p), width = pagewidth, height = pagewidth*0.7,
+         units = "mm", bg = "white")
+
+  rm(p)
+
+  ## Russian survey index ####
 
   Russian_SI <- read.csv('../ghl-gadget-data/data/out/Russian survey index from gadget2.csv')
 
@@ -240,7 +267,7 @@ if(reload_data) {
   }
 
   Russian_SI <- Russian_SI %>% filter(year %in% model_params$year_range)
-  
+
   attributes(Russian_SI)$step <- attributes(EggaN_SI_female)$step
   attributes(Russian_SI)$area <- attributes(EggaN_SI_female)$area
   attributes(Russian_SI)$year <- stats::setNames(
@@ -270,13 +297,14 @@ if(reload_data) {
          units = "mm", bg = "white")
 
   rm(p)
-  ## Save
+
+  ## Save ####
 
   save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3, EcoS_SI,
        Russian_SI, file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
-  ### Plot all
+  ### Plot all ####
 
   p <- dplyr::bind_rows(
     EggaN_SI_female %>%

@@ -352,6 +352,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_abundancedistribution(
+  #   'WinterS_SI',
+  #   WinterS_SI,
+  #   fleets = list(),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_surveyindices_log(beta = 1),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   g3l_abundancedistribution(
     'RussianS_SI',
     Russian_SI %>%
