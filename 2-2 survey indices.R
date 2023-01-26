@@ -245,17 +245,17 @@ if(reload_data) {
   #         open_ended = c("upper"))
   #     )
   #   )
-  # 
+  #
   # p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
   #   geom_col() +
   #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
   #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
   #   scale_y_continuous(expand = c(0, 0))
-  # 
+  #
   # ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
   #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
   #        units = "mm", bg = "white")
-  # 
+  #
   # rm(p)
 
   ## Russian survey index ####
@@ -298,10 +298,38 @@ if(reload_data) {
 
   rm(p)
 
+  ## Russian CPUE index ####
+
+  # Rus_CPUE_SI <- read.csv('../ghl-gadget-data/data/in/Russian CPUE index from Elvar.csv') %>%
+  #   rename("weight" = "cpue") %>%
+  #   filter(year %in% model_params$year_range) %>%
+  #   add_g3_attributes(
+  #     params = list(
+  #       year = model_params$year_range,
+  #       step = model_params$timestep_fun,
+  #       length = mfdb_interval(
+  #         "all", c(40, stock_params$maxlength),
+  #         open_ended = c("upper"))
+  #     )
+  #   )
+  #
+  # p <- ggplot(Rus_CPUE_SI, aes(x = year, y = weight)) +
+  #   geom_col() +
+  #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
+  #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+  #   scale_y_continuous(expand = c(0, 0))
+  #
+  # ggsave(filename = file.path(base_dir, "figures/Russian_CPUE_index.png"),
+  #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
+  #        units = "mm", bg = "white")
+  #
+  # rm(p)
+
   ## Save ####
 
-  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3, EcoS_SI,
-       Russian_SI, file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
+  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3,
+       EcoS_SI, Russian_SI, # WinterS_SI, Rus_CPUE_SI,
+       file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
   ### Plot all ####

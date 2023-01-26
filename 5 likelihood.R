@@ -373,6 +373,15 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_abundancedistribution(
+  #   'Rus_CPUE_SI',
+  #   Rus_CPUE_SI,
+  #   fleets = list(),
+  #   stocks = stocks,
+  #   g3l_distribution_surveyindices_log(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   list()
 
 )
