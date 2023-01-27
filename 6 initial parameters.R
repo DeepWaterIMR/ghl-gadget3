@@ -10,6 +10,14 @@
 actions <- c(
   time_actions,
   stock_actions,
+  # list(
+  #   g3l_random_walk(
+  #     'growth',
+  #     substitute(log(avoid_zero(x)),
+  #                list(x = g3_parameterized('ghl.K', by_year = TRUE))),
+  #     weight = g3_parameterized('rnd_weight', scale = -1),
+  #     sigma_f = g3_parameterized('ghl_K_sigma'))
+  # ),
   fleet_actions,
   likelihood_actions)
 
@@ -31,15 +39,17 @@ tmb_param <- attr(tmb_model, "parameter_template")
 tmb_param <-
   tmb_param %>%
   g3_init_guess('\\.rec', 1e5, 0.1, 1e6, 1) %>%
-  g3_init_guess('\\.init', 1e5, 0.1, 1e6, 1) %>%
+  g3_init_guess('\\.init', 1, 0.1, 1e6, 0) %>%
   g3_init_guess('recl', 14, 12, 20, 1) %>%
   g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
   g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
-  g3_init_guess('init.scalar', 10, 1, 100, 1) %>%
+  g3_init_guess('init.scalar', 5e4, 1, 1e5, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
+  # g3_init_guess('ghl_K_sigma', 0.2, 0, 1, 0) %>%
+  # g3_init_guess('rnd_weight', 1, 1, 100, 0) %>%
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('prop_mat0', 0.1, 0, 1, 1) %>%
   g3_init_guess('B0', 1e5, 1, 1e7, 1) %>%
@@ -173,6 +183,10 @@ if(force_bound_params) {
   model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }
+
+### Rearrange parameters to follow the model order (fixed a bug that occurs sometimes)
+
+tmb_param <- tmb_param[match(names(attr(model,'parameter_template')), tmb_param$switch),]
 
 ## Write the parameters to a csv file
 

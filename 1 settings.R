@@ -66,13 +66,13 @@ stock_params$maxlengthgroupgrowth <-
                         mfdb::mfdb_timestep_yearly)) {20} else {15}
 
 stock_params$male_imm$minage <- 1
-stock_params$male_imm$maxage <- 10
+stock_params$male_imm$maxage <- 20
 stock_params$male_imm$minlength <- 1
-stock_params$male_imm$maxlength <- 60
+stock_params$male_imm$maxlength <- 65
 stock_params$male_imm$max_possible_data_length <- 60 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
 
 stock_params$female_imm$minage <- 1
-stock_params$female_imm$maxage <- 10
+stock_params$female_imm$maxage <- 20
 stock_params$female_imm$minlength <- 1
 stock_params$female_imm$maxlength <- 90
 stock_params$female_imm$max_possible_data_length <- 75 # This parameter is used to filter maturity data to smooth maturity proportions going into likelihood.
