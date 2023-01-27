@@ -188,6 +188,12 @@ if(force_bound_params) {
 
 tmb_param <- tmb_param[match(names(attr(model,'parameter_template')), tmb_param$switch),]
 
+### Set initial population sd to same than recl.sd
+
+if(!tmb_param[grep('rec.sd', tmb_param$switch),"optimise"]) {
+  init_sigma[init_sigma$age == 1, "ms"] <- unname(unlist(tmb_param[grep('rec.sd', tmb_param$switch),]$value))
+}
+
 ## Write the parameters to a csv file
 
 write.csv(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.csv"), row.names = FALSE)
