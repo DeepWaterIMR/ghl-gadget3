@@ -17,7 +17,7 @@ init_abund2 <- function(
   g3a_initial_ageprop <- function(alpha, a50){
     gadget3:::f_substitute(
       ~bounded(-1*alpha*(age - a50),0,1),
-      list(alpha = alpha, a50 = a5?ge0))
+      list(alpha = alpha, a50 = a50))
   }
   
   ## ---------------------------------------------------------------------------

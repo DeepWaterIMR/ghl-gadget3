@@ -8,6 +8,8 @@
 
 ## Source or list custom functions used within the script
 
+source("R/model_actions2.R")
+
 ## ---------------------------
 
 ## Read data
@@ -63,7 +65,7 @@ stocks <- list(female_imm,female_mat,male_imm,male_mat)
 ## Compile stock actions ####
 
 ## Immature stock actions
-female_imm_actions <- model_actions(
+female_imm_actions <- model_actions2(
   imm = female_imm,
   mat = female_mat,
   mlgg = stock_params$maxlengthgroupgrowth,
@@ -75,10 +77,11 @@ female_imm_actions <- model_actions(
   init_mode = setup_options$initial_abund_mode,
   # tv_params = c('recl'),
   # by_age_params = c('m'),
+  allstocks = stocks,
   exp_params = c('init.f')
   )
 
-male_imm_actions <- model_actions(
+male_imm_actions <- model_actions2(
   imm = male_imm,
   mat = male_mat,
   mlgg = stock_params$maxlengthgroupgrowth,
@@ -90,11 +93,12 @@ male_imm_actions <- model_actions(
   init_mode = setup_options$initial_abund_mode,
   # tv_params = c('recl'),
   # by_age_params = c('m'),
+  allstocks = stocks,
   exp_params = c('init.f')
   )
 
 ## Mature stock actions
-female_mat_actions <- model_actions(
+female_mat_actions <- model_actions2(
   imm = female_imm,
   mat = female_mat,
   mlgg = stock_params$maxlengthgroupgrowth,
@@ -106,10 +110,11 @@ female_mat_actions <- model_actions(
   init_mode = setup_options$initial_abund_mode,
   # tv_params = c('recl'),
   # by_age_params = c('m'),
+  allstocks = stocks,
   exp_params = c('init.f')
   )
 
-male_mat_actions <- model_actions(
+male_mat_actions <- model_actions2(
   imm = male_imm,
   mat = male_mat,
   mlgg = stock_params$maxlengthgroupgrowth,
@@ -121,6 +126,7 @@ male_mat_actions <- model_actions(
   init_mode = setup_options$initial_abund_mode,
   # tv_params = c('recl'),
   # by_age_params = c('m'),
+  allstocks = stocks,
   exp_params = c('init.f')
   )
 
