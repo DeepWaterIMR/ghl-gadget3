@@ -11,6 +11,16 @@
 ##
 ## ---------------------------
 
+## You can only the model in one session / folder (computer) simultanously
+## To run in terminal through screen on Eucleia, do:
+# screen -S gadgetrun
+# /software/R-4.2.1/bin/R
+# setwd("ghl-gadget3")
+# source("_RUN_THE_MODEL.R", echo = TRUE)
+# Ctrl-a-d # to detach (close and let the process run)
+# screen -r gadgetrun # to reattach (look into the process)
+## Remember not to start another run in Rstudio server while the screen session is running
+
 ## Source the run first script
 
 if(exists("mdb")) mfdb::mfdb_disconnect(mdb)
