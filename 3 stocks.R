@@ -73,9 +73,9 @@ female_imm_actions <- model_actions(
   rec_scalar_id = stocks,
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('init.f'),
-  tv_params = c('recl')
-  # by_age_params = c('m')
+  # tv_params = c('recl'),
+  # by_age_params = c('m'),
+  exp_params = c('init.f')
   )
 
 male_imm_actions <- model_actions(
@@ -88,9 +88,9 @@ male_imm_actions <- model_actions(
   rec_scalar_id = stocks,
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('init.f'),
-  tv_params = c('recl')
-  # by_age_params = c('m')
+  # tv_params = c('recl'),
+  # by_age_params = c('m'),
+  exp_params = c('init.f')
   )
 
 ## Mature stock actions
@@ -104,9 +104,9 @@ female_mat_actions <- model_actions(
   rec_scalar_id = stocks,
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('init.f'),
-  tv_params = c('recl')
-  # by_age_params = c('m')
+  # tv_params = c('recl'),
+  # by_age_params = c('m'),
+  exp_params = c('init.f')
   )
 
 male_mat_actions <- model_actions(
@@ -119,9 +119,9 @@ male_mat_actions <- model_actions(
   rec_scalar_id = stocks,
   parametric_sd = FALSE,
   init_mode = setup_options$initial_abund_mode,
-  exp_params = c('init.f'),
-  tv_params = c('recl')
-  # by_age_params = c('m')
+  # tv_params = c('recl'),
+  # by_age_params = c('m'),
+  exp_params = c('init.f')
   )
 
 ## Combine stock actions
