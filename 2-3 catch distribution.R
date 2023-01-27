@@ -818,7 +818,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 2*stock_params$dl),
+                 by = 5*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
