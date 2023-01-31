@@ -364,8 +364,8 @@ if(reload_data) {
       dplyr::select(-total_weight),
     Rus_CPUE_SI %>%
       dplyr::mutate(index = "Rus_CPUE_SI",
-                    p = number/max(number)) %>%
-      dplyr::select(-number)
+                    p = weight/max(weight)) %>%
+      dplyr::select(-weight)
   ) %>%
     ggplot(aes(x = year, y = p, color = index)) +
     geom_line() +
