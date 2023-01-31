@@ -123,7 +123,7 @@ clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
 
   nasse <- bind_rows(nasse, tmp %>% mutate(len = as.numeric(gsub("len", "", length))))
 
-## Immature males
+  ## Immature males
 
   tmp <- tibble(year = unique(x$year),
                 step = unique(x$step),
@@ -247,6 +247,22 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
     mutate(len = as.numeric(gsub("len", "", length)))
 
   length_groups <- length_groups[length_groups>=nasse %>% filter(number>0) %>% pull(len) %>% min()]
+  first_length_group <- attributes(x)$length[1]
+  last_length_group <- attributes(x)$length[length(length_groups)]
+
+  if(!is.null(attr(first_length_group[[1]], "min_open_ended"))) {
+    if(!min(nasse$len) %in% length_groups) {
+      length_groups <- c(min(nasse$len), length_groups)
+      names(length_groups)[names(length_groups) == ""] <- paste0("len", length_groups[names(length_groups) == ""])
+    }
+  }
+
+  if(!is.null(attr(last_length_group[[1]], "max_open_ended"))) {
+    if(!max(nasse$len) %in% length_groups) {
+      length_groups <- c(length_groups, max(nasse$len))
+      names(length_groups)[names(length_groups) == ""] <- paste0("len", length_groups[names(length_groups) == ""])
+    }
+  }
 
   nasse <- nasse %>%
     filter(len <= stock_params$male_mat$max_possible_data_length,
@@ -275,6 +291,7 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
     ungroup()
 
   nasse <- lapply(nasse %>% split(list(.$year, .$step, .$area)), function(k) {
+
     mod <- stats::loess(ratio~len, span= 0.75, data = k, na.action = "na.omit",
                         control=loess.control(surface="direct"))
     tmp <- data.frame(
@@ -290,29 +307,55 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
       mutate(length = paste0("len", len), .before = "len")
 
     tmp2 <- stats::predict(mod, tmp %>% filter(sex == "female"))
+
     tmp2[tmp2 < 0] <- 0
     tmp2[tmp2 > 1] <- 1
 
     tmp$pred.ratio <- c(tmp2, 1-tmp2)
 
-    full_join(
+    tmp$pred.ratio[tmp$len > stock_params$male_mat$max_possible_data_length & tmp$sex == "female"] <- 1
+    tmp$pred.ratio[tmp$len > stock_params$male_mat$max_possible_data_length & tmp$sex == "male"] <- 0
+
+    out <- full_join(
       k, tmp,
       by = c("year", "step", "area", "sex", "length", "len")) %>%
       arrange(year, step, area, sex, len) %>%
       mutate(ratio = ifelse(sex == "male", 1 - ratio, ratio))
+
+    if(nrow(out[out$len ==  length_groups[[1]] & is.na(out$ratio),]) > 0) {
+
+      if(out[out$len ==  length_groups[[1]] & out$sex == "female",]$pred.ratio >
+         out[out$len ==  length_groups[[2]] & out$sex == "female",]$pred.ratio) {
+        out[out$len ==  length_groups[[1]] & out$sex == "female",]$pred.ratio <-
+          out[out$len ==  length_groups[[2]] & out$sex == "female",]$pred.ratio
+
+        out[out$len ==  length_groups[[1]] & out$sex == "male",]$pred.ratio <-
+          1 - out[out$len ==  length_groups[[2]] & out$sex == "female",]$pred.ratio
+      }
+    }
+
+    out
   }) %>%
-    bind_rows() %>%
-    replace_na(list(n = 10)) %>%
-    mutate(pred.number = round(pred.ratio * n, 0))
+    bind_rows()
+
+  nasse <- nasse %>%
+    mutate(
+      n = ifelse(is.na(n), 10, ifelse(n == 0, 10, n)),
+      pred.number = round(pred.ratio * n, 0)
+    )
+
 
   if(plot) {
-    print(
-      ggplot(nasse) +
-        geom_point(aes(x = len, y = ratio, color = sex)) +
-        geom_path(aes(x = len, y = pred.ratio, color = sex)) +
-        labs(x = "Length (cm)", y = "Sex ratio (points = data, lines = smoothed)") +
-        facet_wrap(~year)
-    )
+
+    plot <- ggplot(nasse) +
+          geom_point(aes(x = len, y = ratio, color = sex)) +
+          geom_path(aes(x = len, y = pred.ratio, color = sex)) +
+          labs(x = "Length (cm)", y = "Sex ratio (points = data, lines = smoothed)") +
+          facet_wrap(~year)
+
+
+    suppressWarnings(print(plot))
+
   }
 
   if(!return_gadget_compatible) {

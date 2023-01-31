@@ -170,7 +170,7 @@ plot.matp <- function(x, quarterly = all(names(model_params$timestep_fun) == 1:4
   first_length_group <- attributes(x)$length[1]
   last_length_group <- attributes(x)$length[length(length_groups)]
 
-  if(attr(first_length_group[[1]], "min_open_ended")) {
+  if(!is.null(attr(first_length_group[[1]], "min_open_ended"))) {
     length_groups <- length_groups[-1]
   }
 

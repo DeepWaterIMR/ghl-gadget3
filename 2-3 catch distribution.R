@@ -109,7 +109,7 @@ if(reload_data) {
       length =
         mfdb_interval(
           'len',
-          seq(41, stock_params$male_mat$max_possible_data_length+6,
+          seq(46, stock_params$male_mat$max_possible_data_length+6,
               by = 5*stock_params$dl),
           open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
@@ -217,7 +217,7 @@ if(reload_data) {
       length =
         mfdb_interval(
           'len',
-          seq(41, stock_params$male_mat$max_possible_data_length+6,
+          seq(46, stock_params$male_mat$max_possible_data_length+6,
               by = 5*stock_params$dl),
           open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
@@ -339,13 +339,13 @@ if(reload_data) {
   # tmp <- tmp %>% filter(length >= tmp %>% filter(number>0) %>% pull(length) %>% min())
 
   TrawlRus_sexratio <- g3_data(
-    tmp,
+    tmp %>% filter(length >= 36),
     params =
       list(
         length =
           mfdb_interval(
             'len',
-            seq(41, stock_params$male_mat$max_possible_data_length+6,
+            seq(36, stock_params$male_mat$max_possible_data_length+6,
                 by = 5*stock_params$dl),
             open_ended = c('upper')),
         sex = mfdb_group(female = 'female', male = 'male'),
@@ -353,8 +353,7 @@ if(reload_data) {
         year = model_params$year_range
       ),
     method = "number",
-    column_names = c(year = "year", step = "step", area = "area"),
-    verbose = FALSE
+    column_names = c(year = "year", step = "step", area = "area")
   )
 
   TrawlRus_sexratio <- clean_sexratio_data(TrawlRus_sexratio)
@@ -417,13 +416,13 @@ if(reload_data) {
 
   ### Sex ratio
   OtherRus_sexratio <- g3_data(
-    tmp,
+    tmp %>% filter(length >= 36),
     params =
       list(
         length =
           mfdb_interval(
             'len',
-            seq(41, stock_params$male_mat$max_possible_data_length+6,
+            seq(36, stock_params$male_mat$max_possible_data_length+6,
                 by = 5*stock_params$dl),
             open_ended = c('upper')),
         sex = mfdb_group(female = 'female', male = 'male'),
