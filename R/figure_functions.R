@@ -52,7 +52,7 @@ plot.sexr <- function(x, ncol = NULL) {
   first_length_group <- attributes(x)$length[1]
   last_length_group <- attributes(x)$length[length(length_groups)]
 
-  if(attr(first_length_group[[1]], "min_open_ended")) {
+  if(!is.null(attr(first_length_group[[1]], "min_open_ended"))) {
     length_groups <- length_groups[-1]
   }
 
@@ -85,11 +85,11 @@ plot.sexr <- function(x, ncol = NULL) {
     geom_vline(xintercept = length_groups, color = "grey") +
     geom_vline(xintercept = attr(first_length_group[[1]], "min"),
                color = "grey",
-               linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
+               linetype = ifelse(!is.null(attr(first_length_group[[1]], "min_open_ended")),
                                  "dotted", "solid")) +
     geom_vline(xintercept = attr(last_length_group[[1]], "max"),
                color = "grey",
-               linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+               linetype = ifelse(!is.null(attr(last_length_group[[1]], "max_open_ended")),
                                  "dotted", "solid")) +
     geom_rect(aes(xmin = .data$min_length, xmax = .data$max_length,
                   ymin = 0, ymax = .data$ratio),
