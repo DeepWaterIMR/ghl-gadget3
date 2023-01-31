@@ -128,10 +128,7 @@ if(reload_data) {
         population = grep("^O|^X",
                           tbl(mdb$db, "population") %>% select(name) %>% pull(),
                           invert = TRUE, value = TRUE),
-        length = mfdb_interval(
-          "all", c(28, stock_params$maxlength),
-          open_ended = c("upper")
-        ),
+        length = mfdb_interval("all", c(28, 65)),
         timestep = model_params$timestep_fun,
         year = model_params$year_range[model_params$year_range != "2014"])
     )[[1]]
@@ -143,10 +140,7 @@ if(reload_data) {
         population = grep("^O|^X",
                           tbl(mdb$db, "population") %>% select(name) %>% pull(),
                           invert = TRUE, value = TRUE),
-        length = mfdb_interval(
-          "all", c(28, stock_params$maxlength),
-          open_ended = c("upper")
-        ),
+        length = mfdb_interval("all", c(28, 65)),
         timestep = model_params$timestep_fun,
         year = model_params$year_range[model_params$year_range != "2014"])
     )[[1]]
@@ -196,22 +190,23 @@ if(reload_data) {
       year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
 
-  Juv_SI_3 <- mfdb_sample_count(
-    mdb = mdb, cols = c("length"),
-    params = list(
-      data_source = "BESS-index-abundance",
-      population = grep("^O|^X",
-                        tbl(mdb$db, "population") %>% select(name) %>% pull(),
-                        invert = TRUE, value = TRUE),
-      length = mfdb_interval("len", c(28,35)),
-      timestep = model_params$timestep_fun,
-      year = model_params$year_range[model_params$year_range != "2014"])
-  )[[1]]
+  # Juv_SI_3 <- mfdb_sample_count(
+  #   mdb = mdb, cols = c("length"),
+  #   params = list(
+  #     data_source = "BESS-index-abundance",
+  #     population = grep("^O|^X",
+  #                       tbl(mdb$db, "population") %>% select(name) %>% pull(),
+  #                       invert = TRUE, value = TRUE),
+  #     length = mfdb_interval("len", c(28,35)),
+  #     timestep = model_params$timestep_fun,
+  #     year = model_params$year_range[model_params$year_range != "2014"])
+  # )[[1]]
 
 
   p <- bind_rows(Juv_SI_1 %>% mutate(length = "Juv_SI_1 (10-17 cm)"),
-                 Juv_SI_2 %>% mutate(length = "Juv_SI_2 (18-27 cm)"),
-                 Juv_SI_3 %>% mutate(length = "Juv_SI_3 (28-35 cm)")) %>%
+                 Juv_SI_2 %>% mutate(length = "Juv_SI_2 (18-27 cm)")
+                 # Juv_SI_3 %>% mutate(length = "Juv_SI_3 (28-35 cm)")
+                 ) %>%
     ggplot(., aes(x = year, y = number/1e6)) +
     geom_col() +
     facet_wrap(~length, scales = "free_y", ncol = 1) +
@@ -245,17 +240,17 @@ if(reload_data) {
   #         open_ended = c("upper"))
   #     )
   #   )
-  #
+  # 
   # p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
   #   geom_col() +
   #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
   #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
   #   scale_y_continuous(expand = c(0, 0))
-  #
+  # 
   # ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
   #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
   #        units = "mm", bg = "white")
-  #
+  # 
   # rm(p)
 
   ## Russian survey index ####
@@ -300,35 +295,35 @@ if(reload_data) {
 
   ## Russian CPUE index ####
 
-  # Rus_CPUE_SI <- read.csv('../ghl-gadget-data/data/in/Russian CPUE index from Elvar.csv') %>%
-  #   rename("weight" = "cpue") %>%
-  #   filter(year %in% model_params$year_range) %>%
-  #   add_g3_attributes(
-  #     params = list(
-  #       year = model_params$year_range,
-  #       step = model_params$timestep_fun,
-  #       length = mfdb_interval(
-  #         "all", c(40, stock_params$maxlength),
-  #         open_ended = c("upper"))
-  #     )
-  #   )
-  #
-  # p <- ggplot(Rus_CPUE_SI, aes(x = year, y = weight)) +
-  #   geom_col() +
-  #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
-  #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
-  #   scale_y_continuous(expand = c(0, 0))
-  #
-  # ggsave(filename = file.path(base_dir, "figures/Russian_CPUE_index.png"),
-  #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
-  #        units = "mm", bg = "white")
-  #
-  # rm(p)
+  Rus_CPUE_SI <- read.csv('../ghl-gadget-data/data/in/Russian CPUE index from Elvar.csv') %>%
+    rename("weight" = "cpue") %>%
+    filter(year %in% model_params$year_range[model_params$year_range > 1980]) %>%
+    add_g3_attributes(
+      params = list(
+        year = model_params$year_range,
+        step = model_params$timestep_fun,
+        length = mfdb_interval(
+          "all", c(40, stock_params$maxlength),
+          open_ended = c("upper"))
+      )
+    )
+
+  p <- ggplot(Rus_CPUE_SI, aes(x = year, y = weight)) +
+    geom_col() +
+    labs(y = "Survey index biomass (1000 t)", x = "Year") +
+    scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+    scale_y_continuous(expand = c(0, 0))
+
+  ggsave(filename = file.path(base_dir, "figures/Russian_CPUE_index.png"),
+         plot = print(p), width = pagewidth, height = pagewidth*0.7,
+         units = "mm", bg = "white")
+
+  rm(p)
 
   ## Save ####
 
-  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, Juv_SI_3,
-       EcoS_SI, Russian_SI, # WinterS_SI, Rus_CPUE_SI,
+  save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, # Juv_SI_3,
+       EcoS_SI, Russian_SI, Rus_CPUE_SI, # WinterS_SI, 
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
@@ -353,10 +348,10 @@ if(reload_data) {
       dplyr::mutate(index = "Juv_SI_2",
                     p = number/max(number)) %>%
       dplyr::select(-number),
-    Juv_SI_3 %>%
-      dplyr::mutate(index = "Juv_SI_3",
-                    p = number/max(number)) %>%
-      dplyr::select(-number),
+    # Juv_SI_3 %>%
+    #   dplyr::mutate(index = "Juv_SI_3",
+    #                 p = number/max(number)) %>%
+    #   dplyr::select(-number),
     EcoS_SI %>%
       mutate(value = if(EcoS_SI_as_biomass_index) total_weight else number) %>%
       dplyr::mutate(index = "EcoS_SI",
@@ -366,7 +361,11 @@ if(reload_data) {
       dplyr::mutate(step = as.character(step),
                     index = "Russian_SI",
                     p = total_weight/max(total_weight)) %>%
-      dplyr::select(-total_weight)
+      dplyr::select(-total_weight),
+    Rus_CPUE_SI %>%
+      dplyr::mutate(index = "Rus_CPUE_SI",
+                    p = number/max(number)) %>%
+      dplyr::select(-number)
   ) %>%
     ggplot(aes(x = year, y = p, color = index)) +
     geom_line() +
