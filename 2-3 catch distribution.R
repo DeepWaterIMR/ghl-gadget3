@@ -111,7 +111,7 @@ if(reload_data) {
           'len',
           seq(41, stock_params$male_mat$max_possible_data_length+6,
               by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
+          open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
@@ -219,7 +219,7 @@ if(reload_data) {
           'len',
           seq(41, stock_params$male_mat$max_possible_data_length+6,
               by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
+          open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
@@ -283,7 +283,7 @@ if(reload_data) {
 
   rm(p1, p2)
 
-  ## Russian trawl catches ####
+  ## TrawlRus ####
 
   tmp_f <- readRDS("../ghl-gadget-data/data/out/Russian trawl ldist female from gadget2.rds")
   tmp_m <- readRDS("../ghl-gadget-data/data/out/Russian trawl ldist male from gadget2.rds")
@@ -347,7 +347,7 @@ if(reload_data) {
             'len',
             seq(41, stock_params$male_mat$max_possible_data_length+6,
                 by = 5*stock_params$dl),
-            open_ended = c('lower','upper')),
+            open_ended = c('upper')),
         sex = mfdb_group(female = 'female', male = 'male'),
         timestep = model_params$timestep_fun,
         year = model_params$year_range
@@ -363,7 +363,7 @@ if(reload_data) {
   print(plot.sexr(TrawlRus_sexratio))
   dev.off()
 
-  ## Russian other catches ####
+  ## OtherRus ####
 
   tmp_f <- readRDS("../ghl-gadget-data/data/out/Russian other ldist female from gadget2.rds")
   tmp_m <- readRDS("../ghl-gadget-data/data/out/Russian other ldist male from gadget2.rds")
@@ -425,7 +425,7 @@ if(reload_data) {
             'len',
             seq(41, stock_params$male_mat$max_possible_data_length+6,
                 by = 5*stock_params$dl),
-            open_ended = c('lower','upper')),
+            open_ended = c('upper')),
         sex = mfdb_group(female = 'female', male = 'male'),
         timestep = model_params$timestep_fun,
         year = model_params$year_range
@@ -572,7 +572,7 @@ if(reload_data) {
         mfdb_interval(
           'len', seq(31, stock_params$male_mat$max_possible_data_length+6,
                      by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
+          open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
@@ -703,7 +703,7 @@ if(reload_data) {
           'len',
           seq(41, stock_params$male_mat$max_possible_data_length+6,
               by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
+          open_ended = c('upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
