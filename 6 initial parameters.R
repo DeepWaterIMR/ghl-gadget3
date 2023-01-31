@@ -132,37 +132,38 @@ if(set_weights) {
   # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
     '                                           comp approx_weight       weight
-           cdist_sumofsquares_EggaN_matp_weight  1.956147e+03   190.551874
-     cdist_sumofsquares_OtherRus_sexdist_weight  5.340361e+02     4.802193
-       cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03 10909.863753
-          cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03  3555.459831
-           cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   102.321286
-           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  2248.741029
-          cdist_sumofsquares_EcoS_aldist_weight  6.293601e+03    37.718309
-     cdist_sumofsquares_TrawlNor_sexdist_weight  4.182257e+02     4.757358
-         cdist_sumofsquares_EcoS_sexdist_weight  7.657063e+02    82.985234
-     cdist_sumofsquares_OtherNor_sexdist_weight  3.042224e+02     5.845288
-    cdist_sumofsquares_EggaN_aldist_male_weight  4.432070e+03   120.219041
-       cdist_sumofsquares_RussianS_ldist_weight  8.133667e+02  3036.614969
-      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   228.943364
-          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  7724.634317
-         cdist_sumofsquares_EggaS_aldist_weight  1.679424e+04    55.519817
-       cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04   14445.2639
-  cdist_sumofsquares_EggaN_aldist_female_weight  1.361760e+04    71.814261
-     cdist_sumofsquares_TrawlRus_sexdist_weight  3.167435e+02     5.266938
-       cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03 10261.845575
-       cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03  6797.157089
- adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   272.474998
+        cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02   2063.05731
+       cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03   8566.50148
+         cdist_sumofsquares_EcoS_sexdist_weight  7.657063e+02    79.891048
+     cdist_sumofsquares_TrawlRus_sexdist_weight  3.167435e+02     5.239877
+           cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   110.713012
+     cdist_sumofsquares_TrawlNor_sexdist_weight  4.182257e+02      6.18449
+         cdist_sumofsquares_EggaS_aldist_weight  1.679424e+04    99.653304
+     cdist_sumofsquares_OtherNor_sexdist_weight  3.042224e+02     4.599592
+           cdist_sumofsquares_EggaN_matp_weight  1.956147e+03    62.390436
+    cdist_sumofsquares_EggaN_aldist_male_weight  4.432070e+03    66.416772
+           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  1909.941899
+       cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03  6084.900457
+      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   131.165312
+       cdist_sumofsquares_RussianS_ldist_weight  8.133667e+02  2135.693173
+          cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03  4605.458423
+       cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 15080.982359
+     cdist_sumofsquares_OtherRus_sexdist_weight  5.340361e+02     4.858735
+  cdist_sumofsquares_EggaN_aldist_female_weight  1.361760e+04    63.267759
+          cdist_sumofsquares_EcoS_aldist_weight  6.293601e+03    38.500523
+          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  2202.304757
+       cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03  9881.281771
         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28         2500
-        adist_surveyindices_log_Juv_SI_3_weight  1.739155e+28            0
-     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01    44.142828
-   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02         2500
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28         2500
-        cdist_sumofsquares_WinterS_ldist_weight  1.                   1000
+   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02          500
+         adist_surveyindices_log_EcoS_SI_weight  1.517135e+28           30
+     adist_surveyindices_log_Rus_CPUE_SI_weight  1.216945e+32           30
+ adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03          500
+     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01           40
   '
   ), header = TRUE)
 
-  tmb_param[match(tmp_weights$comp,tmb_param$switch), "value"] <- tmp_weights$weight
+  tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <- tmp_weights$weight
 }
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
