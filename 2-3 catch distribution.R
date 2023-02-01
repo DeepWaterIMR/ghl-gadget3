@@ -745,14 +745,20 @@ if(reload_data) {
       filter(
         sampling_type == "ECS",
         !is.na(age),
+        !is.na(sex),
         # grepl("new", readingtype)
         readingtype %in% c("new_other_reader", "new_qualified_reader")
-      ),
+      ) %>%
+      mutate(sex = ifelse(
+        sex == "U" & length_bin %in% c("(0,5]", "(5,10]", "(10,15]", "(15,20]", "(20,25]"),
+                          sample(c("F", "M"), replace = TRUE), sex),
+        age = ifelse(age == 0, 1, age)) %>%
+      filter(sex %in% c("F", "M")),
     params =
       list(
         timestep = model_params$timestep_fun,
         age = mfdb_interval(
-          "age", stock_params$minage:stock_params$maxage,
+          "age", 0:stock_params$maxage,
           open_ended = c("upper")
         ),
         length = mfdb_interval(
