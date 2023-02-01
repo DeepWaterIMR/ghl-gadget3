@@ -178,6 +178,13 @@ if(reload_data) {
       year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
 
+  Juv_SI_1$year <- Juv_SI_1$year - 1
+  
+  attributes(Juv_SI_1)$year <- stats::setNames(
+    lapply(unique(Juv_SI_1$year), function(k) k),
+    lapply(unique(Juv_SI_1$year), function(k) k)
+  )
+  
   Juv_SI_2 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
     params = list(
@@ -190,6 +197,14 @@ if(reload_data) {
       year = model_params$year_range[model_params$year_range != "2014"])
   )[[1]]
 
+  Juv_SI_2$year <- Juv_SI_2$year - 1
+  
+  attributes(Juv_SI_2)$year <- stats::setNames(
+    lapply(unique(Juv_SI_2$year), function(k) k),
+    lapply(unique(Juv_SI_2$year), function(k) k)
+  )
+  
+  
   # Juv_SI_3 <- mfdb_sample_count(
   #   mdb = mdb, cols = c("length"),
   #   params = list(
