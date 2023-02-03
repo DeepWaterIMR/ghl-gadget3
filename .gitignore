@@ -8,3 +8,5 @@
 ~$*
 README.html
 model_files*
+._.DS_Store
+*.DS_Store
