@@ -167,7 +167,7 @@ if(set_weights) {
   param_order <- names(tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"])
 
   tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <-
-    tmp_weights[na.omit(match(param_order, tmp_weights$comp)), "comp"]
+    tmp_weights[na.omit(match(param_order, tmp_weights$comp)), "weight"]
 
 }
 
