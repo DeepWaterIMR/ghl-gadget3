@@ -239,7 +239,6 @@ if(reload_data) {
       !is.na(sex)),
     params =
       list(
-        year = model_params$year_range,
         timestep = model_params$timestep_fun,
         age = mfdb_interval(
           "age", stock_params$minage:stock_params$maxage,
@@ -751,7 +750,7 @@ if(reload_data) {
       ) %>%
       mutate(sex = ifelse(
         sex == "U" & length_bin %in% c("(0,5]", "(5,10]", "(10,15]", "(15,20]", "(20,25]"),
-                          sample(c("F", "M"), replace = TRUE), sex),
+        sample(c("F", "M"), replace = TRUE), sex),
         age = ifelse(age == 0, 1, age)) %>%
       filter(sex %in% c("F", "M")),
     params =
@@ -842,17 +841,38 @@ if(reload_data) {
     RussianS_ldist$step <- 1
   }
 
-  tmp <- attributes(RussianS_ldist)$length
+  RussianS_ldist <- RussianS_ldist %>% dplyr::select(-area, -age)
+
+  RussianS_ldist$length <- gsub("^len-0-30$", "len-26-30", RussianS_ldist$length)
+
+  RussianS_ldist <- bind_rows(
+    RussianS_ldist,
+    RussianS_ldist %>%
+      dplyr::select(year, step) %>%
+      dplyr::distinct() %>%
+      mutate(length = "len-0-25",
+             number = 0)
+  ) %>%
+    dplyr::arrange(year, step, length) %>%
+    dplyr::mutate(
+      length = strsplit(gsub("\\+", "", length), "-"),
+      length = paste0(sapply(length, "[", 1), sapply(length, "[", 2)))
+
+  tmp <- gsub("len", "", RussianS_ldist$length) %>%
+    as.numeric() %>%
+    unique() %>%
+    c(., c(115)) %>%
+    sort()
 
   RussianS_ldist <- RussianS_ldist %>%
-    dplyr::select(-age) %>%
-    group_by(year, step, area, length) %>%
-    summarise(number = sum(number))
-
-  attributes(RussianS_ldist)$length <- tmp
-  attributes(RussianS_ldist)$step <- attributes(EggaN_ldist)$step
-  attributes(RussianS_ldist)$area <- attributes(EggaN_ldist)$area
-  attributes(RussianS_ldist)$age <- attributes(EggaN_ldist)$age
+    add_g3_attributes(
+      params = list(
+        step = model_params$timestep_fun,
+        length = mfdb_interval(
+          "len", tmp, open_ended = c("lower", "upper")
+        )
+      )
+    )
 
   rm(tmp)
 
