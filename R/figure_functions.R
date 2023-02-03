@@ -1222,16 +1222,18 @@ bounded_vec <- g3_native(r = function (x, a, b) {
 
 
 
-plot_exponentiall50 <- function(length, alpha, l50, base_size = 8) {
-  tibble(l=length,
-         y=eval(gadget3::g3_suitability_exponentiall50(alpha,l50)[[2]], list(stock__midlen=l))) %>%
-    ggplot(aes(l,y)) +
-    geom_line() +
-    labs(x = "Length", y = "Suitability") +
-    ggplot2::theme_classic(base_size = base_size)
-}
 
-# plot_exponentiall50(1:120, 0.5, 40)
+
+# plot_suitability(fit, fleets = "EcoS_survey") +
+#   g3plot_exponentiall50(
+#     1:120,
+#     alpha = unlist(fit$params$value[grep("eco.survey.alpha", fit$params$switch)]),
+#     l50 = unlist(fit$params$value[grep("eco.survey.l50", fit$params$switch)]),
+#     add = T)
+
+
+
+# g3plot_exponentiall50(1:120, c(0.5, 0.2), c(40, 50))
 
 plot_andersen <- function(length, p0, p1, p2, p3, p4, p5, base_size = 8) {
   tibble(l=length,

@@ -63,8 +63,8 @@ tmb_param <-
   g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   g3_init_guess('\\.M', 0.12, 0.001, 1, 0) %>%
-  g3_init_guess('_male_imm.M', 0.24, 0.001, 1, 0) %>%
-  g3_init_guess('_male_mat.M', 0.24, 0.001, 1, 0) %>%
+  g3_init_guess('_male_imm.M', 0.2, 0.001, 1, 0) %>%
+  g3_init_guess('_male_mat.M', 0.2, 0.001, 1, 0) %>%
   g3_init_guess('_female.mat_initial_alpha', 0.260, 0.001, 3, 1) %>%
   g3_init_guess('_male.mat_initial_alpha', 0.376, 0.001, 3, 1) %>%
   g3_init_guess('_female.mat_initial_a50', 12.98, 3, 25, 0) %>%
@@ -163,7 +163,12 @@ if(set_weights) {
   '
   ), header = TRUE)
 
-  tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <- tmp_weights$weight
+
+  param_order <- names(tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"])
+
+  tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <-
+    tmp_weights[na.omit(match(param_order, tmp_weights$comp)), "comp"]
+
 }
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
