@@ -247,7 +247,7 @@ if(reload_data) {
         length = mfdb_interval(
           "len",
           seq(41, stock_params$male_mat$max_possible_data_length+6, by = 5),
-          open_ended = c("upper","lower")
+          open_ended = c("upper")
         ),
         sex = mfdb_group(female = 'F', male = 'M')
       ),
@@ -508,8 +508,8 @@ if(reload_data) {
         ),
         length = mfdb_interval(
           "len",
-          seq(31, 87, by = 5),
-          open_ended = c("upper","lower")
+          seq(26, 87, by = 5),
+          open_ended = c("upper")
         )
       ),
     method = "est_n",
@@ -541,8 +541,8 @@ if(reload_data) {
         ),
         length = mfdb_interval(
           "len",
-          seq(31,66, by = 5),
-          open_ended = c("upper","lower")
+          seq(26,66, by = 5),
+          open_ended = c("upper")
         )
       ),
     method = "est_n",
@@ -648,8 +648,8 @@ if(reload_data) {
         ),
         length = mfdb_interval(
           "len",
-          seq(31, 87, by = 5),
-          open_ended = c("upper","lower")
+          seq(26, 87, by = 5),
+          open_ended = c("upper")
         ),
         sex = mfdb_group(female = 'F', male = 'M')
       ),

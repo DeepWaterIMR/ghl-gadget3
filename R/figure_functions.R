@@ -330,8 +330,7 @@ plot.ldist <- function(x, type = "bar", scales = "free_y") {
 
 ## Age-Length distributions
 
-# x <- EggaN_adist
-# quarterly = all(names(model_params$timestep_fun) == 1:4); type = "bar"; facet_age = TRUE; free_y = FALSE
+# type = "bar"; facet_age = FALSE; scales = "fixed"; ncol = NULL; color_palette = scales::brewer_pal(palette = "Set1")
 plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", ncol = NULL, color_palette = scales::brewer_pal(palette = "Set1")) {
 
   length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
@@ -339,7 +338,7 @@ plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", nc
   first_length_group <- attributes(x)$length[1]
   last_length_group <- attributes(x)$length[length(length_groups)]
 
-  if(attr(first_length_group[[1]], "min_open_ended")) {
+  if(!is.null(attr(first_length_group[[1]], "min_open_ended"))) {
     length_groups <- length_groups[-1]
   }
 
@@ -388,14 +387,19 @@ plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", nc
              aes(xmin = .data$min_length, xmax = .data$max_length,
                  ymin = 0, ymax = .data$number, fill = factor(.data$year_class))) +
         geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
-        geom_vline(xintercept = attr(first_length_group[[1]], "min"),
-                   color = "grey",
-                   linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
-                                     "dotted", "solid"), linewidth = 1/2.13) +
-        geom_vline(xintercept = attr(last_length_group[[1]], "max"),
-                   color = "grey",
-                   linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
-                                     "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(
+          xintercept =
+            attr(first_length_group[[1]], "min"),
+          color = "grey",
+          linetype = ifelse(
+            !is.null(attr(first_length_group[[1]], "min_open_ended")),
+            "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(
+          xintercept = attr(last_length_group[[1]], "max"),
+          color = "grey",
+          linetype = ifelse(
+            !is.null(attr(last_length_group[[1]], "max_open_ended")),
+            "dotted", "solid"), linewidth = 1/2.13) +
         geom_rect(color = "black") +
         labs(x = "Length (cm)", y = "Number") +
         facet_grid(.data$Age~.data$Date, scales = scales,
@@ -412,14 +416,18 @@ plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", nc
         facet_wrap(~.data$Date, scales = scales, dir = "v", ncol = ncol,
                    labeller = ggplot2::label_wrap_gen(multi_line=FALSE)) +
         geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
-        geom_vline(xintercept = attr(first_length_group[[1]], "min"),
-                   color = "grey",
-                   linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
-                                     "dotted", "solid"), linewidth = 1/2.13) +
-        geom_vline(xintercept = attr(last_length_group[[1]], "max"),
-                   color = "grey",
-                   linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
-                                     "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(
+          xintercept = attr(first_length_group[[1]], "min"),
+          color = "grey",
+          linetype =
+            ifelse(!is.null(attr(first_length_group[[1]], "min_open_ended")),
+                   "dotted", "solid"), linewidth = 1/2.13) +
+        geom_vline(
+          xintercept = attr(last_length_group[[1]], "max"),
+          color = "grey",
+          linetype =
+            ifelse(!is.null(attr(last_length_group[[1]], "max_open_ended")),
+                   "dotted", "solid"), linewidth = 1/2.13) +
         scale_x_continuous(expand = c(0,0.5), n.breaks = 8) +
         scale_y_continuous(expand = c(0, 0)) +
         geom_col(color = "black") +
@@ -432,13 +440,17 @@ plot.aldist <- function(x, type = "bar", facet_age = FALSE, scales = "fixed", nc
     ggplot(data = x, aes(x = .data$Length, y = .data$number, fill = .data$Age,
                          group = .data$Age)) +
       geom_vline(xintercept = length_groups, color = "grey", linewidth = 0.5/2.13) +
-      geom_vline(xintercept = attr(first_length_group[[1]], "min"),
+      geom_vline(
+        xintercept = attr(first_length_group[[1]], "min"),
+        color = "grey",
+        linetype =
+          ifelse(!is.null(attr(first_length_group[[1]], "min_open_ended")),
+                          "dotted", "solid"), linewidth = 1/2.13) +
+      geom_vline(
+        xintercept = attr(last_length_group[[1]], "max"),
                  color = "grey",
-                 linetype = ifelse(attr(first_length_group[[1]], "min_open_ended"),
-                                   "dotted", "solid"), linewidth = 1/2.13) +
-      geom_vline(xintercept = attr(last_length_group[[1]], "max"),
-                 color = "grey",
-                 linetype = ifelse(attr(last_length_group[[1]], "max_open_ended"),
+                 linetype =
+          ifelse(!is.null(attr(last_length_group[[1]], "max_open_ended")),
                                    "dotted", "solid"), linewidth = 1/2.13) +
       geom_area(color = "black") +
       labs(x = "Length (cm)", y = "Number") +
