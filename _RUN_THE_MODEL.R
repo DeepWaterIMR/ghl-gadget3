@@ -19,6 +19,9 @@
 # source("_RUN_THE_MODEL.R", echo = TRUE)
 # Ctrl-a-d # to detach (close and let the process run)
 # screen -r gadgetrun # to reattach (look into the process)
+## Alternatively you can run it using nohup
+## cd to the desired ghl-gadget3 folder.
+# nohup /software/R-4.2.1/bin/R -e 'source("_RUN_THE_MODEL.R", echo=TRUE, chdir = TRUE)' &
 ## Remember not to start another run in Rstudio server while the screen session is running
 
 ## Source the run first script
