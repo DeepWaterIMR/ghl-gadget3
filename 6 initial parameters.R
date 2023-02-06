@@ -99,7 +99,7 @@ tmb_param <-
                 2, 4, 0) %>%
   g3_init_guess(pattern = '_female_mat\\.init\\.sd',
                 value = init_sigma %>%
-                  filter(sex == "F") %>%
+                  filter(grepl('_female_mat', stock)) %>%
                   filter(age %in%
                            stock_params$female_mat$minage:
                            stock_params$female_mat$maxage) %>%
@@ -107,21 +107,21 @@ tmb_param <-
                 lower = 0, upper = 20, optimise = FALSE) %>%
   g3_init_guess('_male_mat\\.init\\.sd',
                 init_sigma %>%
-                  filter(sex == "M") %>%
+                  filter(grepl('_male_mat', stock)) %>%
                   filter(age %in%
                            stock_params$male_mat$minage:
                            stock_params$male_mat$maxage) %>%
                   pull(ms), 0, 20, 0) %>%
   g3_init_guess('_female_imm\\.init\\.sd',
                 init_sigma %>%
-                  filter(sex == "F") %>%
+                  filter(grepl('_female_imm', stock)) %>%
                   filter(age %in%
                            stock_params$female_imm$minage:
                            stock_params$female_imm$maxage) %>%
                   pull(ms), 0, 20, 0) %>%
   g3_init_guess('_male_imm\\.init\\.sd',
                 init_sigma %>%
-                  filter(sex == "M") %>%
+                  filter(grepl('_male_imm', stock)) %>%
                   filter(age %in%
                            stock_params$male_imm$minage:
                            stock_params$male_imm$maxage) %>%
