@@ -13,7 +13,8 @@
 
 ## You can only the model in one session / folder (computer) simultanously
 ## To run in terminal through screen on Eucleia, do:
-# screen -dmL gdrunsunday bash -c '/software/R-4.2.1/bin/R; source("_RUN_THE_MODEL.R", echo = TRUE, chdir = TRUE); exec bash'
+# screen -dmSL gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
+## You can also run the same script manually:
 # screen -S gadgetrun
 # /software/R-4.2.1/bin/R
 # setwd("ghl-gadget3")
@@ -41,7 +42,7 @@ previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_o
 bootstrap <- FALSE # Not implemented yet
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
-run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
+run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
@@ -172,7 +173,7 @@ optim_param <- g3_optim(model = tmb_model,
                         params = tmb_param,
                         use_parscale = TRUE,
                         method = 'BFGS',
-                        control = list(maxit = 4000), #,reltol = 1e-5
+                        control = list(maxit = 1), #,reltol = 1e-5
                         print_status = TRUE
 )
 time_optim_end <- Sys.time()
