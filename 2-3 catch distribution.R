@@ -994,6 +994,25 @@ if(reload_data) {
   print(compare_mat_ldist(EggaN_ldist, EggaN_mat, rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))))
   dev.off()
 
+  ## Cheat matp
+
+  Cheat_mat <- EggaN_mat %>%
+    dplyr::group_by(step, area, maturity_stage, length) %>%
+    dplyr::summarise(number = round(mean(number), 0))
+
+  Cheat_mat <- lapply(1980:1990, function(k) {
+    bind_cols(tibble(year = k), Cheat_mat)
+  }) %>% bind_rows()
+
+  attributes(Cheat_mat) <- c(attributes(Cheat_mat),
+                             attributes(EggaN_mat)[!names(attributes(EggaN_mat)) %in% names(attributes(Cheat_mat))]
+  )
+
+  if(use_cheat_fleet) {
+    png(file.path(base_dir, "figures/Cheat_maturity_data_proportions.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+    print(plot.matp(Cheat_mat))
+    dev.off()
+  }
   ## EggaS
 
   EggaS_mat <- mfdb_concatenate_results(

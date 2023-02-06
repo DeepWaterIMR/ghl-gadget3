@@ -13,6 +13,7 @@
 
 ## You can only the model in one session / folder (computer) simultanously
 ## To run in terminal through screen on Eucleia, do:
+# screen -dmL gdrunsunday bash -c '/software/R-4.2.1/bin/R; source("_RUN_THE_MODEL.R", echo = TRUE, chdir = TRUE); exec bash'
 # screen -S gadgetrun
 # /software/R-4.2.1/bin/R
 # setwd("ghl-gadget3")
@@ -20,7 +21,7 @@
 # Ctrl-a-d # to detach (close and let the process run)
 # screen -r gadgetrun # to reattach (look into the process)
 ## Alternatively you can run it using nohup
-## cd to the desired ghl-gadget3 folder.
+# cd to the desired ghl-gadget3 folder.
 # nohup /software/R-4.2.1/bin/R -e 'source("_RUN_THE_MODEL.R", echo=TRUE, chdir = TRUE)' &
 ## Remember not to start another run in Rstudio server while the screen session is running
 
@@ -44,6 +45,8 @@ run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
+use_cheat_fleet <- TRUE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
+
 
 ## Optimisation mode (param_opt_mode), options:
 # (1) parameters are bounded internally (ie using the bounded function) works with 'BFGS' optim method

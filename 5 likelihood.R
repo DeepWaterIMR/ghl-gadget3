@@ -282,6 +282,19 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  if(use_cheat_fleet) {
+    g3l_catchdistribution(
+      'Cheat_matp',
+      Cheat_mat %>%
+        rename(stock = maturity_stage) %>%
+        mutate(stock = paste0("ghl_", stock)),
+      fleets = list(Cheat),
+      stocks = stocks,
+      area_group = c(all = 1),
+      g3l_distribution_sumofsquares(),
+      nll_breakdown = nll_breakdown,
+      report = lik_report)},
+
   ## Survey indices
 
   g3l_abundancedistribution(
