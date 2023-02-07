@@ -150,7 +150,7 @@ if(set_weights) {
          cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04    58.885955
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02  2005.654285
        cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 16307.002793
-       cdist_sumofsquares_Cheat_matp_weight.     1              30
+       cdist_sumofsquares_Cheat_matp_weight      1              30
   cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    56.910744
      cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02     5.808491
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  8266.863081
