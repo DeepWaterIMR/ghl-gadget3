@@ -173,7 +173,7 @@ optim_param <- g3_optim(model = tmb_model,
                         params = tmb_param,
                         use_parscale = TRUE,
                         method = 'BFGS',
-                        control = list(maxit = 1), #,reltol = 1e-5
+                        control = list(maxit = 4000), #,reltol = 1e-5
                         print_status = TRUE
 )
 time_optim_end <- Sys.time()
