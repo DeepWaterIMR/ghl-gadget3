@@ -150,13 +150,14 @@ if(set_weights) {
          cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04    58.885955
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02  2005.654285
        cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 16307.002793
+       cdist_sumofsquares_Cheat_matp_weight.     1              30
   cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    56.910744
      cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02     5.808491
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  8266.863081
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03  7250.163478
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03     40
         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    2500
-         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28    92.447863
+         cdist_surveyindices_log_EcoS_SI_weight  1.371257e+28    100
      adist_surveyindices_log_Rus_CPUE_SI_weight           Inf   123.558712
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01    40.439418
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02    300
