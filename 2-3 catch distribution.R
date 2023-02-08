@@ -98,6 +98,28 @@ if(reload_data) {
   print(plot.ldist(TrawlNor_ldist, type = "ggridges"))
   dev.off()
 
+  ## Split length distributions
+
+  # TrawlNor_ldist_male <- read_table("Trawl_Nor_Male_adjusted.txt") %>%
+  #   dplyr::select(-area, -length) %>%
+  #   dplyr::rename("year" = "step",
+  #                 "length" = "number",
+  #                 "number" = "male") %>%
+  #   dplyr::mutate(step = 1, .before = "length") %>%
+  #   gadgetutils::add_g3_attributes(
+  #     params = list(
+  #       step = model_params$timestep_fun,
+  #       length = mfdb_interval(
+  #         "len",
+  #         seq(stock_params$minlength, stock_params$maxlength,
+  #             by = 2*stock_params$dl),
+  #         open_ended = c("upper","lower")
+  #       )
+  #     )
+  #   )
+  #
+  # print(plot.ldist(TrawlNor_ldist_male))
+
   #### Sex ratio
 
   TrawlNor_sexratio <- mfdb_sample_count(

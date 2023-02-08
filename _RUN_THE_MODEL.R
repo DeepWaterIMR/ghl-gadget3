@@ -45,6 +45,7 @@ mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clo
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
+run_jitter <- TRUE # Run jitter instead of optimisation
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 use_cheat_fleet <- TRUE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
 
@@ -158,63 +159,90 @@ model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
 
-## Optimize model parameters
 
-if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
-time_optim_start <- Sys.time()
-message("Optimization started ", time_optim_start)
-## g3_optim is a wrapper for stats::optim. It returns the parameter
-## dataframe with the optimised parameters and includes an attribute with
-## a summary of the optimisation.
-## The control argument is identical to control for optim with the following defaults:
-## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
-optim_param <- g3_optim(model = tmb_model,
-                        params = tmb_param,
-                        use_parscale = TRUE,
-                        method = 'BFGS',
-                        control = list(maxit = 4000), #,reltol = 1e-5
-                        print_status = TRUE
-)
-time_optim_end <- Sys.time()
-time_optim <- round(as.numeric(time_optim_end - time_optim_start, units = "mins"), 1)
-message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
+if(!run_jitter) {
+  ## Optimize model parameters
 
-## Write the times to a file
-info_file <- file(file.path(base_dir, "run_times.txt"))
-close(info_file)
-cat(
-  c("Optimization:\n",
-    "   started ", as.character(time_optim_start), "\n",
-    "   finished ", as.character(time_optim_end), "\n",
-    "   time ", time_optim, " min", "\n",
-    "   method: ", attributes(optim_param)$summary$method, "\n",
-    "   convergence: ", attributes(optim_param)$summary$convergence, "\n",
-    "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
-    "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
-  file = file.path(base_dir, "run_times.txt"), sep = "")
+  if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
-### Save the model parameters
+  time_optim_start <- Sys.time()
+  message("Optimization started ", time_optim_start)
+  ## g3_optim is a wrapper for stats::optim. It returns the parameter
+  ## dataframe with the optimised parameters and includes an attribute with
+  ## a summary of the optimisation.
+  ## The control argument is identical to control for optim with the following defaults:
+  ## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
+  optim_param <- g3_optim(model = tmb_model,
+                          params = tmb_param,
+                          use_parscale = TRUE,
+                          method = 'BFGS',
+                          control = list(maxit = 4000), #,reltol = 1e-5
+                          print_status = TRUE
+  )
+  time_optim_end <- Sys.time()
+  time_optim <- round(as.numeric(time_optim_end - time_optim_start, units = "mins"), 1)
+  message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
 
-write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
-save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
+  ## Write the times to a file
+  info_file <- file(file.path(base_dir, "run_times.txt"))
+  close(info_file)
+  cat(
+    c("Optimization:\n",
+      "   started ", as.character(time_optim_start), "\n",
+      "   finished ", as.character(time_optim_end), "\n",
+      "   time ", time_optim, " min", "\n",
+      "   method: ", attributes(optim_param)$summary$method, "\n",
+      "   convergence: ", attributes(optim_param)$summary$convergence, "\n",
+      "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
+      "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
+    file = file.path(base_dir, "run_times.txt"), sep = "")
 
-## Plots
+  ### Save the model parameters
 
-optim_fit <- g3_fit(model, optim_param)
-save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
+  write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
+  save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
 
-# gadget_plots(optim_fit, file.path(base_dir, "figures"))
+  ## Plots
 
-tmppath <- file.path(getwd(), base_dir, "figures")
-gadget_plots(optim_fit, path = tmppath, file_type = "html")
-rm(tmppath)
+  optim_fit <- g3_fit(model, optim_param)
+  save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
 
-## Copy the R scripts used to compile the model
-file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
+  # gadget_plots(optim_fit, file.path(base_dir, "figures"))
 
-## Save workspace
-save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+  tmppath <- file.path(getwd(), base_dir, "figures")
+  gadget_plots(optim_fit, path = tmppath, file_type = "html")
+  rm(tmppath)
+
+  ## Copy the R scripts used to compile the model
+  file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
+
+  ## Save workspace
+  save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+
+
+} else {
+  ## Jitter model parameters (takes forever)
+
+  jitter_out <- gadgetutils::g3_jitter(
+    gd = base_dir,
+    outdir = "jitter",
+    model = tmb_model,
+    params = tmb_param,
+    njits = 2,
+    control = list(maxit = 10))
+
+
+  gadgetplots:::bind_fit_components(jitter_fit, 'score')
+
+
+  jitter_fit <-
+    1:50 %>%
+    purrr::map(function(x) try(g3_fit(model = tmb_model, params = jitter_out[[x]])) )
+
+  save(jitter_fit, file = file.path(base_dir, vers, 'jitter_fit.Rdata'))
+
+}
 
 
 

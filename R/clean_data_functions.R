@@ -9,7 +9,7 @@
 ## ---------------------------
 
 ## Function to clean up maturity data
-clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
+clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE, ratio = FALSE) {
 
   length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
 
@@ -215,10 +215,17 @@ clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
   if(!return_gadget_compatible) {
     return(nasse)
   } else {
+    if(ratio) {
+      nasse %>%
+        dplyr::select(-len, -number, -n, -ratio, -pred.number) %>%
+        rename("number" = "pred.ratio") %>%
+        as.data.frame()
+    } else {
     nasse <- nasse %>%
       dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
       rename("number" = "pred.number") %>%
       as.data.frame()
+    }
 
     attributes(nasse) <- c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
                            attributes(x)[!names(attributes(x)) %in% c("class", "row.names", "names")])
@@ -230,7 +237,7 @@ clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
 }
 
 ## Function to clean up sex ratio data. Many assumptions...
-clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE) {
+clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE, ratio = FALSE) {
 
   length_groups <- sapply(attributes(x)$length, function(k) attr(k, "min"))
 
@@ -344,7 +351,6 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
       pred.number = round(pred.ratio * n, 0)
     )
 
-
   if(plot) {
 
     plot <- ggplot(nasse) +
@@ -361,10 +367,17 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
   if(!return_gadget_compatible) {
     return(nasse)
   } else {
-    nasse <- nasse %>%
+    if(ratio) {
+      nasse %>%
+        dplyr::select(-len, -number, -n, -ratio, -pred.number) %>%
+        rename("number" = "pred.ratio") %>%
+        as.data.frame()
+    } else {
+      nasse <- nasse %>%
       dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
       rename("number" = "pred.number") %>%
       as.data.frame()
+    }
 
     attributes(nasse) <- c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
                            attributes(x)[!names(attributes(x)) %in% c("class", "row.names", "names")])
