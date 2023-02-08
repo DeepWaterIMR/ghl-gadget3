@@ -24,39 +24,23 @@
 if(reload_data) {
 
   ## Read initial sigmas
-  ### Acquired by (from iterated fit object 2023-02-06:
-  # fit$stock.std %>%
+  ### Acquired by (from iterated fit object 2023-02-08:
+  # optim_fit$stock.std %>%
   #   dplyr::filter(.data$number > 0) %>%
-  #   dplyr::arrange(.data$year, .data$step, .data$stock, .data$age)dat %>%
+  #   dplyr::arrange(.data$year, .data$step, .data$stock, .data$age) %>%
   #   dplyr::group_by(.data$stock, .data$age) %>%
   #   dplyr::summarise(
   #     mean = mean(.data$mean_length, na.rm = TRUE),
   #     mean_sd = mean(.data$stddev_length, na.rm = TRUE),
   #     .groups = "drop"
   #   ) %>%
-  #   dplyr::mutate(type = "Mean") %>%
-  #   dplyr::bind_rows(
-  #     dat %>%
-  #       dplyr::filter(.data$year == min(.data$year), .data$step == min(.data$step)) %>%
-  #       dplyr::select(.data$stock, .data$age, .data$mean_length, .data$stddev_length) %>%
-  #       dplyr::rename("mean" = "mean_length", "mean_sd" = "stddev_length") %>%
-  #       dplyr::mutate(type = "First time-step")
-  #   ) %>%
-  #   dplyr::bind_rows(
-  #     dat %>%
-  #       dplyr::filter(.data$year == max(.data$year), .data$step == max(.data$step)) %>%
-  #       dplyr::select(.data$stock, .data$age, .data$mean_length, .data$stddev_length) %>%
-  #       dplyr::rename("mean" = "mean_length", "mean_sd" = "stddev_length") %>%
-  #       dplyr::mutate(type = "Last time-step")
-  #   ) %>% filter(type == "Mean") %>%
   #   rename(ms = mean_sd, ml = mean) %>%
   #   dplyr::select(age, stock, ms, ml) %>%
-  #   write_csv("../ghl-gadget-data/data/out/Initial ldist data.csv")
+  #   write_csv("data/Initial ldist data.csv")
 
 
-  init_sigma <- readr::read_csv(
-    "../ghl-gadget-data/data/out/Initial ldist data.csv",
-    col_types = cols())
+  init_sigma <- readr::read_csv("data/Initial ldist data.csv", 
+                                col_types = cols())
 
   # init_sigma$ms <- init_sigma$ms*0.35
   # init_sigma[init_sigma$age == 1, "ms"] <- 2

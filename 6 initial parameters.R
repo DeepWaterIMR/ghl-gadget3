@@ -63,9 +63,9 @@ tmb_param <-
   g3_init_guess('\\.p3$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
-  g3_init_guess('\\.M', 0.12, 0.001, 1, 0) %>%
-  g3_init_guess('_male_imm.M', 0.2, 0.001, 1, 0) %>%
-  g3_init_guess('_male_mat.M', 0.2, 0.001, 1, 0) %>%
+  g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
+  g3_init_guess('_male_imm.M', 0.18, 0.001, 1, 0) %>%
+  g3_init_guess('_male_mat.M', 0.18, 0.001, 1, 0) %>%
   g3_init_guess('_female.mat_initial_alpha', 0.260, 0.001, 3, 1) %>%
   g3_init_guess('_male.mat_initial_alpha', 0.376, 0.001, 3, 1) %>%
   g3_init_guess('_female.mat_initial_a50', 12.98, 3, 25, 0) %>%
@@ -148,7 +148,7 @@ if(set_weights) {
       cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   174.354729
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02  2638.115615
           cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03  4262.092926
-           cdist_sumofsquares_Cheat_matp_weight  2.123770e+03 25518.845256
+           cdist_sumofsquares_Cheat_matp_weight  2.123770e+03     0
        cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 14551.535482
      cdist_sumofsquares_OtherRus_sexdist_weight  6.886410e+02     5.619482
   cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    67.362949
@@ -157,8 +157,8 @@ if(set_weights) {
        cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03  8510.695801  
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03     40
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02    300
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    2500
-        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    1000
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    1500
+        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    500
          cdist_surveyindices_log_EcoS_SI_weight  1.371257e+28    100
      adist_surveyindices_log_Rus_CPUE_SI_weight           Inf   123.558712
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01    40.439418
