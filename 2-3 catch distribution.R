@@ -140,7 +140,8 @@ if(reload_data) {
     ))[[1]] %>%
     filter(!year %in% c(1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
-  TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio)
+  TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio, ratio = T)
+  TrawlNor_sexratio$number <- floor(TrawlNor_sexratio$number*1000)
 
   png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
   print(plot.sexr(TrawlNor_sexratio))

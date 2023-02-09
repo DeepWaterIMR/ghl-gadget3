@@ -216,7 +216,7 @@ clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE, rat
     return(nasse)
   } else {
     if(ratio) {
-      nasse %>%
+      nasse <- nasse %>%
         dplyr::select(-len, -number, -n, -ratio, -pred.number) %>%
         rename("number" = "pred.ratio") %>%
         as.data.frame()
@@ -368,7 +368,7 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
     return(nasse)
   } else {
     if(ratio) {
-      nasse %>%
+      nasse <- nasse %>%
         dplyr::select(-len, -number, -n, -ratio, -pred.number) %>%
         rename("number" = "pred.ratio") %>%
         as.data.frame()
