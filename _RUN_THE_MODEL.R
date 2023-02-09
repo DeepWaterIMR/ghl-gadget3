@@ -45,7 +45,7 @@ mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clo
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
-run_jitter <- TRUE # Run jitter instead of optimisation
+run_jitter <- FALSE# Run jitter instead of optimisation
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
 use_cheat_fleet <- TRUE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
 
@@ -72,7 +72,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-
+  
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -87,7 +87,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-
+    
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -159,13 +159,12 @@ model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
 save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
 
-
-
+#################################
+## Optimize model parameters ####
 if(!run_jitter) {
-  ## Optimize model parameters
-
+  
   if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
-
+  
   time_optim_start <- Sys.time()
   message("Optimization started ", time_optim_start)
   ## g3_optim is a wrapper for stats::optim. It returns the parameter
@@ -183,7 +182,7 @@ if(!run_jitter) {
   time_optim_end <- Sys.time()
   time_optim <- round(as.numeric(time_optim_end - time_optim_start, units = "mins"), 1)
   message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
-
+  
   ## Write the times to a file
   info_file <- file(file.path(base_dir, "run_times.txt"))
   close(info_file)
@@ -197,72 +196,81 @@ if(!run_jitter) {
       "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
       "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
     file = file.path(base_dir, "run_times.txt"), sep = "")
-
+  
   ### Save the model parameters
-
+  
   write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
   save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
-
+  
   ## Plots
-
+  
   optim_fit <- g3_fit(model, optim_param)
   save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
-
+  
   # gadget_plots(optim_fit, file.path(base_dir, "figures"))
-
+  
   tmppath <- file.path(getwd(), base_dir, "figures")
   gadget_plots(optim_fit, path = tmppath, file_type = "html")
   rm(tmppath)
-
+  
   ## Copy the R scripts used to compile the model
   file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
-
+  
   ## Save workspace
   save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-
-
+  
+  
 } else {
-  ## Jitter model parameters (takes forever)
-
-  jitter_out <- gadgetutils::g3_jitter(
+  
+  ###############################################
+  ## Jitter model parameters (takes forever) ####
+  
+  jitpar_out <- gadgetutils::g3_jitter(
     gd = base_dir,
     outdir = "jitter",
     model = tmb_model,
     params = tmb_param,
-    njits = 2,
-    control = list(maxit = 10))
-
-
-  gadgetplots:::bind_fit_components(jitter_fit, 'score')
-
-
-  jitter_fit <-
-    1:50 %>%
-    purrr::map(function(x) try(g3_fit(model = tmb_model, params = jitter_out[[x]])) )
-
-  save(jitter_fit, file = file.path(base_dir, vers, 'jitter_fit.Rdata'))
-
+    njits = 20,
+    control = list(maxit = 3000))
+  
+  jitter_fit <- lapply(seq_along(jitpar_out), function(i) {
+    message(paste0(i, "/", length(jitpar_out)))
+    if(is.null(jitpar_out[[i]])) return(NULL)
+    if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
+    try(g3_fit(model = tmb_model, params = jitpar_out[[i]]))
+  })
+  
+  jitter_fit <- Filter(
+    Negate(is.null), 
+    lapply(jitter_fit, function(k) if(inherits(k, "try-error")) NULL else k)
+  )
+    
+  gadgetplots:::bind_fit_components(jitter_fit, 'score') %>% na.omit
+    
+  save(jitter_fit, file = file.path(getwd(), base_dir, 'jitter_fit.Rdata'))
 }
 
 
+nassu <- lapply(seq_along(jitter_fit), function(i) {
+  jitter_fit[[i]]$params[grepl("weight$", jitter_fit[[i]]$params$switch),]
+})
 
-
-
+lapply(nassu, function(k) data.frame(unlist(k$value))) %>% bind_cols()
 
 #####################################################################
 ## Iterative reweighting and optimization                        ####
 ## Running this part takes a long time (3-10 hours on a server)  ####
 
 if(run_iterative) {
-
+  
   if(set_weights) {
     tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
       data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
-
+  
   time_iter_start <- Sys.time()
   message("Iteration started ", time_iter_start)
-
+  
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
@@ -286,30 +294,30 @@ if(run_iterative) {
     cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
     shortcut = FALSE
   )
-
+  
   time_iter_end <- Sys.time()
   time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
   message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
-
+  
   cat(
     c("Iteration:\n",
       "   started ", as.character(time_iter_start), "\n",
       "   finished ", as.character(time_iter_end), "\n",
       "   time ", time_iter, " min", "\n\n"),
     file = file.path(base_dir, "run_times.txt"), sep = "", append = TRUE)
-
+  
   ### Save the model parameters
-
+  
   write.csv(as.data.frame(iter_param), file = file.path(base_dir, "data/Iterated TMB parameters.csv"))
   save(iter_param, file = file.path(base_dir, "data/Iterated TMB parameters.rda"), compress = "xz")
-
+  
   ### Plots
-
+  
   iter_fit <- g3_fit(model, iter_param)
   save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-
+  
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
-
+  
   tmppath <- file.path(getwd(), base_dir, "figures")
   make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
   rm(tmppath)
