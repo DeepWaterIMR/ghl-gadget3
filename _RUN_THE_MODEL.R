@@ -45,9 +45,9 @@ mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clo
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 run_retro <- FALSE # Run retrospective analysis?
-run_jitter <- FALSE# Run jitter instead of optimisation
+run_jitter <- FALSE # Run jitter instead of optimisation
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds. Experimental feature making it easier to control the model.
-use_cheat_fleet <- TRUE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
+use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
 
 
 ## Optimisation mode (param_opt_mode), options:
@@ -230,8 +230,43 @@ if(!run_jitter) {
     outdir = "jitter",
     model = tmb_model,
     params = tmb_param,
-    njits = 20,
-    control = list(maxit = 3000))
+    njits = 10,
+    control = list(maxit = 3000),
+    ncores = ceiling(0.4*parallel::detectCores()))
+  
+  jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
+    if(is.null(jitpar_out[[i]])) return(NULL)
+    if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
+    out <- jitpar_out[[i]][jitpar_out[[i]]$optimise, c("switch", "value")]
+    rownames(out) <- 1:nrow(out)
+    names(out)[names(out) == "value"] <- paste0("value_run",i)
+    out
+  }) %>% 
+    purrr::discard(is.null) %>% 
+    purrr::reduce(dplyr::full_join, by = "switch") %>%
+    dplyr::rowwise() %>% 
+    dplyr::mutate(
+      mean = mean(dplyr::c_across(dplyr::starts_with("value"))),
+      sd = sd(dplyr::c_across(dplyr::starts_with("value"))),
+      cv = abs(sd/mean)) 
+  
+  jitpar_list %>% 
+    write.g3.file(out_path, 'jitter.param.comparison')
+  
+  p <- ggplot2::ggplot(
+    data = jitpar_list,
+    ggplot2::aes(.data$switch,.data$cv,label=.data$switch)) +
+    ggplot2::geom_point() +
+    ggplot2::coord_flip() +
+    ggplot2::labs(
+      x = "", 
+      y = paste0("Parameter CV over ", 
+                 length(grep("^value", names(jitpar_list))), " jitter runs")
+    ) +
+    ggplot2::theme_bw(base_size = 8) 
+  
+    ggsave(file.path(base_dir, "figures/Jitter_parameter_CV.png"),
+           plot = p, width = pagewidth, height = pagewidth*1.5, units = "mm")
   
   jitter_fit <- lapply(seq_along(jitpar_out), function(i) {
     message(paste0(i, "/", length(jitpar_out)))
@@ -244,18 +279,42 @@ if(!run_jitter) {
     Negate(is.null), 
     lapply(jitter_fit, function(k) if(inherits(k, "try-error")) NULL else k)
   )
-    
-  gadgetplots:::bind_fit_components(jitter_fit, 'score') %>% na.omit
-    
+  
   save(jitter_fit, file = file.path(getwd(), base_dir, 'jitter_fit.Rdata'))
+  
+  gadgetplots:::bind_fit_components(jitter_fit, 'score') %>% 
+    na.omit() %>% 
+    summarise(
+      n_jitter = n(),
+      mean = mean(nll),
+      sd = sd(nll),
+      cv = sd/mean) %>% 
+    write.g3.file(out_path, 'jitter.nll.summary')
+
+  p <- lapply(seq_along(jitter_fit), function(i) {
+    jitter_fit[[i]]$res.by.year %>%
+      dplyr::group_by(.data$year) %>%
+      dplyr::summarise(value = sum(.data$total.biomass)/1e6) %>%
+      dplyr::mutate(run = i)
+  }) %>% 
+    dplyr::bind_rows() %>% 
+    ggplot2::ggplot(
+      ggplot2::aes(.data$year,
+                   .data$value,
+                   col=as.factor(.data$run))) +
+    ggplot2::geom_line() +
+    ggplot2::labs(
+      y = "Total model population biomass ('000 tons)",
+      x='Year',col='Jitter run') +
+    ggplot2::coord_cartesian(expand = FALSE) +
+    ggplot2::expand_limits(y = 0) +
+    ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    ggplot2::theme_classic(base_size = 8)
+  
+  ggsave(file.path(base_dir, "figures/Jitter_model_biomass.png"),
+         plot = p, width = pagewidth, height = pagewidth*0.7, units = "mm")
+
 }
-
-
-nassu <- lapply(seq_along(jitter_fit), function(i) {
-  jitter_fit[[i]]$params[grepl("weight$", jitter_fit[[i]]$params$switch),]
-})
-
-lapply(nassu, function(k) data.frame(unlist(k$value))) %>% bind_cols()
 
 #####################################################################
 ## Iterative reweighting and optimization                        ####
