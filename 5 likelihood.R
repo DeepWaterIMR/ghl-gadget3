@@ -26,6 +26,26 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_catchdistribution(
+  #   'TrawlNor_ldist_male',
+  #   TrawlNor_ldist_male,
+  #   fleets = list(TrawlNor),
+  #   stocks = list(male_imm, male_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  #
+  # g3l_catchdistribution(
+  #   'TrawlNor_ldist_female',
+  #   TrawlNor_ldist_female,
+  #   fleets = list(TrawlNor),
+  #   stocks = list(female_imm, female_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   g3l_catchdistribution(
     'TrawlRus_ldist',
     TrawlRus_ldist,

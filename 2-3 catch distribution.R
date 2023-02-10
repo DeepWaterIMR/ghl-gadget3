@@ -15,11 +15,12 @@
 
 # source("0 run first.R")
 
-# if(reload_data) {
+if(reload_data) {
 
   # source("R/gadget_data_functions.R")
   source("R/figure_functions.R")
   source("R/clean_data_functions.R")
+  source("R/split_g3_data.R")
 
   # Data to by-pass MFDB
 
@@ -98,9 +99,29 @@
   print(plot.ldist(TrawlNor_ldist, type = "ggridges"))
   dev.off()
 
-  ## Split length distributions
-
-  # TrawlNor_ldist_male <- read_table("Trawl_Nor_Male_adjusted.txt") %>%
+  ## Split length distributions from Daniel data
+  # TrawlNor_ldist_female <- read_table("data/Trawl_Nor_Female_adjusted.txt") %>%
+  #   dplyr::select(-area, -length) %>%
+  #   dplyr::rename("year" = "step",
+  #                 "length" = "number",
+  #                 "number" = "female") %>%
+  #   dplyr::mutate(step = 1, .before = "length") %>%
+  #   gadgetutils::add_g3_attributes(
+  #     params = list(
+  #       step = model_params$timestep_fun,
+  #       length = mfdb_interval(
+  #         "len",
+  #         seq(stock_params$minlength, stock_params$maxlength,
+  #             by = 2*stock_params$dl),
+  #         open_ended = c("upper","lower")
+  #       )
+  #     )
+  #   )
+  #
+  # print(plot.ldist(TrawlNor_ldist_female))
+  #
+  #
+  # TrawlNor_ldist_male <- read_table("data/Trawl_Nor_Male_adjusted.txt") %>%
   #   dplyr::select(-area, -length) %>%
   #   dplyr::rename("year" = "step",
   #                 "length" = "number",
@@ -119,7 +140,7 @@
   #   )
   #
   # print(plot.ldist(TrawlNor_ldist_male))
-
+  #
   #### Sex ratio
 
   TrawlNor_sexratio <- mfdb_sample_count(
@@ -143,33 +164,54 @@
   TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio)
   # TrawlNor_sexratio$number <- floor(TrawlNor_sexratio$number*1000)
 
+  ## To apply average over all years
+  # TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio, ratio = TRUE)
+  # TrawlNor_sexratio <-
+  #   bind_rows(TrawlNor_sexratio,
+  #             TrawlNor_sexratio %>%
+  #               group_by(area, sex, length) %>%
+  #               summarise(number = mean(number)) %>%
+  #               ungroup() %>%
+  #               tidyr::expand(
+  #                 year = setdiff(1980:2021, unique(TrawlNor_sexratio$year)),
+  #                 tidyr::nesting(sex, length, number)) %>%
+  #               mutate(step = "1", area = "all", .after = "year")
+  #   ) %>%
+  #   mutate(number = floor(number*1000)) %>%
+  #   arrange(year, step, sex, length)
+
   png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
   print(plot.sexr(TrawlNor_sexratio))
   dev.off()
 
   ## Split length distributions
 
-  TrawlNor_split_sexratio <- mfdb_sample_count(
-    mdb,
-    c('sex', 'length'),
-    list(
-      data_source = "ldist-catches-NOR",
-      gear = c("BottomTrawls", "ShrimpTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
-      length =
-        mfdb_interval(
-          "len",
-          seq(stock_params$minlength, stock_params$maxlength,
-              by = 5*stock_params$dl),
-          open_ended = c("upper","lower")
-        ),
-      sex = mfdb_group(female = 'F', male = 'M'),
-      timestep = model_params$timestep_fun,
-      year = model_params$year_range
-    ))[[1]] %>%
-    filter(!year %in% c(1981, 1988, 1992, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+  tmp <- split_g3_data(TrawlNor_ldist, TrawlNor_sexratio, split_column = "sex")
 
-  TrawlNor_split_sexratio <-
-    clean_sexratio_data(TrawlNor_split_sexratio, plot = TRUE)
+  TrawlNor_ldist_male <- tmp[["male"]]
+  TrawlNor_ldist_female <- tmp[["female"]]
+
+  # TrawlNor_split_sexratio <- mfdb_sample_count(
+  #   mdb,
+  #   c('sex', 'length'),
+  #   list(
+  #     data_source = "ldist-catches-NOR",
+  #     gear = c("BottomTrawls", "ShrimpTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
+  #     length =
+  #       mfdb_interval(
+  #         "len",
+  #         seq(stock_params$minlength, stock_params$maxlength,
+  #             by = 5*stock_params$dl),
+  #         open_ended = c("upper","lower")
+  #       ),
+  #     sex = mfdb_group(female = 'F', male = 'M'),
+  #     timestep = model_params$timestep_fun,
+  #     year = model_params$year_range
+  #   ))[[1]] %>%
+  #   filter(!year %in% c(1981, 1988, 1992, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+  #
+  # TrawlNor_split_sexratio <-
+  #   clean_sexratio_data(TrawlNor_split_sexratio, plot = TRUE)
 
 
   # AllNorCatches_aldist <- mfdb_sample_count(
