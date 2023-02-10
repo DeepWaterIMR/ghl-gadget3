@@ -15,7 +15,7 @@
 
 # source("0 run first.R")
 
-if(reload_data) {
+# if(reload_data) {
 
   # source("R/gadget_data_functions.R")
   source("R/figure_functions.R")
@@ -65,7 +65,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 2*stock_params$dl),
+                 by = 5*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
@@ -138,14 +138,39 @@ if(reload_data) {
       timestep = model_params$timestep_fun,
       year = model_params$year_range
     ))[[1]] %>%
-    filter(!year %in% c(1988, 1992, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+    filter(!year %in% c(1981, 1988, 1992, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
-  TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio, ratio = T)
-  TrawlNor_sexratio$number <- floor(TrawlNor_sexratio$number*1000)
+  TrawlNor_sexratio <- clean_sexratio_data(TrawlNor_sexratio)
+  # TrawlNor_sexratio$number <- floor(TrawlNor_sexratio$number*1000)
 
   png(file.path(base_dir, "figures/TrawlNor_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
   print(plot.sexr(TrawlNor_sexratio))
   dev.off()
+
+  ## Split length distributions
+
+  TrawlNor_split_sexratio <- mfdb_sample_count(
+    mdb,
+    c('sex', 'length'),
+    list(
+      data_source = "ldist-catches-NOR",
+      gear = c("BottomTrawls", "ShrimpTrawls", "PelagicTrawls", "OtherTrawls", "Seines", "DanishSeines"),
+      length =
+        mfdb_interval(
+          "len",
+          seq(stock_params$minlength, stock_params$maxlength,
+              by = 5*stock_params$dl),
+          open_ended = c("upper","lower")
+        ),
+      sex = mfdb_group(female = 'F', male = 'M'),
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range
+    ))[[1]] %>%
+    filter(!year %in% c(1981, 1988, 1992, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
+
+  TrawlNor_split_sexratio <-
+    clean_sexratio_data(TrawlNor_split_sexratio, plot = TRUE)
+
 
   # AllNorCatches_aldist <- mfdb_sample_count(
   #   mdb,
