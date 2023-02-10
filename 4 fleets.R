@@ -320,9 +320,17 @@ fleet_actions <-
             )
           ),
         catchability_f = 
-          g3a_predate_catchability_effortfleet(
-            catchability_fs = ~1,
-            E = ~1e-8)
+          g3a_predate_catchability_totalfleet(
+            g3_timeareadata('EcoS_catches',
+                            EcoS_catches %>%
+                              mutate(area = 1, # Check this hack out
+                                     step = as.numeric(step),
+                                     year = as.numeric(year))
+            )
+          )
+          # g3a_predate_catchability_effortfleet(
+          #   catchability_fs = ~1,
+          #   E = ~1e-8)
       ),
     WinterS %>%
       g3a_predate_fleet(

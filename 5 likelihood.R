@@ -325,16 +325,28 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
-  g3l_catchdistribution(
+  g3l_abundancedistribution(
     'EcoS_SI',
     EcoS_SI %>%
       rename("weight" = "total_weight"), # A bug here,
-    fleets = list(EcoS),
+    fleets = list(),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_surveyindices_log(beta = 1),
     nll_breakdown = nll_breakdown,
     report = lik_report),
+
+  # Suitability tied to the SI  
+  # g3l_catchdistribution(
+  #   'EcoS_SI',
+  #   EcoS_SI %>%
+  #     rename("weight" = "total_weight"), # A bug here,
+  #   fleets = list(EcoS),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_surveyindices_log(beta = 1),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
 
   g3l_abundancedistribution(
     'Juv_SI_1',
