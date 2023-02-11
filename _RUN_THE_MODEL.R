@@ -327,7 +327,7 @@ if(run_jitter & !run_iterative_only) {
 ## Iterative reweighting and optimization                        ####
 ## Running this part takes a long time (3-10 hours on a server)  ####
 
-if(run_iterative) {
+if(run_iterative | run_iterative_only) {
 
   if(set_weights) {
     tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
@@ -356,7 +356,7 @@ if(run_iterative) {
            EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
       ),
     use_parscale = TRUE,
-    control = list(maxit = 3000),
+    control = list(maxit = 4000),
     cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
     shortcut = FALSE,
     mc.cores = ceiling(0.4*parallel::detectCores())

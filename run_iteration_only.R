@@ -35,6 +35,9 @@ time_iter_end <- Sys.time()
 time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
 message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
 
+info_file <- file(file.path(base_dir, "run_times.txt"))
+close(info_file)
+
 cat(
   c("Iteration:\n",
     "   started ", as.character(time_iter_start), "\n",
