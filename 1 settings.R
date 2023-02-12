@@ -9,7 +9,7 @@
 ## Set up the model folders
 
 if(reset_model & dir.exists(base_dir)) {
-  prev_param_file <- "data/Iterated TMB parameters.csv"
+  prev_param_file <- "data/Optimized TMB parameters.csv"
   if(previous_model_params_as_initial &
      file.exists(prev_param_file)) {
 
