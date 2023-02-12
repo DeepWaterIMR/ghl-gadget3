@@ -51,6 +51,8 @@ tmb_param <-
   g3_init_guess('B0', 1e5, 1, 1e7, 1) %>%
   g3_init_guess('\\.alpha', 0.5, 0.01, 5, 1) %>%
   g3_init_guess('l50', 40, 10, 80, 1) %>%
+  g3_init_guess('ecos.survey.alpha', 0.5, 0.01, 8, 1) %>%
+  g3_init_guess('ecos.survey.l50', 40, 5, 20, 1) %>%
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
