@@ -10,7 +10,9 @@
 # Required packages to run the model
 
 packages <- c(
-  "remotes", "tidyverse", "reshape2", "data.table", "DBI", "duckdb", "mfdb", "Matrix", "TMB", "gadget3", "gadgetutils", "cowplot", "fishmethods", "ggFishPlots", "gadgetplots", "curl", "rmarkdown")
+  "remotes", "tidyverse", "reshape2", "data.table", "DBI", "duckdb", "mfdb",
+  "Matrix", "TMB", "gadget3", "gadgetutils", "cowplot", "fishmethods", 
+  "ggFishPlots", "gadgetplots", "curl", "rmarkdown")
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
