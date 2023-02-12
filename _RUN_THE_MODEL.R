@@ -167,7 +167,7 @@ save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
 
 #################################
 ## Optimize model parameters ####
-if(!run_jitter & !run_iterative_only) {
+if(!run_jitter & !run_iterative_only & !run_retro) {
 
   if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
@@ -395,6 +395,50 @@ if(run_iterative | run_iterative_only) {
   make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
   rm(tmppath)
   }
+}
+
+#########################
+## Retroscpetive run ####
+
+if(run_retro) {
+  # load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
+  #
+  # retro_model <- list()
+  # retro_params <- list()
+  # for(peel in 1:5){
+  #
+  #   source(file.path(base_dir, '00-setup', 'setup-likelihood.R'))  # Generates likelihood_actions
+  #
+  #   retro_actions <-
+  #     c(cdredmat_actions,
+  #       cdredimm_actions,
+  #       fleet_actions,
+  #       likelihood_actions,
+  #       time_actions,
+  #       list(g3l_bounds_penalty(tmb_param))
+  #     )
+  #   retro_model[[peel]] <- g3_to_tmb(retro_actions)
+  #   retro_params[[peel]] <- params_final
+  #   retro_params[[peel]]$value$retro_years <- peel
+  # }
+  #
+  # peel <- 0
+  #
+  # retro <-
+  #   parallel::mclapply(1:5,function(x){
+  #     g3_optim(retro_model[[x]],
+  #              retro_params[[x]],
+  #              control = list(maxit = 1000))
+  #   },
+  #   mc.cores = parallel::detectCores())
+  # ## Collate fit
+  # retro_fit <-
+  #   1:5 %>%
+  #   set_names(paste0('r',1:5)) %>%
+  #   purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
+  #
+  # save(retro_fit, file = file.path(base_dir, vers,'RETRO', 'retro_fit.Rdata'))
+  # gadget_plots(fit, file.path(base_dir, vers, 'figs'), 'html', retrofit = retro_fit)
 }
 
 ## Save workspace
