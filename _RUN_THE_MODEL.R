@@ -420,6 +420,11 @@ if(run_retro) {
                           print_status = TRUE
   )
 
+  ### Save the model parameters
+  
+  write.csv(as.data.frame(retro_param), file = file.path(base_dir, "data/Retro parameters.csv"))
+  save(retro_param, file = file.path(base_dir, "data/Retro parameters.rda"), compress = "xz")
+  
 #
 #
 #   load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
@@ -453,12 +458,19 @@ if(run_retro) {
 #     },
 #     mc.cores = parallel::detectCores())
 #   ## Collate fit
-#   retro_fit <-
-#     1:5 %>%
-#     set_names(paste0('r',1:5)) %>%
-#     purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
+  retro_fit <- g3_fit(tmb_model, retro_param)
+    # 1:5 %>%
+    # set_names(paste0('r',1:5)) %>%
+    # purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
+  
+  if(plot_html) {
+    tmppath <- file.path(getwd(), base_dir, "figures")
+    make_html(retro_fit, path = tmppath, file_name = "model_output_figures_retro.html")
+    rm(tmppath)
+  }
+  
 #
-#   save(retro_fit, file = file.path(base_dir, vers,'RETRO', 'retro_fit.Rdata'))
+  save(retro_fit, file = file.path(getwd(), base_dir, 'retro_fit.Rdata'), compress = "xz")
 #   gadget_plots(fit, file.path(base_dir, vers, 'figs'), 'html', retrofit = retro_fit)
 }
 
