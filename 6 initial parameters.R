@@ -54,7 +54,7 @@ tmb_param <-
   g3_init_guess('bbin', 6, 1e-08, 10, 1) %>%
   g3_init_guess('prop_mat0', 0.1, 0, 1, 1) %>%
   g3_init_guess('B0', 1e5, 1, 1e7, 1) %>%
-  g3_init_guess('\\.alpha', 0.5, 0.01, 1, 1) %>%
+  g3_init_guess('\\.alpha', 0.5, 0.01, 2, 1) %>%
   g3_init_guess('l50', 40, 10, 80, 1) %>%
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
