@@ -47,7 +47,7 @@ plot_html <- TRUE # Whether html model summary should be plotted. In most cases 
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
-previous_model_params_as_initial <- FALSE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization.
+previous_model_params_as_initial <- TRUE # Whether to use parameters from fit_opt object as initial values for tmb_params. Potentially speeds up the optimization. The parameters are stored in the data folder.
 
 ## Run options
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)

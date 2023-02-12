@@ -9,12 +9,16 @@
 ## Set up the model folders
 
 if(reset_model & dir.exists(base_dir)) {
+  prev_param_file <- "data/Iterated TMB parameters.csv"
   if(previous_model_params_as_initial &
-     file.exists("model_files/data/Optimized TMB parameters.rda")) {
-    load("model_files/data/Optimized TMB parameters.rda")
-    prev_param <- fit.opt$par
-    names(prev_param) <- gsub("__", ".", names(prev_param))
-    rm(fit.opt)
+     file.exists(prev_param_file)) {
+
+    prev_param <- read.csv(prev_param_file) %>%
+      dplyr::select(switch, value) %>%
+      filter(!grepl("weight$", switch))
+
+    prev_param <- setNames(prev_param$value, prev_param$switch)
+    # names(prev_param) <- gsub("__", ".", names(prev_param))
   }
 
   unlink(base_dir, recursive = TRUE)
