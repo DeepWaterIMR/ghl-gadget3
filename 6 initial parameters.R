@@ -21,12 +21,7 @@ actions <- c(
   fleet_actions,
   likelihood_actions)
 
-# Turn actions into an R function
-
-model <- g3_to_r(actions)
-
-# You can edit the model code with:
-# model <- edit(model)
+## Actions to tmb_model
 
 tmb_model <- g3_to_tmb(actions)
 
@@ -197,9 +192,14 @@ if(force_bound_params) {
 
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
 
-  model <- g3_to_r(actions)
   tmb_model <- g3_to_tmb(actions)
 }
+
+# Turn actions into an R function
+
+model <- g3_to_r(actions)
+# You can edit the model code with:
+# model <- edit(model)
 
 ### Rearrange parameters to follow the model order (fixed a bug that occurs sometimes)
 
@@ -215,3 +215,7 @@ if(!tmb_param[grep('rec.sd', tmb_param$switch),"optimise"]) {
 
 write.csv(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.csv"), row.names = FALSE)
 save(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.rda"))
+
+## Save the R model
+
+save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")

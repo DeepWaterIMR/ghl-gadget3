@@ -145,7 +145,7 @@ source("6 initial parameters.R")
 
 ## Fit the initial parameters to the model, print the likelihood score and make plots which will be overwritten by optimized parameter plots later.
 
-result <- model(tmb_param$value)
+# result <- model(tmb_param$value)
 # result[[1]]
 
 # fit_init <- gadget3:::g3_fit(model,tmb_param)
@@ -160,10 +160,10 @@ result <- model(tmb_param$value)
 
 ## Compile the TMB-based model
 
-model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
+# model_tmb <- g3_tmb_adfun(tmb_model, tmb_param)
+#
+# save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 
-save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
-save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
 
 #################################
 ## Optimize model parameters ####
@@ -401,44 +401,65 @@ if(run_iterative | run_iterative_only) {
 ## Retroscpetive run ####
 
 if(run_retro) {
-  # load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
-  #
-  # retro_model <- list()
-  # retro_params <- list()
-  # for(peel in 1:5){
-  #
-  #   source(file.path(base_dir, '00-setup', 'setup-likelihood.R'))  # Generates likelihood_actions
-  #
-  #   retro_actions <-
-  #     c(cdredmat_actions,
-  #       cdredimm_actions,
-  #       fleet_actions,
-  #       likelihood_actions,
-  #       time_actions,
-  #       list(g3l_bounds_penalty(tmb_param))
-  #     )
-  #   retro_model[[peel]] <- g3_to_tmb(retro_actions)
-  #   retro_params[[peel]] <- params_final
-  #   retro_params[[peel]]$value$retro_years <- peel
-  # }
-  #
-  # peel <- 0
-  #
-  # retro <-
-  #   parallel::mclapply(1:5,function(x){
-  #     g3_optim(retro_model[[x]],
-  #              retro_params[[x]],
-  #              control = list(maxit = 1000))
-  #   },
-  #   mc.cores = parallel::detectCores())
-  # ## Collate fit
-  # retro_fit <-
-  #   1:5 %>%
-  #   set_names(paste0('r',1:5)) %>%
-  #   purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
-  #
-  # save(retro_fit, file = file.path(base_dir, vers,'RETRO', 'retro_fit.Rdata'))
-  # gadget_plots(fit, file.path(base_dir, vers, 'figs'), 'html', retrofit = retro_fit)
+
+  if(exists("iter_param")) {
+    init_retro_param <- iter_param
+  } else if(exists("optim_param")) {
+    init_retro_param <- optim_param
+  } else {
+    init_retro_param <- tmb_param
+  }
+
+  init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- 1
+
+  retro_param <- g3_optim(model = tmb_model,
+                          params = init_retro_param,
+                          use_parscale = TRUE,
+                          method = 'BFGS',
+                          control = list(maxit = 3000), #,reltol = 1e-5
+                          print_status = TRUE
+  )
+
+#
+#
+#   load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
+#
+#   retro_model <- list()
+#   retro_params <- list()
+#   for(peel in 1:5){
+#
+#     source(file.path(base_dir, '00-setup', 'setup-likelihood.R'))  # Generates likelihood_actions
+#
+#     retro_actions <-
+#       c(cdredmat_actions,
+#         cdredimm_actions,
+#         fleet_actions,
+#         likelihood_actions,
+#         time_actions,
+#         list(g3l_bounds_penalty(tmb_param))
+#       )
+#     retro_model[[peel]] <- g3_to_tmb(retro_actions)
+#     retro_params[[peel]] <- params_final
+#     retro_params[[peel]]$value$retro_years <- peel
+#   }
+#
+#   peel <- 0
+#
+#   retro <-
+#     parallel::mclapply(1:5,function(x){
+#       g3_optim(retro_model[[x]],
+#                retro_params[[x]],
+#                control = list(maxit = 1000))
+#     },
+#     mc.cores = parallel::detectCores())
+#   ## Collate fit
+#   retro_fit <-
+#     1:5 %>%
+#     set_names(paste0('r',1:5)) %>%
+#     purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
+#
+#   save(retro_fit, file = file.path(base_dir, vers,'RETRO', 'retro_fit.Rdata'))
+#   gadget_plots(fit, file.path(base_dir, vers, 'figs'), 'html', retrofit = retro_fit)
 }
 
 ## Save workspace
