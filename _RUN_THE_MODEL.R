@@ -410,16 +410,18 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- 1
-
-  retro_param <- g3_optim(model = tmb_model,
-                          params = init_retro_param,
-                          use_parscale = TRUE,
-                          method = 'BFGS',
-                          control = list(maxit = 3000), #,reltol = 1e-5
-                          print_status = TRUE
-  )
-
+  retro_param <- lapply(0:5, function(lag) {
+    init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- lag
+    
+    g3_optim(model = tmb_model,
+                            params = init_retro_param,
+                            use_parscale = TRUE,
+                            method = 'BFGS',
+                            control = list(maxit = 3000), #,reltol = 1e-5
+                            print_status = TRUE
+    )
+  })
+  
   ### Save the model parameters
   
   write.csv(as.data.frame(retro_param), file = file.path(base_dir, "data/Retro parameters.csv"))
