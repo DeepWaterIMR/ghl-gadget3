@@ -62,7 +62,7 @@ tmb_param <-
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female_imm.M', 0.12, 0.001, 0.4, 0) %>%
-  g3_init_guess('_female_mat.M', 0.10, 0.001, 0.4, 0) %>%
+  g3_init_guess('_female_mat.M', 0.12, 0.001, 0.4, 0) %>%
   g3_init_guess('_male_imm.M', 0.16, 0.001, 0.4, 0) %>%
   g3_init_guess('_male_mat.M', 0.16, 0.001, 0.4, 0) %>%
   g3_init_guess('_female.mat_initial_alpha', 0.260, 0.001, 3, 1) %>%
