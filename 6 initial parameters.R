@@ -33,7 +33,7 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 1e4, 0.1, 1e5, 1) %>%
+  g3_init_guess('\\.rec', 1e4, 0.1, 5e4, 1) %>%
   g3_init_guess('\\.init', 1e4, 0.1, 1e5, 1) %>%
   g3_init_guess('recl', 14, 12, 20, 0) %>%
   g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
