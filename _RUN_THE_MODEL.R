@@ -238,8 +238,8 @@ if(run_jitter & !run_iterative_only) {
     model = tmb_model,
     params = tmb_param,
     njits = 10,
-    control = list(maxit = 3000),
-    ncores = ceiling(0.4*parallel::detectCores()))
+    control = list(maxit = 4000, reltol = 1e-9),
+    ncores = 10)
 
   jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
     if(is.null(jitpar_out[[i]])) return(NULL)
@@ -258,7 +258,7 @@ if(run_jitter & !run_iterative_only) {
       cv = abs(sd/mean))
 
   jitpar_list %>%
-    write.g3.file(out_path, 'jitter.param.comparison')
+    write.g3.file(file.path(base_dir, "jitter"), 'jitter.param.comparison')
 
   p <- ggplot2::ggplot(
     data = jitpar_list,
@@ -296,7 +296,7 @@ if(run_jitter & !run_iterative_only) {
       mean = mean(nll),
       sd = sd(nll),
       cv = sd/mean) %>%
-    write.g3.file(out_path, 'jitter.nll.summary')
+    write.g3.file(file.path(base_dir, "jitter"), 'jitter.nll.summary')
 
   p <- lapply(seq_along(jitter_fit), function(i) {
     jitter_fit[[i]]$res.by.year %>%
