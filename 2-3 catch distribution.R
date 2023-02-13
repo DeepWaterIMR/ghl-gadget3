@@ -389,17 +389,62 @@ if(reload_data) {
     )
   }
 
-  tmp <- bind_rows(
-    tmp_f %>%
-      mutate(
-        sex = "female",
-        length = sapply(length, split_fun)),
-    tmp_m %>%
-      mutate(
-        sex = "male",
-        length = sapply(length, split_fun))
-  ) %>%
-    mutate(age = as.integer(gsub("[^0-9.-]", "", age)))
+  tmp_f <- tmp_f %>%
+    mutate(
+      sex = "female",
+      length = sapply(length, split_fun))
+
+  tmp_m <- tmp_m %>%
+    mutate(
+      sex = "male",
+      length = sapply(length, split_fun))
+
+  tmp <- bind_rows(tmp_f, tmp_m) # %>%
+    # mutate(age = as.integer(gsub("[^0-9.-]", "", age)))
+
+  TrawlRus_ldist_female <- gadgetutils::g3_data(
+    tmp_f,
+    params =
+      list(
+        year = model_params$year_range,
+        timestep = model_params$timestep_fun,
+        length = mfdb_interval(
+          "len",
+          seq(stock_params$minlength, stock_params$maxlength,
+              by = 2*stock_params$dl),
+          open_ended = c("upper","lower")
+        )
+      ),
+    method = "number",
+    column_names = c(year = "year", step = "step", area = "area"),
+    verbose = FALSE) %>%
+    filter(!year %in% c(1991, 1993))
+
+  png(file.path(base_dir, "figures/TrawlRus_ldist_female.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(TrawlRus_ldist_female, type = "ggridges"))
+  dev.off()
+
+  TrawlRus_ldist_male <- gadgetutils::g3_data(
+    tmp_m,
+    params =
+      list(
+        year = model_params$year_range,
+        timestep = model_params$timestep_fun,
+        length = mfdb_interval(
+          "len",
+          seq(stock_params$minlength, stock_params$maxlength,
+              by = 2*stock_params$dl),
+          open_ended = c("upper","lower")
+        )
+      ),
+    method = "number",
+    column_names = c(year = "year", step = "step", area = "area"),
+    verbose = FALSE) %>%
+    filter(!year %in% c(1991, 1993))
+
+  png(file.path(base_dir, "figures/TrawlRus_ldist_male.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+  print(plot.ldist(TrawlRus_ldist_male, type = "ggridges"))
+  dev.off()
 
   TrawlRus_ldist <- gadgetutils::g3_data(
     tmp,

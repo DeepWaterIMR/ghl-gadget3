@@ -56,6 +56,26 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_catchdistribution(
+  #   'TrawlRus_ldist_female',
+  #   TrawlRus_ldist_female,
+  #   fleets = list(TrawlRus),
+  #   stocks = c(female_imm, female_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  #
+  # g3l_catchdistribution(
+  #   'TrawlRus_ldist_male',
+  #   TrawlRus_ldist_male,
+  #   fleets = list(TrawlRus),
+  #   stocks = c(male_imm, male_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
   g3l_catchdistribution(
     'OtherNor_ldist',
     OtherNor_ldist,
@@ -356,7 +376,7 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
-  # Suitability tied to the SI  
+  # Suitability tied to the SI
   # g3l_catchdistribution(
   #   'EcoS_SI',
   #   EcoS_SI %>%
