@@ -78,7 +78,7 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
-
+  
   if(!dir.exists(base_dir)) {
     message(base_dir, "/data does not exist. Setting reload_data to TRUE. Data are reloaded from MFDB.")
   } else {
@@ -93,7 +93,7 @@ if(!exists("mdb") & reload_data) {
   if(grepl("https:", mfdb_path)) {
     temp <- tempfile()
     tmp <- try(suppressWarnings(download.file(mfdb_path, temp)), silent = TRUE)
-
+    
     if(class(tmp) == "try-error") {
       stop("Did not manage to find the duckdb file online. A wrong URL or a private Github repo?")
     } else {
@@ -168,27 +168,26 @@ source("6 initial parameters.R")
 #################################
 ## Optimize model parameters ####
 if(!run_jitter & !run_iterative_only & !run_retro) {
-
+  
   if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
-
+  
   time_optim_start <- Sys.time()
   message("Optimization started ", time_optim_start)
   ## g3_optim is a wrapper for stats::optim. It returns the parameter
   ## dataframe with the optimised parameters and includes an attribute with
   ## a summary of the optimisation.
-  ## The control argument is identical to control for optim with the following defaults:
-  ## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
+  ## The control argument is identical to control for optim
   optim_param <- g3_optim(model = tmb_model,
                           params = tmb_param,
                           use_parscale = TRUE,
                           method = 'BFGS',
-                          control = list(maxit = 3000), #,reltol = 1e-5
+                          control = list(maxit = 3000, reltol = 1e-9),
                           print_status = TRUE
   )
   time_optim_end <- Sys.time()
   time_optim <- round(as.numeric(time_optim_end - time_optim_start, units = "mins"), 1)
   message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
-
+  
   ## Write the times to a file
   info_file <- file(file.path(base_dir, "run_times.txt"))
   close(info_file)
@@ -202,36 +201,36 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
       "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
       "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
     file = file.path(base_dir, "run_times.txt"), sep = "")
-
+  
   ### Save the model parameters
-
+  
   write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
   save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
-
+  
   ## Plots
-
+  
   optim_fit <- g3_fit(model, optim_param)
   save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
-
+  
   if(plot_html) {
     tmppath <- file.path(getwd(), base_dir, "figures")
     gadget_plots(optim_fit, path = tmppath, file_type = "html")
     rm(tmppath)
   }
-
+  
   ## Copy the R scripts used to compile the model
   file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
-
+  
   ## Save workspace
   save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-
+  
 }
 
 if(run_jitter & !run_iterative_only) {
-
+  
   ###############################################
   ## Jitter model parameters (takes forever) ####
-
+  
   jitpar_out <- gadgetutils::g3_jitter(
     gd = base_dir,
     outdir = "jitter",
@@ -240,7 +239,7 @@ if(run_jitter & !run_iterative_only) {
     njits = 10,
     control = list(maxit = 4000, reltol = 1e-9),
     ncores = 10)
-
+  
   jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
     if(is.null(jitpar_out[[i]])) return(NULL)
     if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
@@ -256,10 +255,10 @@ if(run_jitter & !run_iterative_only) {
       mean = mean(dplyr::c_across(dplyr::starts_with("value"))),
       sd = sd(dplyr::c_across(dplyr::starts_with("value"))),
       cv = abs(sd/mean))
-
+  
   jitpar_list %>%
     write.g3.file(file.path(base_dir, "jitter"), 'jitter.param.comparison')
-
+  
   p <- ggplot2::ggplot(
     data = jitpar_list,
     ggplot2::aes(.data$switch,.data$cv,label=.data$switch)) +
@@ -271,24 +270,24 @@ if(run_jitter & !run_iterative_only) {
                  length(grep("^value", names(jitpar_list))), " jitter runs")
     ) +
     ggplot2::theme_bw(base_size = 8)
-
+  
   ggsave(file.path(base_dir, "figures/Jitter_parameter_CV.png"),
          plot = p, width = pagewidth, height = pagewidth*1.5, units = "mm")
-
+  
   jitter_fit <- lapply(seq_along(jitpar_out), function(i) {
     message(paste0(i, "/", length(jitpar_out)))
     if(is.null(jitpar_out[[i]])) return(NULL)
     if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
     try(g3_fit(model = tmb_model, params = jitpar_out[[i]]))
   })
-
+  
   jitter_fit <- Filter(
     Negate(is.null),
     lapply(jitter_fit, function(k) if(inherits(k, "try-error")) NULL else k)
   )
-
+  
   save(jitter_fit, file = file.path(getwd(), base_dir, 'jitter_fit.Rdata'))
-
+  
   gadgetplots:::bind_fit_components(jitter_fit, 'score') %>%
     na.omit() %>%
     summarise(
@@ -297,7 +296,7 @@ if(run_jitter & !run_iterative_only) {
       sd = sd(nll),
       cv = sd/mean) %>%
     write.g3.file(file.path(base_dir, "jitter"), 'jitter.nll.summary')
-
+  
   p <- lapply(seq_along(jitter_fit), function(i) {
     jitter_fit[[i]]$res.by.year %>%
       dplyr::group_by(.data$year) %>%
@@ -317,10 +316,10 @@ if(run_jitter & !run_iterative_only) {
     ggplot2::expand_limits(y = 0) +
     ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
     ggplot2::theme_classic(base_size = 8)
-
+  
   ggsave(file.path(base_dir, "figures/Jitter_model_biomass.png"),
          plot = p, width = pagewidth, height = pagewidth*0.7, units = "mm")
-
+  
 }
 
 #####################################################################
@@ -328,15 +327,16 @@ if(run_jitter & !run_iterative_only) {
 ## Running this part takes a long time (3-10 hours on a server)  ####
 
 if(run_iterative | run_iterative_only) {
-
+  
   if(set_weights) {
-    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
+    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0,
+              c("value", "lower", "upper", "optimise")] <-
       data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
-
+  
   time_iter_start <- Sys.time()
   message("Iteration started ", time_iter_start)
-
+  
   iter_param <- g3_iterative(
     gd = base_dir,
     wgts = "iterative_reweighting",
@@ -361,39 +361,39 @@ if(run_iterative | run_iterative_only) {
     shortcut = FALSE,
     mc.cores = ceiling(0.4*parallel::detectCores())
   )
-
+  
   time_iter_end <- Sys.time()
   time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
   message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
-
+  
   if(run_iterative_only) {
     info_file <- file(file.path(base_dir, "run_times.txt"))
     close(info_file)
   }
-
+  
   cat(
     c("Iteration:\n",
       "   started ", as.character(time_iter_start), "\n",
       "   finished ", as.character(time_iter_end), "\n",
       "   time ", time_iter, " min", "\n\n"),
     file = file.path(base_dir, "run_times.txt"), sep = "", append = TRUE)
-
+  
   ### Save the model parameters
-
+  
   write.csv(as.data.frame(iter_param), file = file.path(base_dir, "data/Iterated TMB parameters.csv"))
   save(iter_param, file = file.path(base_dir, "data/Iterated TMB parameters.rda"), compress = "xz")
-
+  
   ### Plots
-
+  
   iter_fit <- g3_fit(model, iter_param)
   save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
-
+  
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
-
+  
   if(plot_html) {
-  tmppath <- file.path(getwd(), base_dir, "figures")
-  make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
-  rm(tmppath)
+    tmppath <- file.path(getwd(), base_dir, "figures")
+    make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
+    rm(tmppath)
   }
 }
 
@@ -401,7 +401,7 @@ if(run_iterative | run_iterative_only) {
 ## Retroscpetive run ####
 
 if(run_retro) {
-
+  
   if(exists("iter_param")) {
     init_retro_param <- iter_param
   } else if(exists("optim_param")) {
@@ -409,57 +409,64 @@ if(run_retro) {
   } else {
     init_retro_param <- tmb_param
   }
-
-  init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- 1
-
-  retro_param <- g3_optim(model = tmb_model,
-                          params = init_retro_param,
-                          use_parscale = TRUE,
-                          method = 'BFGS',
-                          control = list(maxit = 3000), #,reltol = 1e-5
-                          print_status = TRUE
-  )
-
-#
-#
-#   load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
-#
-#   retro_model <- list()
-#   retro_params <- list()
-#   for(peel in 1:5){
-#
-#     source(file.path(base_dir, '00-setup', 'setup-likelihood.R'))  # Generates likelihood_actions
-#
-#     retro_actions <-
-#       c(cdredmat_actions,
-#         cdredimm_actions,
-#         fleet_actions,
-#         likelihood_actions,
-#         time_actions,
-#         list(g3l_bounds_penalty(tmb_param))
-#       )
-#     retro_model[[peel]] <- g3_to_tmb(retro_actions)
-#     retro_params[[peel]] <- params_final
-#     retro_params[[peel]]$value$retro_years <- peel
-#   }
-#
-#   peel <- 0
-#
-#   retro <-
-#     parallel::mclapply(1:5,function(x){
-#       g3_optim(retro_model[[x]],
-#                retro_params[[x]],
-#                control = list(maxit = 1000))
-#     },
-#     mc.cores = parallel::detectCores())
-#   ## Collate fit
-#   retro_fit <-
-#     1:5 %>%
-#     set_names(paste0('r',1:5)) %>%
-#     purrr::map(function(x) g3_fit(model = retro_model[[x]], params = retro[[x]]))
-#
-#   save(retro_fit, file = file.path(base_dir, vers,'RETRO', 'retro_fit.Rdata'))
-#   gadget_plots(fit, file.path(base_dir, vers, 'figs'), 'html', retrofit = retro_fit)
+  
+  retro_param <- lapply(0:5, function(lag) {
+    init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- lag
+    
+    g3_optim(model = tmb_model,
+             params = init_retro_param,
+             use_parscale = TRUE,
+             method = 'BFGS',
+             control = list(maxit = 3000), #,reltol = 1e-5
+             print_status = TRUE
+    )
+  })
+  
+  ### Save the model parameters
+  
+  write.csv(retro_param %>% bind_rows(), file = file.path(base_dir, "data/Retro parameters.csv"))
+  save(retro_param, file = file.path(base_dir, "data/Retro parameters.rda"), compress = "xz")
+  
+  ## Collate fit
+  
+  retro_fit <- lapply(retro_param, function(k) {
+    message(unname(unlist(k[grep("retro", k$switch),"value"])))
+    g3_fit(tmb_model, k)
+  })
+  
+  save(retro_fit, file = file.path(base_dir, 'retro_fit.Rdata'), compress = "xz")
+  
+  # if(plot_html) {
+  #   tmppath <- file.path(getwd(), base_dir, "figures")
+  #   make_html(retro_fit, path = tmppath, file_name = "model_output_figures_retro.html")
+  #   rm(tmppath)
+  # }
+  
+  # Plot
+  
+  p <- lapply(seq_along(retro_fit), function(i) {
+    retro_fit[[i]]$res.by.year %>%
+      dplyr::group_by(.data$year) %>%
+      dplyr::summarise(value = sum(.data$total.biomass)/1e6) %>%
+      dplyr::mutate(run = i-1)
+  }) %>%
+    dplyr::bind_rows() %>%
+    ggplot2::ggplot(
+      ggplot2::aes(.data$year,
+                   .data$value,
+                   col=as.factor(.data$run))) +
+    ggplot2::geom_line() +
+    ggplot2::labs(
+      y = "Total model population biomass ('000 tons)",
+      x='Year',col='Years\nremoved') +
+    ggplot2::coord_cartesian(expand = FALSE) +
+    ggplot2::expand_limits(y = 0) +
+    ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    ggplot2::theme_classic(base_size = 8)
+  
+  ggsave(file.path(base_dir, "figures/Retro_model_biomass.png"),
+         plot = p, width = pagewidth, height = pagewidth*0.7, units = "mm")
+  
 }
 
 ## Save workspace
