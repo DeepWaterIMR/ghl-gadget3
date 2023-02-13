@@ -37,6 +37,7 @@ if(!dir.exists(base_dir)) {
 model_params <- list()
 
 model_params$year_range <- 1980:2021
+model_params$peel <- 0 # How many years retro peels from abundancedistributions.
 model_params$timestep_fun <- mfdb::mfdb_timestep_yearly
 model_params$female_stock <- c("female_imm", "female_mat")
 model_params$male_stock <- c("male_imm", "male_mat")

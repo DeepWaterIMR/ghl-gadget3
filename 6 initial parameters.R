@@ -193,7 +193,6 @@ if(force_bound_params) {
   }
 
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
-
   tmb_model <- g3_to_tmb(actions)
 }
 
@@ -220,4 +219,6 @@ save(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.rda"))
 
 ## Save the R model
 
-save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
+if(!run_retro) {
+  save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
+}

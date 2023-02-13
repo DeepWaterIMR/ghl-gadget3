@@ -410,10 +410,25 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  retro_param <- lapply(0:5, function(lag) {
-    init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- lag
+  retro_param <- lapply(1:5, function(peel) {
 
-    g3_optim(model = tmb_model,
+    message(peel)
+    source("5 likelihood.R")
+
+    if(force_bound_params) {
+      retro_actions <- c(
+        time_actions, stock_actions, fleet_actions, likelihood_actions,
+        list(g3experiments::g3l_bounds_penalty(tmb_param))
+      )
+      retro_model <- g3_to_tmb(retro_actions)
+    } else {
+      retro_actions <- c(time_actions, stock_actions, fleet_actions, likelihood_actions)
+      retro_model <- g3_to_tmb(retro_actions)
+    }
+
+    init_retro_param$value$retro_years <- peel
+
+    g3_optim(model = retro_model,
              params = init_retro_param,
              use_parscale = TRUE,
              method = 'BFGS',

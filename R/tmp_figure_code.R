@@ -6,6 +6,12 @@ fit=optim_fit
 
 x <- split(fit$catchdist.fleets, fit$catchdist.fleets$name, drop = TRUE)
 
+lapply(x, function(k) {
+  if(length(unique(k$age)) == 1) {
+
+  }
+})
+
 k <- x[[5]]
 cor(k$observed, k$predicted)^2
 ggplot(k, aes(x = observed, y = predicted)) + geom_point()

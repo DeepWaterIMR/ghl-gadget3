@@ -340,9 +340,12 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'EggaN_SI_female',
     if("total_weight" %in% colnames(EggaN_SI_female)) {
-      EggaN_SI_female %>% rename("weight" = "total_weight")
+      EggaN_SI_female %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
+        rename("weight" = "total_weight")
     } else {
-      EggaN_SI_female
+      EggaN_SI_female %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
     },
     fleets = list(),
     stocks = list(female_imm, female_mat),
@@ -354,9 +357,12 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'EggaN_SI_male',
     if("total_weight" %in% colnames(EggaN_SI_male)) {
-      EggaN_SI_male %>% rename("weight" = "total_weight")
+      EggaN_SI_male %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
+        rename("weight" = "total_weight")
     } else {
-      EggaN_SI_male
+      EggaN_SI_male %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
     },
     fleets = list(),
     stocks = list(male_imm, male_mat),
@@ -368,6 +374,7 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'EcoS_SI',
     EcoS_SI %>%
+      dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
       rename("weight" = "total_weight"), # A bug here,
     fleets = list(),
     stocks = stocks,
@@ -390,7 +397,8 @@ likelihood_actions <- list(
 
   g3l_abundancedistribution(
     'Juv_SI_1',
-    Juv_SI_1,
+    Juv_SI_1 %>%
+      dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
     fleets = list(),
     stocks = list(male_imm, female_imm),
     area_group = c(all = 1),
@@ -400,7 +408,8 @@ likelihood_actions <- list(
 
   g3l_abundancedistribution(
     'Juv_SI_2',
-    Juv_SI_2,
+    Juv_SI_2 %>%
+      dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
     fleets = list(),
     stocks = list(male_imm, female_imm),
     area_group = c(all = 1),
@@ -431,6 +440,7 @@ likelihood_actions <- list(
   g3l_abundancedistribution(
     'RussianS_SI',
     Russian_SI %>%
+      dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
       rename("weight" = "total_weight"), # A bug here
     fleets = list(),
     stocks = stocks,
@@ -441,7 +451,8 @@ likelihood_actions <- list(
 
   g3l_abundancedistribution(
     'Rus_CPUE_SI',
-    Rus_CPUE_SI,
+    Rus_CPUE_SI %>%
+      dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
     fleets = list(),
     stocks = stocks,
     g3l_distribution_surveyindices_log(beta = 1),
