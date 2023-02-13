@@ -66,7 +66,7 @@ if(reload_data) {
            length = mfdb_interval(
              "len",
              seq(stock_params$minlength, stock_params$maxlength,
-                 by = 5*stock_params$dl),
+                 by = 2*stock_params$dl),
              open_ended = c("upper","lower")
            )
       )
@@ -186,10 +186,10 @@ if(reload_data) {
 
   ## Split length distributions
 
-  tmp <- split_g3_data(TrawlNor_ldist, TrawlNor_sexratio, split_column = "sex")
-
-  TrawlNor_ldist_male <- tmp[["male"]]
-  TrawlNor_ldist_female <- tmp[["female"]]
+  # tmp <- split_g3_data(TrawlNor_ldist, TrawlNor_sexratio, split_column = "sex")
+  #
+  # TrawlNor_ldist_male <- tmp[["male"]]
+  # TrawlNor_ldist_female <- tmp[["female"]]
 
   # TrawlNor_split_sexratio <- mfdb_sample_count(
   #   mdb,

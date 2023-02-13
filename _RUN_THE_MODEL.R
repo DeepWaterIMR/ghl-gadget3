@@ -164,6 +164,8 @@ source("6 initial parameters.R")
 #
 # save(model_tmb, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 
+## Copy the R scripts used to compile the model
+file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
 
 #################################
 ## Optimize model parameters ####
@@ -218,11 +220,8 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
     rm(tmppath)
   }
 
-  ## Copy the R scripts used to compile the model
-  file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
-
   ## Save workspace
-  save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+  # save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
 
 }
 
@@ -286,7 +285,7 @@ if(run_jitter & !run_iterative_only) {
     lapply(jitter_fit, function(k) if(inherits(k, "try-error")) NULL else k)
   )
 
-  save(jitter_fit, file = file.path(getwd(), base_dir, 'jitter_fit.Rdata'))
+  save(jitter_fit, file = file.path(base_dir, "jitter", 'jitter_fit.Rdata'))
 
   gadgetplots:::bind_fit_components(jitter_fit, 'score') %>%
     na.omit() %>%
