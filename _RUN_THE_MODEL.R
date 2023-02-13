@@ -176,13 +176,12 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
   ## g3_optim is a wrapper for stats::optim. It returns the parameter
   ## dataframe with the optimised parameters and includes an attribute with
   ## a summary of the optimisation.
-  ## The control argument is identical to control for optim with the following defaults:
-  ## maxit = 1000, trace = 2, reltol = .Machine$double.eps^2
+  ## The control argument is identical to control for optim
   optim_param <- g3_optim(model = tmb_model,
                           params = tmb_param,
                           use_parscale = TRUE,
                           method = 'BFGS',
-                          control = list(maxit = 3000), #,reltol = 1e-5
+                          control = list(maxit = 3000, reltol = 1e-9),
                           print_status = TRUE
   )
   time_optim_end <- Sys.time()
@@ -330,7 +329,8 @@ if(run_jitter & !run_iterative_only) {
 if(run_iterative | run_iterative_only) {
   
   if(set_weights) {
-    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0, c("value", "lower", "upper", "optimise")] <-
+    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0,
+              c("value", "lower", "upper", "optimise")] <-
       data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
   }
   
@@ -412,7 +412,7 @@ if(run_retro) {
   
   retro_param <- lapply(0:5, function(lag) {
     init_retro_param[grep("^retro_years$", init_retro_param$switch),"value"] <- lag
-    
+
     g3_optim(model = tmb_model,
              params = init_retro_param,
              use_parscale = TRUE,
@@ -421,9 +421,9 @@ if(run_retro) {
              print_status = TRUE
     )
   })
-  
+
   ### Save the model parameters
-  
+
   write.csv(retro_param %>% bind_rows(), file = file.path(base_dir, "data/Retro parameters.csv"))
   save(retro_param, file = file.path(base_dir, "data/Retro parameters.rda"), compress = "xz")
   
@@ -434,13 +434,13 @@ if(run_retro) {
     g3_fit(tmb_model, k)
   })
   
+  save(retro_fit, file = file.path(base_dir, 'retro_fit.Rdata'), compress = "xz")
+  
   # if(plot_html) {
   #   tmppath <- file.path(getwd(), base_dir, "figures")
   #   make_html(retro_fit, path = tmppath, file_name = "model_output_figures_retro.html")
   #   rm(tmppath)
   # }
-  
-  save(retro_fit, file = file.path(base_dir, 'retro_fit.Rdata'), compress = "xz")
   
   # Plot
   
