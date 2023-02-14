@@ -15,7 +15,7 @@
 
 # source("0 run first.R")
 
-# if(reload_data) {
+if(reload_data) {
 
   # source("R/gadget_data_functions.R")
   source("R/figure_functions.R")
