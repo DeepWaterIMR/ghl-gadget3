@@ -186,11 +186,6 @@ if(reload_data) {
 
   ## Split length distributions
 
-  # tmp <- split_g3_data(TrawlNor_ldist, TrawlNor_sexratio, split_column = "sex")
-  #
-  # TrawlNor_ldist_male <- tmp[["male"]]
-  # TrawlNor_ldist_female <- tmp[["female"]]
-
   # TrawlNor_split_sexratio <- mfdb_sample_count(
   #   mdb,
   #   c('sex', 'length'),
@@ -201,7 +196,7 @@ if(reload_data) {
   #       mfdb_interval(
   #         "len",
   #         seq(stock_params$minlength, stock_params$maxlength,
-  #             by = 5*stock_params$dl),
+  #             by = 2*stock_params$dl),
   #         open_ended = c("upper","lower")
   #       ),
   #     sex = mfdb_group(female = 'F', male = 'M'),
@@ -212,6 +207,15 @@ if(reload_data) {
   #
   # TrawlNor_split_sexratio <-
   #   clean_sexratio_data(TrawlNor_split_sexratio, plot = TRUE)
+  #
+  #
+  # png(file.path(base_dir, "figures/TrawlNor_ldist_sex_splitting.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
+  # TrawlNor_ldist_sex <- split_g3_data(TrawlNor_ldist, TrawlNor_split_sexratio, split_column = "sex", separate = FALSE, plot = TRUE)
+  # dev.off()
+
+  # TrawlNor_ldist_male <- tmp[["male"]]
+  # TrawlNor_ldist_female <- tmp[["female"]]
+
 
 
   # AllNorCatches_aldist <- mfdb_sample_count(
@@ -1015,10 +1019,10 @@ if(reload_data) {
   print(plot.ldist(RussianS_ldist))
   dev.off()
 
-  ############################
-  ## Maturity proportions ####
+  ###########################
+  # Maturity proportions ####
 
-  ## EggaN
+  ## EggaN ####
 
   EggaN_mat <- mfdb_concatenate_results(
     mfdb_sample_count(
@@ -1129,7 +1133,7 @@ if(reload_data) {
   print(compare_mat_ldist(EggaN_ldist, EggaN_mat, rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))))
   dev.off()
 
-  ## Cheat matp
+  ## Cheat matp ####
 
   Cheat_mat <- EggaN_mat %>%
     dplyr::group_by(step, area, maturity_stage, length) %>%
@@ -1148,7 +1152,8 @@ if(reload_data) {
     print(plot.matp(Cheat_mat))
     dev.off()
   }
-  ## EggaS
+
+  ## EggaS ####
 
   EggaS_mat <- mfdb_concatenate_results(
     mfdb_sample_count(

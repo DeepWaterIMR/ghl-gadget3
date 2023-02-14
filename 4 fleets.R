@@ -22,8 +22,8 @@ if(!exists("TrawlNor_catches")) source("2-3 landings.R")
 EggaN <- g3_fleet(c("EggaN", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
 
-EggaS <- g3_fleet(c("EggaS", "survey")) %>%
-  g3s_livesonareas(areas[c('1')])
+# EggaS <- g3_fleet(c("EggaS", "survey")) %>%
+#   g3s_livesonareas(areas[c('1')])
 
 EcoS <- g3_fleet(c("EcoS", "survey")) %>%
   g3s_livesonareas(areas[c('1')])
@@ -120,9 +120,9 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha', by_stock = c('species', 'sex'),
+              g3_parameterized('othernor.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('other.l50', by_stock = c('species', 'sex'),
+              g3_parameterized('othernor.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -184,9 +184,9 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha', by_stock = c('species', 'sex'),
+              g3_parameterized('othernor.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('other.l50', by_stock = c('species', 'sex'),
+              g3_parameterized('othernor.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -216,9 +216,9 @@ fleet_actions <-
             #   p5 = g3_parameterized('andersen.L', by_stock = c('species', 'sex'))
             # )
             g3_suitability_exponentiall50(
-              g3_parameterized('other.alpha', by_stock = c('species', 'sex'),
+              g3_parameterized('trawlnor.alpha', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('other.l50', by_stock = c('species', 'sex'),
+              g3_parameterized('trawlnor.l50', by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -281,30 +281,30 @@ fleet_actions <-
             )
           )
       ),
-    EggaS %>%
-      g3a_predate_fleet(
-        stocks,
-        suitabilities =
-          stocks %>%
-          set_names(.,map(.,'name')) %>%
-          map(function(x)
-            g3_suitability_exponentiall50(
-              g3_parameterized('eggan.survey.alpha', by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('eggan.survey.l50', by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets)
-            )
-          ),
-        catchability_f =
-          g3a_predate_catchability_totalfleet(
-            g3_timeareadata('EggaS_catches',
-                            EggaS_catches %>%
-                              mutate(area = 1, # Check this hack out
-                                     step = as.numeric(step),
-                                     year = as.numeric(year))
-            )
-          )
-      ),
+    # EggaS %>%
+    #   g3a_predate_fleet(
+    #     stocks,
+    #     suitabilities =
+    #       stocks %>%
+    #       set_names(.,map(.,'name')) %>%
+    #       map(function(x)
+    #         g3_suitability_exponentiall50(
+    #           g3_parameterized('eggan.survey.alpha', by_stock = c('species', 'sex'),
+    #                            exponentiate = exponentiate_fleets),
+    #           g3_parameterized('eggan.survey.l50', by_stock = c('species', 'sex'),
+    #                            exponentiate = exponentiate_fleets)
+    #         )
+    #       ),
+    #     catchability_f =
+    #       g3a_predate_catchability_totalfleet(
+    #         g3_timeareadata('EggaS_catches',
+    #                         EggaS_catches %>%
+    #                           mutate(area = 1, # Check this hack out
+    #                                  step = as.numeric(step),
+    #                                  year = as.numeric(year))
+    #         )
+    #       )
+    #   ),
     EcoS %>%
       g3a_predate_fleet(
         stocks,
@@ -319,7 +319,7 @@ fleet_actions <-
                                exponentiate = exponentiate_fleets)
             )
           ),
-        catchability_f = 
+        catchability_f =
           g3a_predate_catchability_totalfleet(
             g3_timeareadata('EcoS_catches',
                             EcoS_catches %>%

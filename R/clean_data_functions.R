@@ -221,10 +221,10 @@ clean_mat_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE, rat
         rename("number" = "pred.ratio") %>%
         as.data.frame()
     } else {
-    nasse <- nasse %>%
-      dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
-      rename("number" = "pred.number") %>%
-      as.data.frame()
+      nasse <- nasse %>%
+        dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
+        rename("number" = "pred.number") %>%
+        as.data.frame()
     }
 
     attributes(nasse) <- c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
@@ -354,10 +354,10 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
   if(plot) {
 
     plot <- ggplot(nasse) +
-          geom_point(aes(x = len, y = ratio, color = sex)) +
-          geom_path(aes(x = len, y = pred.ratio, color = sex)) +
-          labs(x = "Length (cm)", y = "Sex ratio (points = data, lines = smoothed)") +
-          facet_wrap(~year)
+      geom_point(aes(x = len, y = ratio, color = sex)) +
+      geom_path(aes(x = len, y = pred.ratio, color = sex)) +
+      labs(x = "Length (cm)", y = "Sex ratio (points = data, lines = smoothed)") +
+      facet_wrap(~year)
 
 
     suppressWarnings(print(plot))
@@ -374,13 +374,14 @@ clean_sexratio_data <- function(x, return_gadget_compatible = TRUE, plot = FALSE
         as.data.frame()
     } else {
       nasse <- nasse %>%
-      dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
-      rename("number" = "pred.number") %>%
-      as.data.frame()
+        dplyr::select(-len, -number, -n, -ratio, -pred.ratio) %>%
+        rename("number" = "pred.number") %>%
+        as.data.frame()
     }
 
-    attributes(nasse) <- c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
-                           attributes(x)[!names(attributes(x)) %in% c("class", "row.names", "names")])
+    attributes(nasse) <-
+      c(attributes(nasse)[names(attributes(nasse)) %in% c("class", "row.names", "names")],
+        attributes(x)[!names(attributes(x)) %in% c("class", "row.names", "names")])
 
     attributes(nasse)$length <- attributes(nasse)$length[sapply(attributes(nasse)$length, function(k) attributes(k)$min %in% length_groups)]
 

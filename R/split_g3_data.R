@@ -201,7 +201,7 @@ split_g3_data <- function(x, y, split_column, method = "fill_mean", separate = T
       tmp
     })
   } else {
-    tmp <- as.data.frame(out)
+    tmp <- as.data.frame(out) %>% dplyr::relocate(length, .before = "number")
     attributes(tmp) <- c(attributes(tmp), x_attr[setdiff(names(x_attr), names(attributes(tmp)))])
     attributes(tmp) <- c(attributes(tmp), y_attr[setdiff(names(y_attr), names(attributes(tmp)))])
     tmp
