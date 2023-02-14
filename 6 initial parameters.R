@@ -40,7 +40,7 @@ tmb_param <-
   g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
-  g3_init_guess('init.scalar', 35, 1, 1e6, 1) %>%
+  g3_init_guess('init.scalar', 35, 1, 1e4, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
