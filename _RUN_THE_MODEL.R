@@ -412,7 +412,7 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  retro_param <- lapply(1:5, function(peel) {
+  retro_param <- lapply(0:5, function(peel) {
 
     message(peel)
     source("5 likelihood.R")

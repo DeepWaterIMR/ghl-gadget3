@@ -154,7 +154,7 @@ likelihood_actions <- list(
     fleets = list(OtherNor, OtherRus),
     stocks = stocks,
     area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area', 'sex')),
+    g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 

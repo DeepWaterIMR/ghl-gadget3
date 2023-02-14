@@ -340,9 +340,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('winters.survey.alpha', by_stock = c('species', 'sex'),
+              g3_parameterized('winters.survey.alpha', by_stock = c('species'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('winters.survey.l50', by_stock = c('species', 'sex'),
+              g3_parameterized('winters.survey.l50', by_stock = c('species'),
                                exponentiate = exponentiate_fleets)
             )
           ),
@@ -364,9 +364,9 @@ fleet_actions <-
           set_names(.,map(.,'name')) %>%
           map(function(x)
             g3_suitability_exponentiall50(
-              g3_parameterized('russians.survey.alpha', by_stock = c('species', 'sex'),
+              g3_parameterized('russians.survey.alpha', by_stock = c('species'),
                                exponentiate = exponentiate_fleets),
-              g3_parameterized('russians.survey.l50', by_stock = c('species', 'sex'),
+              g3_parameterized('russians.survey.l50', by_stock = c('species'),
                                exponentiate = exponentiate_fleets)
             )
           ),
