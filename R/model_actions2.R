@@ -88,8 +88,36 @@ init_abund2 <- function(
              p_age = p_age))
 
 
-    }
-    else{
+    } else if (init_mode == 4){
+
+      ## Proportion mature at age
+      p_age <- g3a_initial_ageprop(
+        gadget3::g3_parameterized('mat_initial_alpha',
+                                  by_stock = comp_id),
+        gadget3::g3_parameterized('mat_initial_a50',
+                                  by_stock = comp_id))
+
+      ## Invert for immature stock
+      if(!mature){
+        p_age <- gadget3:::f_substitute(~1-p_age, list(p_age = p_age))
+      }
+
+      out <- gadget3:::f_substitute(
+        ~scalar*exp(-1*(M+init_F)*(age-minage))*p_age,
+        list(scalar = gadget3::g3_parameterized('init.scalar',
+                                                by_stock = allstocks,
+                                                exponentiate = exp_init_scalar,
+                                                scale = 1000),
+
+             M = naturalmortality,
+             init_F = gadget3::g3_parameterized(name = 'init.F',
+                                                by_stock = comp_id,
+                                                exponentiate = exp_init_f),
+             minage = gadget3::g3_step(~stock_with(imm, imm__minage)),
+             p_age = p_age))
+
+
+    } else {
 
       ## MODE 2: Initial parameter per age group per stock
       out <- gadget3:::f_substitute(
@@ -204,7 +232,7 @@ model_actions2 <- function(
   recsd <- setup_g3_param('rec.sd', rec_id, tv_params, by_age_params, exp_params)
   mat_alpha <- setup_g3_param('mat_alpha', comp_id, tv_params, by_age_params, exp_params, scale = 0.001)
   mat_l50 <- setup_g3_param('mat_l50', comp_id, tv_params, by_age_params, exp_params)
-  natm <- setup_g3_param('M', by_stock = TRUE, tv_params, by_age_params, exp_params)
+  natm <- setup_g3_param('M', by_stock = comp_id, tv_params, by_age_params, exp_params)
 
   ## Create some variables
   initvonb <- gadget3::g3a_renewal_vonb(Linf = Linf, K = kk, recl = recl)
