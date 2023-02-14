@@ -111,7 +111,7 @@ init_abund2 <- function(
 
              M = naturalmortality,
              init_F = gadget3::g3_parameterized(name = 'init.F',
-                                                by_stock = comp_id,
+                                                by_stock = allstocks,
                                                 exponentiate = exp_init_f),
              minage = gadget3::g3_step(~stock_with(imm, imm__minage)),
              p_age = p_age))
