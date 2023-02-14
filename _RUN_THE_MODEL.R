@@ -348,14 +348,15 @@ if(run_iterative | run_iterative_only) {
       list(SI_EggaN = c('log_EggaN_SI_female',
                         'log_EggaN_SI_male'),
            SI_Juv = c('log_Juv_SI_1',
-                      'log_Juv_SI_2'),
+                      'log_Juv_SI_2',
+                      'log_EcoS_SI'),
            TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
            OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
            TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
-           OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
+           # OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
            EcoS = c('EcoS_ldist', 'EcoS_aldist', 'EcoS_sexdist'),
-           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp'),
-           EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
+           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp')
+           # EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
       ),
     use_parscale = TRUE,
     control = list(maxit = 4000),
