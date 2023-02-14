@@ -183,7 +183,8 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
                           params = tmb_param,
                           use_parscale = TRUE,
                           method = 'BFGS',
-                          control = list(maxit = 3000, reltol = 1e-9),
+                          control = list(maxit = 3000 #, reltol = 1e-9
+                                         ),
                           print_status = TRUE
   )
   time_optim_end <- Sys.time()
@@ -236,7 +237,8 @@ if(run_jitter & !run_iterative_only) {
     model = tmb_model,
     params = tmb_param,
     njits = 10,
-    control = list(maxit = 4000, reltol = 1e-9),
+    control = list(maxit = 4000 #, reltol = 1e-9
+                   ),
     ncores = 10)
 
   jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
@@ -431,7 +433,7 @@ if(run_retro) {
              params = init_retro_param,
              use_parscale = TRUE,
              method = 'BFGS',
-             control = list(maxit = 3000), #,reltol = 1e-5
+             control = list(maxit = 3000),
              print_status = TRUE
     )
   })

@@ -313,7 +313,7 @@ if(reload_data) {
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
       year = model_params$year_range
-    ))[[1]] %>% filter(!year %in% c(1985,1991,1994,2011,2012)) # add 1992,1995?
+    ))[[1]] %>% filter(!year %in% c(1981,1985,1991,1994,2011,2012))
 
   OtherNor_sexratio <- clean_sexratio_data(OtherNor_sexratio)
 
