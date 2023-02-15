@@ -15,7 +15,7 @@
 ## To run in terminal through screen on Eucleia, do:
 # screen -dmSL gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
 ## You can also run the same script manually:
-# screen -S gadgetrun
+# screen -LS gadgetrun
 # /software/R-4.2.1/bin/R
 # setwd("ghl-gadget3")
 # source("_RUN_THE_MODEL.R", echo = TRUE)
@@ -417,7 +417,7 @@ if(run_retro) {
   retro_list <- parallel::mclapply(0:5, function(peel) {
 
     # print(paste0("Peel: ", peel))
-    
+
     model_params$peel <- peel
     source("5 likelihood.R")
 
@@ -443,11 +443,11 @@ if(run_retro) {
              print_status = TRUE
     )
     #message("g3_optim for ", peel, " finished. Running g3_fit")
-    
+
     fit <- g3_fit(retro_model, param)
-    
+
     # message("Peel ", peel, " finished.")
-    
+
     return(list(peel = peel, param = param, fit = fit))
   }, mc.cores = 6
   )
@@ -464,7 +464,7 @@ if(run_retro) {
   # }
 
   # Plot
-  
+
   retro_fit <- lapply(retro_list, function(k) k$fit)
 
   p <- lapply(seq_along(retro_fit), function(i) {

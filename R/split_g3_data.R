@@ -19,13 +19,6 @@ split_g3_data <- function(x, y, split_column, method = "fill_mean", separate = T
   length_attr <- x_attr$length
   y_attr <- attributes(y)
 
-  # length_groups <- names(attributes(y)$length) %>%
-  #   gsub("[^0-9.-]", "", .) %>%
-  #   as.numeric()
-  #
-  # first_length_group <- attributes(y)$length[1]
-  # last_length_group <- attributes(y)$length[length(length_groups)]
-
   x <- x %>%
     dplyr::mutate(length = factor(length, names(length_attr))) %>%
     tidyr::complete(year, step, area, length, fill = list(number = 0))
@@ -47,7 +40,7 @@ split_g3_data <- function(x, y, split_column, method = "fill_mean", separate = T
 
   if(method == "mean") {
     out <- full_join(x, y_mean, by = c('length'), multiple = "all")
-    tmp_y <- y_mean
+    tmp_y <- y_mean %>% dplyr::mutate(type = "mean")
   } else {
 
     y_out <- y %>%
