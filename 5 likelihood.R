@@ -230,15 +230,15 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
-  g3l_catchdistribution(
-    'OtherRus_sexdist',
-    OtherRus_sexratio %>% rename(stock_re = sex),
-    fleets = list(OtherRus),
-    stocks = stocks,
-    area_group = c(all = 1),
-    g3l_distribution_sumofsquares(over = c('area', 'length')),
-    nll_breakdown = nll_breakdown,
-    report = lik_report),
+  # g3l_catchdistribution(
+  #   'OtherRus_sexdist',
+  #   OtherRus_sexratio %>% rename(stock_re = sex),
+  #   fleets = list(OtherRus),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'length')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
 
   # g3l_catchdistribution(
   #   'EggaN_sexdist',
