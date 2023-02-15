@@ -57,8 +57,8 @@ tmb_param <-
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
-  g3_init_guess('\\.p3$', 50, 1e-6, 100, 1) %>%
-  g3_init_guess('\\.p4$', 50, 1e-6, 100, 1) %>%
+  g3_init_guess('\\.p3$', .15, 1e-6, 100, 1) %>%
+  g3_init_guess('\\.p4$', 35, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
