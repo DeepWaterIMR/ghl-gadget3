@@ -172,7 +172,7 @@ if(set_weights) {
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
 
-if(exists("prev_param")) {
+if(exists("prev_param") & previous_model_params_as_initial) {
   param_order <- names(tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"])
 
   tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"] <-
