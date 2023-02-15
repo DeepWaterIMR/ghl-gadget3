@@ -136,23 +136,23 @@ if(set_weights) {
           cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03    0
            cdist_sumofsquares_EggaS_matp_weight  2.400939e+03    91.444652
            cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  2263.696914
-          cdist_sumofsquares_EcoS_aldist_weight  6.305738e+03    700
-     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02      20 # 6.30393
+          cdist_sumofsquares_EcoS_aldist_weight  6.305738e+03    200
+     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02      40 # 6.30393
          cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02    29.672328
      cdist_sumofsquares_OtherNor_sexdist_weight  2.649673e+02     5.464418
     cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    6000
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02   2591.61211
-      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   1500
+      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   500
           cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  7985.495998
          cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04    0
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02   2311.43167
        cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 15026.079782
   cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    6000
-     cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02     6.057578
+     cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02     40
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  7591.360938
        cdist_sumofsquares_TrawlNor_ldist_weight  7.578842e+02  1821.731407
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03    23.969047
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    500
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    1000
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28    78.201168
      adist_surveyindices_log_Rus_CPUE_SI_weight           Inf   0
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01    45.183143
