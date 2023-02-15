@@ -413,9 +413,10 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  retro_param <- lapply(0:5, function(peel) {
+  retro_param <- parallel::mclapply(0:5, function(peel) {
 
     message(peel)
+    model_params$peel <- peel
     source("5 likelihood.R")
 
     if(force_bound_params) {
@@ -435,10 +436,11 @@ if(run_retro) {
              params = init_retro_param,
              use_parscale = TRUE,
              method = 'BFGS',
-             control = list(maxit = 3000),
+             control = list(maxit = 1),
              print_status = TRUE
     )
-  })
+  }, mc.cores = 6
+  )
 
   ### Save the model parameters
 
