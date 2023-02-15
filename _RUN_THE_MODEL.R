@@ -490,7 +490,7 @@ if(run_retro) {
 ## Save workspace
 
 save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-message("Script finished ", Sys.time())
+message("Script finished ", Sys.time(), ". Saved to ", base_dir)
 
 ## When running Ctrl + Alt + B, run until here. The options should take care what gets evaluated.
 
