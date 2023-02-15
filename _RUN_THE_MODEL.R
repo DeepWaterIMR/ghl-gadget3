@@ -276,12 +276,13 @@ if(run_jitter & !run_iterative_only) {
   ggsave(file.path(base_dir, "figures/Jitter_parameter_CV.png"),
          plot = p, width = pagewidth, height = pagewidth*1.5, units = "mm")
 
-  jitter_fit <- lapply(seq_along(jitpar_out), function(i) {
+  jitter_fit <- parallel::mclapply(seq_along(jitpar_out), function(i) {
     message(paste0(i, "/", length(jitpar_out)))
     if(is.null(jitpar_out[[i]])) return(NULL)
     if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
     try(g3_fit(model = tmb_model, params = jitpar_out[[i]]))
-  })
+  },
+  mc.cores = 10)
 
   jitter_fit <- Filter(
     Negate(is.null),
@@ -312,7 +313,7 @@ if(run_jitter & !run_iterative_only) {
                    col=as.factor(.data$run))) +
     ggplot2::geom_line() +
     ggplot2::labs(
-      y = "Total model population biomass ('000 tons)",
+      y = "Total model population biomass (kt)",
       x='Year',col='Jitter run') +
     ggplot2::coord_cartesian(expand = FALSE) +
     ggplot2::expand_limits(y = 0) +
@@ -413,9 +414,10 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  retro_param <- parallel::mclapply(0:5, function(peel) {
+  retro_list <- parallel::mclapply(0:5, function(peel) {
 
-    message(peel)
+    # print(paste0("Peel: ", peel))
+    
     model_params$peel <- peel
     source("5 likelihood.R")
 
@@ -432,29 +434,28 @@ if(run_retro) {
 
     init_retro_param$value$retro_years <- peel
 
-    g3_optim(model = retro_model,
+    # message("Running g3_optim for ", peel)
+    param <- g3_optim(model = retro_model,
              params = init_retro_param,
              use_parscale = TRUE,
              method = 'BFGS',
-             control = list(maxit = 1),
+             control = list(maxit = 4000),
              print_status = TRUE
     )
+    #message("g3_optim for ", peel, " finished. Running g3_fit")
+    
+    fit <- g3_fit(retro_model, param)
+    
+    # message("Peel ", peel, " finished.")
+    
+    return(list(peel = peel, param = param, fit = fit))
   }, mc.cores = 6
   )
 
   ### Save the model parameters
 
-  write.csv(retro_param %>% bind_rows(), file = file.path(base_dir, "data/Retro parameters.csv"))
-  save(retro_param, file = file.path(base_dir, "data/Retro parameters.rda"), compress = "xz")
-
-  ## Collate fit
-
-  retro_fit <- lapply(retro_param, function(k) {
-    message(unname(unlist(k[grep("retro", k$switch),"value"])))
-    g3_fit(tmb_model, k)
-  })
-
-  save(retro_fit, file = file.path(base_dir, 'retro_fit.Rdata'), compress = "xz")
+  write.csv(lapply(retro_list, function(k) k$param) %>% bind_rows(), file = file.path(base_dir, "data/Retro parameters.csv"))
+  save(retro_list, file = file.path(base_dir, "data/Retro parameters and fit.rda"), compress = "xz")
 
   # if(plot_html) {
   #   tmppath <- file.path(getwd(), base_dir, "figures")
@@ -463,6 +464,8 @@ if(run_retro) {
   # }
 
   # Plot
+  
+  retro_fit <- lapply(retro_list, function(k) k$fit)
 
   p <- lapply(seq_along(retro_fit), function(i) {
     retro_fit[[i]]$res.by.year %>%
@@ -477,7 +480,7 @@ if(run_retro) {
                    col=as.factor(.data$run))) +
     ggplot2::geom_line() +
     ggplot2::labs(
-      y = "Total model population biomass ('000 tons)",
+      y = "Total model population biomass (kt)",
       x='Year',col='Years\nremoved') +
     ggplot2::coord_cartesian(expand = FALSE) +
     ggplot2::expand_limits(y = 0) +
