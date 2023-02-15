@@ -18,7 +18,7 @@ if(reload_data) {
 
   ## ---------------------------
 
-  ### TrawlNor
+  # TrawlNor ####
 
   if(min(model_params$year_range) < 1977) {
     stop("Add splitting historic Norwegian catches to gear. See the Catch data document")
@@ -38,7 +38,7 @@ if(reload_data) {
   print(plot.catches(TrawlNor_catches))
   dev.off()
 
-  ### OtherNor
+  # OtherNor ####
 
   if(min(model_params$year_range) < 1977) {
     stop("Add splitting historic Norwegian catches to gear. See the Catch data document")
@@ -62,7 +62,7 @@ if(reload_data) {
   print(plot.catches(OtherNor_catches))
   dev.off()
 
-  ### TrawlRus
+  # TrawlRus ####
 
   if(min(model_params$year_range) < 1991) {
 
@@ -97,7 +97,7 @@ if(reload_data) {
       pull(prop) %>%
       mean()
 
-    ### HistRus
+    # HistRus ####
 
     HistRus <- mfdb_sample_totalweight(
       mdb = mdb, cols = NULL,
@@ -112,14 +112,14 @@ if(reload_data) {
       dplyr::select(year, step, area, TrawlRus, OtherRus) %>%
       na.omit()
 
-    ## TrawlRus
+    # TrawlRus ####
 
     TrawlRus_catches <- bind_rows(
       HistRus %>% dplyr::select(-OtherRus) %>% rename("total_weight" = "TrawlRus"),
       TrawlRus %>% filter(year > 1990)
     )
 
-    ## OtherRus
+    # OtherRus ####
 
     OtherRus_catches <- bind_rows(
       HistRus %>% dplyr::select(-TrawlRus) %>% rename("total_weight" = "OtherRus"),
@@ -140,7 +140,7 @@ if(reload_data) {
       )
     )[[1]]
 
-    ### OtherRus
+    # OtherRus ####
 
     OtherRus_catches <- mfdb_sample_totalweight(
       mdb = mdb, cols = NULL,
@@ -163,7 +163,7 @@ if(reload_data) {
   print(plot.catches(OtherRus_catches))
   dev.off()
 
-  ### International catches
+  # International catches ####
 
   Internat_catches <- mfdb_sample_totalweight(
     mdb = mdb, cols = NULL,
@@ -177,7 +177,7 @@ if(reload_data) {
   print(plot.catches(Internat_catches))
   dev.off()
 
-  ## Survey dummy catches
+  # Survey dummy catches ####
 
   if(!exists("EggaN_ldist")) source("2-3 catch distribution.R")
 
@@ -190,14 +190,14 @@ if(reload_data) {
   print(plot.catches(EggaN_catches))
   dev.off()
 
-  EggaS_catches <- structure(
-    data.frame(
-      year = unique(EggaS_ldist$year), step = 1, area = 1, total_weight = 1),
-    area_group = mfdb_group(`1` = 1))
-
-  png(file.path(base_dir, "figures/EggaS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-  print(plot.catches(EggaS_catches))
-  dev.off()
+  # EggaS_catches <- structure(
+  #   data.frame(
+  #     year = unique(EggaS_ldist$year), step = 1, area = 1, total_weight = 1),
+  #   area_group = mfdb_group(`1` = 1))
+  #
+  # png(file.path(base_dir, "figures/EggaS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  # print(plot.catches(EggaS_catches))
+  # dev.off()
 
   EcoS_catches <- structure(
     data.frame(
@@ -226,6 +226,7 @@ if(reload_data) {
   print(plot.catches(RussianS_catches))
   dev.off()
 
+  if(use_cheat_fleet) {
   Cheat_catches <- structure(
     data.frame(
       year = unique(Cheat_mat$year), step = 1, area = 1, total_weight = 1),
@@ -234,6 +235,7 @@ if(reload_data) {
   png(file.path(base_dir, "figures/Cheat_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
   print(plot.catches(Cheat_catches))
   dev.off()
+  }
 
   ## All catches
 
@@ -249,7 +251,7 @@ if(reload_data) {
 
   # Save
 
-  save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, EggaS_catches, EcoS_catches, RussianS_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
+  # save(TrawlNor_catches, OtherNor_catches, TrawlRus_catches, OtherRus_catches, Internat_catches, EggaN_catches, EggaS_catches, EcoS_catches, RussianS_catches, file = file.path(base_dir, "data/Catches to Gadget.rda"))
 
 
   # !reload_data case
