@@ -29,6 +29,14 @@ tmb_model <- g3_to_tmb(actions)
 
 tmb_param <- attr(tmb_model, "parameter_template")
 
+# Init sigma hack, delete
+
+init_sigma <- init_sigma %>% 
+  filter(stock != "ghl_female_imm") %>% 
+  bind_rows(init_sigma %>% 
+              filter(stock == "ghl_female_mat") %>% 
+              mutate(stock = "ghl_female_imm"))
+
 ## Define the initial parameters
 
 tmb_param <-
@@ -39,7 +47,7 @@ tmb_param <-
   g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
   g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
-  g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
+  g3_init_guess('rec.scalar', 10, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
@@ -57,8 +65,8 @@ tmb_param <-
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
-  g3_init_guess('\\.p3$', .15, 1e-6, 100, 1) %>%
-  g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
+  g3_init_guess('\\.p3$', .5, 0.01, 1, 1) %>%
+  g3_init_guess('\\.p4$', 35, 1e-6, 100, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
@@ -129,36 +137,30 @@ tmb_param <-
 if(set_weights) {
   # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
-    '                                           comp approx_weight       weight
-           cdist_sumofsquares_EggaN_matp_weight  1.956147e+03    172.36607
-     cdist_sumofsquares_OtherRus_sexdist_weight  6.886410e+02     5.612954
-       cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03 10702.377617
-          cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03    0
-           cdist_sumofsquares_EggaS_matp_weight  2.400939e+03    91.444652
-           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  2263.696914
-          cdist_sumofsquares_EcoS_aldist_weight  6.305738e+03    200
-     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02      40 # 6.30393
-         cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02    29.672328
-     cdist_sumofsquares_OtherNor_sexdist_weight  2.649673e+02     5.464418
-    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    6000
-       cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02   2591.61211
-      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04   400
-          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  9000
-         cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04    0
-        cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02   2311.43167
-       cdist_sumofsquares_OtherRus_ldist_weight  1.826473e+04 15026.079782
-  cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    6000
-     cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02     15
-       cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  7591.360938
-       cdist_sumofsquares_TrawlNor_ldist_weight  7.578842e+02  1821.731407
- adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03    23.969047
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    1000
-         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28    78.201168
-     adist_surveyindices_log_Rus_CPUE_SI_weight           Inf   0
-     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01    45.183143
-   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   260.488486
-        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    17.825625
-  '
+    '                                           comp approx_weight      weight
+           cdist_sumofsquares_EggaN_matp_weight  1.956147e+03  15.2974241
+       cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03 961.8353625
+           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03 186.7339627
+          cdist_sumofsquares_EcoS_aldist_weight  8.902087e+03   3.1857842
+     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    .6315892
+         cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   3
+     cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    .5489397
+    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03 423.5491263
+       cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 221.0199652
+      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  23.5569851
+          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 815.6735915
+        cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02 195.4152789
+  cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04 786.3379258
+     cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02    .6047172
+       cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  649.439644
+       cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03 619.6624068
+ adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   2.3853588
+   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02  35.4064274
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   4
+        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   2
+         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   1.8471612
+     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   4.2376414
+    '
   ), header = TRUE)
 
 

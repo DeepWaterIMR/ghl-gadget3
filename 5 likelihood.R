@@ -19,7 +19,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'TrawlNor_ldist',
     TrawlNor_ldist,
-    fleets = list(TrawlNor, Internat),
+    fleets = list(TrawlNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
@@ -79,7 +79,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'OtherNor_ldist',
     OtherNor_ldist,
-    fleets = list(OtherNor, OtherRus),
+    fleets = list(OtherNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(),
@@ -151,7 +151,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'OtherNor_aldist',
     OtherNor_aldist %>% rename(stock_re = sex),
-    fleets = list(OtherNor, OtherRus),
+    fleets = list(OtherNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(over = c('area', 'sex', 'length')),
@@ -203,7 +203,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'TrawlNor_sexdist',
     TrawlNor_sexratio %>% rename(stock_re = sex),
-    fleets = list(TrawlNor, Internat),
+    fleets = list(TrawlNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(over = c('area', 'length')),
@@ -213,7 +213,7 @@ likelihood_actions <- list(
   g3l_catchdistribution(
     'OtherNor_sexdist',
     OtherNor_sexratio %>% rename(stock_re = sex),
-    fleets = list(OtherNor, OtherRus),
+    fleets = list(OtherNor),
     stocks = stocks,
     area_group = c(all = 1),
     g3l_distribution_sumofsquares(over = c('area', 'length')),

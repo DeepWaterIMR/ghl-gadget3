@@ -346,11 +346,8 @@ if(run_iterative | run_iterative_only) {
     model = tmb_model,
     params.in = tmb_param,
     grouping =
-      list(SI_EggaN = c('log_EggaN_SI_female',
-                        'log_EggaN_SI_male'),
-           SI_Juv = c('log_Juv_SI_1',
-                      'log_Juv_SI_2',
-                      'log_EcoS_SI'),
+      list(SI_Adults = c('log_EggaN_SI_female', 'log_EggaN_SI_male', 'log_EcoS_SI'),
+           SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
            TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
            OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
            TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
