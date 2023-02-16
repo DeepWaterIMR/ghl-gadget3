@@ -41,7 +41,7 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 tmb_param <-
   tmb_param %>%
-  g3_init_guess('\\.rec', 1e4, 0.1, 5e4, 1) %>%
+  g3_init_guess('\\.rec', 1e4, 0.1, 2.5e4, 1) %>%
   # g3_init_guess('\\.init', 1e4, 0.1, 1e5, 1) %>%
   g3_init_guess('recl', 14, 12, 20, 0) %>%
   g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
@@ -65,7 +65,7 @@ tmb_param <-
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
-  g3_init_guess('\\.p3$', .5, 0.01, 1, 1) %>%
+  g3_init_guess('\\.p3$', .15, 0.01, 1, 1) %>%
   g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
@@ -142,10 +142,10 @@ if(set_weights) {
        cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03 961.8353625
            cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03   250
           cdist_sumofsquares_EcoS_aldist_weight  8.902087e+03   3.1857842
-     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    1
+     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    1.5
          cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   3
-     cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    .5489397
-    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03 500
+     cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    .7
+    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03 430
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 221.0199652
       cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  23.5569851
           cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 1000
