@@ -140,23 +140,23 @@ if(set_weights) {
     '                                           comp approx_weight      weight
            cdist_sumofsquares_EggaN_matp_weight  1.956147e+03  15.2974241
        cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03 961.8353625
-           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03 186.7339627
+           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03   250
           cdist_sumofsquares_EcoS_aldist_weight  8.902087e+03   3.1857842
-     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    .6315892
+     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    1
          cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   3
      cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    .5489397
-    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03 423.5491263
+    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03 500
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 221.0199652
       cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  23.5569851
-          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 815.6735915
+          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 1000
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02 195.4152789
   cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04 786.3379258
      cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02    .6047172
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  649.439644
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03 619.6624068
- adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   2.3853588
+ adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   5
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   10
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   20
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   30
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   2
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   1.8471612
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   4.2376414
