@@ -38,7 +38,6 @@ if(reload_data) {
   #   dplyr::select(age, stock, ms, ml) %>%
   #   write_csv("data/Initial ldist data.csv")
 
-
   init_sigma <- readr::read_csv("data/Initial ldist data.csv", 
                                 col_types = cols())
 

@@ -31,11 +31,11 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 # Init sigma hack, delete
 
-init_sigma <- init_sigma %>% 
-  filter(!(stock == "ghl_female_imm" & age >= 3)) %>% 
-  bind_rows(init_sigma %>% 
-              filter(stock == "ghl_female_mat") %>% 
-              mutate(stock = "ghl_female_imm"))
+# init_sigma <- init_sigma %>% 
+#   filter(!(stock == "ghl_female_imm" & age >= 3)) %>% 
+#   bind_rows(init_sigma %>% 
+#               filter(stock == "ghl_female_mat") %>% 
+#               mutate(stock = "ghl_female_imm"))
 
 ## Define the initial parameters
 
@@ -47,7 +47,7 @@ tmb_param <-
   g3_init_guess('rec.sd', 2, 1, 8, 0) %>%
   g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
-  g3_init_guess('rec.scalar', 10, 1, 100, 0) %>%
+  g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
@@ -66,7 +66,7 @@ tmb_param <-
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
   g3_init_guess('\\.p3$', .5, 0.01, 1, 1) %>%
-  g3_init_guess('\\.p4$', 35, 1e-6, 100, 1) %>%
+  g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
@@ -155,8 +155,8 @@ if(set_weights) {
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  649.439644
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03 619.6624068
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   2.3853588
-   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02  35.4064274
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   4
+   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   10
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   20
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   2
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   1.8471612
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   4.2376414
