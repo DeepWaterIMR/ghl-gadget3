@@ -32,7 +32,7 @@ tmb_param <- attr(tmb_model, "parameter_template")
 # Init sigma hack, delete
 
 init_sigma <- init_sigma %>% 
-  filter(stock != "ghl_female_imm") %>% 
+  filter(!(stock == "ghl_female_imm" & age >= 3)) %>% 
   bind_rows(init_sigma %>% 
               filter(stock == "ghl_female_mat") %>% 
               mutate(stock = "ghl_female_imm"))
