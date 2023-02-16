@@ -40,7 +40,7 @@ tmb_param <-
   g3_init_guess('rec.1980', 0, 0, 100, 0) %>%
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 10, 1, 100, 1) %>%
-  g3_init_guess('init.scalar', 35, 1, 1e4, 1) %>%
+  g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
   g3_init_guess('_male.Linf', 60, 40, 100, 1) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
@@ -58,7 +58,7 @@ tmb_param <-
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
   g3_init_guess('\\.p3$', .15, 1e-6, 100, 1) %>%
-  g3_init_guess('\\.p4$', 35, 1e-6, 100, 1) %>%
+  g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
   g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
