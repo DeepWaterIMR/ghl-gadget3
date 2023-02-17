@@ -167,7 +167,7 @@ TrawlNor_split_sexratio <- mfdb_sample_count(
   filter(!year %in% c(1981, 1988, 1992, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2011))
 
 TrawlNor_split_sexratio <-
-  clean_sexratio_data(TrawlNor_split_sexratio, plot = TRUE)
+  clean_sexratio_data(TrawlNor_split_sexratio)
 
 png(file.path(base_dir, "figures/TrawlNor_ldist_sex_splitting.png"), width = pagewidth*1.2, height = pagewidth*1.2, units = "mm", res = 300)
 TrawlNor_ldist_sex <- split_g3_data(TrawlNor_ldist, TrawlNor_split_sexratio, split_column = "sex", method = "mean", separate = FALSE, plot = TRUE)
@@ -351,7 +351,7 @@ OtherNor_split_sexratio <- mfdb_sample_count(
   filter(!year %in% c(1981,1985,1991,1994,2011,2012))
 
 OtherNor_split_sexratio <-
-  clean_sexratio_data(OtherNor_split_sexratio, plot = TRUE)
+  clean_sexratio_data(OtherNor_split_sexratio)
 
 png(file.path(base_dir, "figures/OtherNor_ldist_sex_splitting.png"), width = pagewidth*1.2, height = pagewidth*1.2, units = "mm", res = 300)
 OtherNor_ldist_sex <- split_g3_data(OtherNor_ldist, OtherNor_split_sexratio, split_column = "sex", separate = FALSE, plot = TRUE)
