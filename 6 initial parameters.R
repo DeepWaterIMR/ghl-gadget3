@@ -31,10 +31,10 @@ tmb_param <- attr(tmb_model, "parameter_template")
 
 # Init sigma hack, delete
 
-# init_sigma <- init_sigma %>% 
-#   filter(!(stock == "ghl_female_imm" & age >= 3)) %>% 
-#   bind_rows(init_sigma %>% 
-#               filter(stock == "ghl_female_mat") %>% 
+# init_sigma <- init_sigma %>%
+#   filter(!(stock == "ghl_female_imm" & age >= 3)) %>%
+#   bind_rows(init_sigma %>%
+#               filter(stock == "ghl_female_mat") %>%
 #               mutate(stock = "ghl_female_imm"))
 
 ## Define the initial parameters
@@ -106,7 +106,7 @@ tmb_param <-
                 value = init_sigma %>%
                   filter(grepl('_female_mat', stock)) %>%
                   filter(age %in%
-                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                           as.numeric(gsub("[^0-9.-]|\\.", "",
                                            tmb_param[grepl('_female_mat\\.init\\.sd',
                                                            tmb_param$switch),]$switch))
                          ) %>%
@@ -117,7 +117,7 @@ tmb_param <-
                   filter(grepl('_male_mat', stock)) %>%
                   filter(
                     age %in%
-                      as.numeric(gsub("[^0-9.-]|\\.", "", 
+                      as.numeric(gsub("[^0-9.-]|\\.", "",
                                       tmb_param[grepl('_male_mat\\.init\\.sd',
                                                       tmb_param$switch),]$switch))
                     ) %>%
@@ -126,7 +126,7 @@ tmb_param <-
                 init_sigma %>%
                   filter(grepl('_female_imm', stock)) %>%
                   filter(age %in%
-                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                           as.numeric(gsub("[^0-9.-]|\\.", "",
                                            tmb_param[grepl('_female_imm\\.init\\.sd',
                                                            tmb_param$switch),]$switch))
                          ) %>%
@@ -135,7 +135,7 @@ tmb_param <-
                 init_sigma %>%
                   filter(grepl('_male_imm', stock)) %>%
                   filter(age %in%
-                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                           as.numeric(gsub("[^0-9.-]|\\.", "",
                                            tmb_param[grepl('_male_imm\\.init\\.sd',
                                                            tmb_param$switch),]$switch))
                          ) %>%
@@ -165,22 +165,24 @@ if(set_weights) {
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03   1821.7
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   24.0
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   260.5
+        adist_surveyindices_log_EggaN_SI_weight  6.397818e+02   200
         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   700.0
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   60.0
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   78.2
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   45.2
+        adist_surveyindices_log_EggaS_SI_weight  0              100
          cdist_sumofsquares_EggaS_aldist_weight  0              100
           cdist_sumofsquares_EggaS_ldist_weight  0              2000
-           cdist_sumofsquares_EggaS_matp_weight  0              100     
+           cdist_sumofsquares_EggaS_matp_weight  0              100
     '
   ), header = TRUE)
-  
-  
+
+
   param_order <- names(tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"])
-  
+
   tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <-
     tmp_weights[na.omit(match(param_order, tmp_weights$comp)), "weight"]
-  
+
   rm(param_order)
 }
 
@@ -188,12 +190,12 @@ if(set_weights) {
 
 if(exists("prev_param") & previous_model_params_as_initial) {
   param_order <- names(tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"])
-  
+
   tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"] <-
     unname(prev_param[na.omit(match(param_order, names(prev_param)))])
-  
+
   rm(param_order)
-  
+
   # tmb_param[match(names(prev_param),tmb_param$switch), "value"] <- unname(prev_param)
 }
 
@@ -203,7 +205,7 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-  
+
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
   tmb_model <- g3_to_tmb(actions)
 }

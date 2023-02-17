@@ -337,56 +337,67 @@ likelihood_actions <- list(
 
   ## Survey indices ####
 
-  g3l_abundancedistribution(
-    'EggaN_SI_female',
-    if("total_weight" %in% colnames(EggaN_SI_female)) {
-      EggaN_SI_female %>%
-        dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
-        rename("weight" = "total_weight")
-    } else {
-      EggaN_SI_female %>%
-        dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
-    },
-    fleets = list(),
-    stocks = list(female_imm, female_mat),
-    area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(beta = 1),
-    nll_breakdown = nll_breakdown,
-    report = lik_report),
-
-  g3l_abundancedistribution(
-    'EggaN_SI_male',
-    if("total_weight" %in% colnames(EggaN_SI_male)) {
-      EggaN_SI_male %>%
-        dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
-        rename("weight" = "total_weight")
-    } else {
-      EggaN_SI_male %>%
-        dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
-    },
-    fleets = list(),
-    stocks = list(male_imm, male_mat),
-    area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(beta = 1),
-    nll_breakdown = nll_breakdown,
-    report = lik_report),
-
   # g3l_abundancedistribution(
-  #   'EggaN_SI',
-  #   if("total_weight" %in% colnames(EggaN_SI)) {
-  #     EggaN_SI %>%
+  #   'EggaN_SI_female',
+  #   if("total_weight" %in% colnames(EggaN_SI_female)) {
+  #     EggaN_SI_female %>%
   #       dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
   #       rename("weight" = "total_weight")
   #   } else {
-  #     EggaN_SI %>%
+  #     EggaN_SI_female %>%
   #       dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
   #   },
   #   fleets = list(),
-  #   stocks = stocks,
+  #   stocks = list(female_imm, female_mat),
   #   area_group = c(all = 1),
   #   g3l_distribution_surveyindices_log(beta = 1),
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
+  #
+  # g3l_abundancedistribution(
+  #   'EggaN_SI_male',
+  #   if("total_weight" %in% colnames(EggaN_SI_male)) {
+  #     EggaN_SI_male %>%
+  #       dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
+  #       rename("weight" = "total_weight")
+  #   } else {
+  #     EggaN_SI_male %>%
+  #       dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
+  #   },
+  #   fleets = list(),
+  #   stocks = list(male_imm, male_mat),
+  #   area_group = c(all = 1),
+  #   g3l_distribution_surveyindices_log(beta = 1),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+
+  g3l_abundancedistribution(
+    'EggaN_SI',
+    if("total_weight" %in% colnames(EggaN_SI)) {
+      EggaN_SI %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel) %>%
+        rename("weight" = "total_weight")
+    } else {
+      EggaN_SI %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel)
+    },
+    fleets = list(),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_surveyindices_log(beta = 1),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
+
+  g3l_abundancedistribution(
+    'EggaS_SI',
+          EggaS_SI %>%
+        dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
+    fleets = list(),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_surveyindices_log(beta = 1),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
 
   g3l_abundancedistribution(
     'EcoS_SI',
@@ -419,7 +430,7 @@ likelihood_actions <- list(
     fleets = list(),
     stocks = list(male_imm, female_imm),
     area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(beta = 1),
+    g3l_distribution_surveyindices_log(),
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
