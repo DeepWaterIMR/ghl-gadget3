@@ -61,6 +61,21 @@ if(reload_data) {
       )
     )[[1]]
 
+    EggaN_SI <- mfdb_sample_totalweight(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-biomass",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
+
   } else {
 
     EggaN_SI_female <- mfdb_sample_count(
@@ -95,11 +110,26 @@ if(reload_data) {
       )
     )[[1]]
 
+    EggaN_SI <- mfdb_sample_count(
+      mdb = mdb, cols = c("length"),
+      params = list(
+        data_source = "EggaN-index-abundance",
+        population = c("C500-700", "C700-1000", "D500-700", "D700-1000",
+                       "E500-700", "E700-1000", "F500-700", "F700-1000"),
+        length = mfdb_interval(
+          "all", c(28, stock_params$maxlength),
+          open_ended = c("upper")),
+        # Remove 94&95 data from the SI:
+        year = model_params$year_range[model_params$year_range >= 1996],
+        timestep = model_params$timestep_fun
+      )
+    )[[1]]
   }
 
 
   p <- bind_rows(EggaN_SI_female %>% mutate(sex = "F"),
-                 EggaN_SI_male %>% mutate(sex = "M")) %>%
+                 EggaN_SI_male %>% mutate(sex = "M")
+                 ) %>%
     mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
     ggplot(., aes(x = year, y = value/1e6, fill = sex)) +
     geom_area(position = position_stack(reverse = TRUE)) +
@@ -179,12 +209,12 @@ if(reload_data) {
   )[[1]]
 
   Juv_SI_1$year <- Juv_SI_1$year - 1
-  
+
   attributes(Juv_SI_1)$year <- stats::setNames(
     lapply(unique(Juv_SI_1$year), function(k) k),
     lapply(unique(Juv_SI_1$year), function(k) k)
   )
-  
+
   Juv_SI_2 <- mfdb_sample_count(
     mdb = mdb, cols = c("length"),
     params = list(
@@ -198,13 +228,13 @@ if(reload_data) {
   )[[1]]
 
   Juv_SI_2$year <- Juv_SI_2$year - 1
-  
+
   attributes(Juv_SI_2)$year <- stats::setNames(
     lapply(unique(Juv_SI_2$year), function(k) k),
     lapply(unique(Juv_SI_2$year), function(k) k)
   )
-  
-  
+
+
   # Juv_SI_3 <- mfdb_sample_count(
   #   mdb = mdb, cols = c("length"),
   #   params = list(
@@ -255,17 +285,17 @@ if(reload_data) {
   #         open_ended = c("upper"))
   #     )
   #   )
-  # 
+  #
   # p <- ggplot(WinterS_SI, aes(x = year, y = weight)) +
   #   geom_col() +
   #   labs(y = "Survey index biomass (1000 t)", x = "Year") +
   #   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
   #   scale_y_continuous(expand = c(0, 0))
-  # 
+  #
   # ggsave(filename = file.path(base_dir, "figures/WinterS_index.png"),
   #        plot = print(p), width = pagewidth, height = pagewidth*0.7,
   #        units = "mm", bg = "white")
-  # 
+  #
   # rm(p)
 
   ## Russian survey index ####
@@ -338,7 +368,7 @@ if(reload_data) {
   ## Save ####
 
   save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, # Juv_SI_3,
-       EcoS_SI, Russian_SI, Rus_CPUE_SI, # WinterS_SI, 
+       EcoS_SI, Russian_SI, Rus_CPUE_SI, # WinterS_SI,
        file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
