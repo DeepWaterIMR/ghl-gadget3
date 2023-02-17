@@ -190,14 +190,14 @@ if(reload_data) {
   print(plot.catches(EggaN_catches))
   dev.off()
 
-  # EggaS_catches <- structure(
-  #   data.frame(
-  #     year = unique(EggaS_ldist$year), step = 1, area = 1, total_weight = 1),
-  #   area_group = mfdb_group(`1` = 1))
-  #
-  # png(file.path(base_dir, "figures/EggaS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-  # print(plot.catches(EggaS_catches))
-  # dev.off()
+  EggaS_catches <- structure(
+    data.frame(
+      year = unique(EggaS_ldist$year), step = 1, area = 1, total_weight = 1),
+    area_group = mfdb_group(`1` = 1))
+
+  png(file.path(base_dir, "figures/EggaS_catches.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+  print(plot.catches(EggaS_catches))
+  dev.off()
 
   EcoS_catches <- structure(
     data.frame(

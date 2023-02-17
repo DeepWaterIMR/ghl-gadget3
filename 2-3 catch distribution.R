@@ -859,6 +859,57 @@ dev.off()
 # print(plot.sexr(EggaN_sexratio))
 # dev.off()
 
+### Maturity proportion ####
+
+EggaN_mat <- mfdb_concatenate_results(
+  mfdb_sample_count(
+    mdb,
+    c('maturity_stage','length'),
+    list(
+      length =
+        mfdb_interval(
+          'len', seq(31, 91, by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
+      maturity_stage = mfdb_group(male_imm = 1:2, male_mat = 3:5),
+      sex = "M",
+      data_source = "ldist-surveys-NOR",
+      sampling_type = "ENS",
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range
+    ))[[1]],
+  
+  mfdb_sample_count(
+    mdb,
+    c('maturity_stage','length'),
+    list(
+      length =
+        mfdb_interval(
+          'len', seq(31, 91, by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
+      maturity_stage = mfdb_group(female_imm = 1:2, female_mat = 3:5),
+      sex = "F",
+      data_source = "ldist-surveys-NOR",
+      sampling_type = "ENS",
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range
+    ))[[1]]
+) %>% filter(!year %in% 1999)
+
+EggaN_mat <- clean_mat_data(EggaN_mat)
+
+png(file.path(base_dir, "figures/EggaN_maturity_data.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.mat(EggaN_mat))
+dev.off()
+
+png(file.path(base_dir, "figures/EggaN_maturity_data_proportions.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.matp(EggaN_mat))
+dev.off()
+
+png(file.path(base_dir, "figures/Maturity_age_ldist_length_comparison.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+print(compare_mat_ldist(EggaN_ldist, EggaN_mat, rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))))
+dev.off()
+
+
 #############
 ## EggaS ####
 
@@ -886,63 +937,65 @@ dev.off()
 #     )
 # )
 
-# EggaS_ldist <- mfdb_sample_count(
-#   mdb,
-#   cols = c("length"),
-#   params =
-#     list(sampling_type = "ESS",
-#          gear = "BottomTrawls",
-#          year = model_params$year_range,
-#          timestep = model_params$timestep_fun,
-#          length = mfdb_interval(
-#            "len",
-#            seq(stock_params$minlength, stock_params$maxlength,
-#                by = 2*stock_params$dl),
-#            open_ended = c("upper","lower")
-#          )
-#     )
-# )[[1]]
-#
-# png(file.path(base_dir, "figures/EggaS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.ldist(EggaS_ldist, type = "ggridges"))
-# dev.off()
-#
-# ## Age-length
-#
-# EggaS_aldist <- g3_data(
-#   nor_survey_aldist %>%
-#     filter(
-#       sampling_type == "ESS",
-#       !is.na(age),
-#       readingtype %in% c("new_other_reader", "new_qualified_reader")
-#     ),
-#   params =
-#     list(
-#       timestep = model_params$timestep_fun,
-#       age = mfdb_interval(
-#         "age", stock_params$minage:stock_params$maxage,
-#         open_ended = c("upper")
-#       ),
-#       length = mfdb_interval(
-#         "len",
-#         seq(26, 87, by = 5),
-#         open_ended = c("upper")
-#       ),
-#       sex = mfdb_group(female = 'F', male = 'M')
-#     ),
-#   method = "est_n",
-#   verbose = FALSE
-# ) %>% rename("number" = "est_n")
-#
-# png(file.path(base_dir, "figures/EggaS_aldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom")
-# p2 <- EggaS_aldist %>% filter(sex == "male") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none")
-# cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), p2), cowplot::get_legend(p1), ncol = 1, rel_heights = c(10,1)) %>% print
-# dev.off()
-#
-# rm(p1, p2)
+### Ldist ####
 
-## Sex ratio
+EggaS_ldist <- mfdb_sample_count(
+  mdb,
+  cols = c("length"),
+  params =
+    list(sampling_type = "ESS",
+         gear = "BottomTrawls",
+         year = model_params$year_range,
+         timestep = model_params$timestep_fun,
+         length = mfdb_interval(
+           "len",
+           seq(stock_params$minlength, stock_params$maxlength,
+               by = 2*stock_params$dl),
+           open_ended = c("upper","lower")
+         )
+    )
+)[[1]]
+
+png(file.path(base_dir, "figures/EggaS_ldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.ldist(EggaS_ldist, type = "ggridges"))
+dev.off()
+
+### Age-length ####
+
+EggaS_aldist <- g3_data(
+  nor_survey_aldist %>%
+    filter(
+      sampling_type == "ESS",
+      !is.na(age),
+      readingtype %in% c("new_other_reader", "new_qualified_reader")
+    ),
+  params =
+    list(
+      timestep = model_params$timestep_fun,
+      age = mfdb_interval(
+        "age", stock_params$minage:stock_params$maxage,
+        open_ended = c("upper")
+      ),
+      length = mfdb_interval(
+        "len",
+        seq(26, 87, by = 5),
+        open_ended = c("upper")
+      ),
+      sex = mfdb_group(female = 'F', male = 'M')
+    ),
+  method = "est_n",
+  verbose = FALSE
+) %>% rename("number" = "est_n")
+
+png(file.path(base_dir, "figures/EggaS_aldist.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+p1 <- EggaS_aldist %>% filter(sex == "female") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Females") + theme(legend.position = "bottom")
+p2 <- EggaS_aldist %>% filter(sex == "male") %>% plot.aldist(., facet_age = FALSE, ncol = 1, scales = "free_y") + ggtitle("Males") + theme(legend.position = "none")
+cowplot::plot_grid(cowplot::plot_grid(p1 + theme(legend.position = "none"), p2), cowplot::get_legend(p1), ncol = 1, rel_heights = c(10,1)) %>% print
+dev.off()
+
+rm(p1, p2)
+
+### Sex ratio ####
 
 ## Non-mfdb way
 # EggaS_sexratio <- g3_data(
@@ -967,28 +1020,76 @@ dev.off()
 #     year = model_params$year_range
 #   ))
 
-# EggaS_sexratio <- mfdb_sample_count(
-#   mdb,
-#   c('sex','length'),
-#   list(
-#     sampling_type = "ESS",
-#     gear = "BottomTrawls",
-#     length =
-#       mfdb_interval(
-#         'len',
-#         seq(41, stock_params$male_mat$max_possible_data_length+6,
-#             by = 5*stock_params$dl),
-#         open_ended = c('upper')),
-#     sex = mfdb_group(female = 'F', male = 'M'),
-#     timestep = model_params$timestep_fun,
-#     year = model_params$year_range
-#   ))[[1]]
-#
-# EggaS_sexratio <- clean_sexratio_data(EggaS_sexratio)
-#
-# png(file.path(base_dir, "figures/EggaS_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
-# print(plot.sexr(EggaS_sexratio))
-# dev.off()
+EggaS_sexratio <- mfdb_sample_count(
+  mdb,
+  c('sex','length'),
+  list(
+    sampling_type = "ESS",
+    gear = "BottomTrawls",
+    length =
+      mfdb_interval(
+        'len',
+        seq(41, stock_params$male_mat$max_possible_data_length+6,
+            by = 5*stock_params$dl),
+        open_ended = c('upper')),
+    sex = mfdb_group(female = 'F', male = 'M'),
+    timestep = model_params$timestep_fun,
+    year = model_params$year_range
+  ))[[1]]
+
+EggaS_sexratio <- clean_sexratio_data(EggaS_sexratio)
+
+png(file.path(base_dir, "figures/EggaS_sexratio.png"), width = pagewidth, height = pagewidth*1.5, units = "mm", res = 300)
+print(plot.sexr(EggaS_sexratio))
+dev.off()
+
+### Matp ####
+
+EggaS_mat <- mfdb_concatenate_results(
+  mfdb_sample_count(
+    mdb,
+    c('maturity_stage','length'),
+    list(
+      length =
+        mfdb_interval(
+          'len', seq(31, 91, by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
+      maturity_stage = mfdb_group(male_imm = 1:2, male_mat = 3:5),
+      sex = "M",
+      data_source = "ldist-surveys-NOR",
+      sampling_type = "ESS",
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range
+    ))[[1]],
+  
+  mfdb_sample_count(
+    mdb,
+    c('maturity_stage','length'),
+    list(
+      length =
+        mfdb_interval(
+          'len', seq(31, 91, by = 5*stock_params$dl),
+          open_ended = c('lower','upper')),
+      maturity_stage = mfdb_group(female_imm = 1:2, female_mat = 3:5),
+      sex = "F",
+      data_source = "ldist-surveys-NOR",
+      sampling_type = "ESS",
+      timestep = model_params$timestep_fun,
+      year = model_params$year_range
+    ))[[1]]
+)
+
+EggaS_mat <- clean_mat_data(EggaS_mat) %>% filter(!year %in% 2016)
+
+png(file.path(base_dir, "figures/EggaS_maturity_data.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.mat(EggaS_mat))
+dev.off()
+
+png(file.path(base_dir, "figures/EggaS_maturity_data_proportions.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
+print(plot.matp(EggaS_mat))
+dev.off()
+
+
 
 ########################
 ## Ecosystem survey ####
@@ -1167,116 +1268,6 @@ dev.off()
 ###########################
 # Maturity proportions ####
 
-## EggaN ####
-
-EggaN_mat <- mfdb_concatenate_results(
-  mfdb_sample_count(
-    mdb,
-    c('maturity_stage','length'),
-    list(
-      length =
-        mfdb_interval(
-          'len', seq(31, 91, by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
-      maturity_stage = mfdb_group(male_imm = 1:2, male_mat = 3:5),
-      sex = "M",
-      data_source = "ldist-surveys-NOR",
-      sampling_type = "ENS",
-      timestep = model_params$timestep_fun,
-      year = model_params$year_range
-    ))[[1]],
-
-  mfdb_sample_count(
-    mdb,
-    c('maturity_stage','length'),
-    list(
-      length =
-        mfdb_interval(
-          'len', seq(31, 91, by = 5*stock_params$dl),
-          open_ended = c('lower','upper')),
-      maturity_stage = mfdb_group(female_imm = 1:2, female_mat = 3:5),
-      sex = "F",
-      data_source = "ldist-surveys-NOR",
-      sampling_type = "ENS",
-      timestep = model_params$timestep_fun,
-      year = model_params$year_range
-    ))[[1]]
-) %>% filter(!year %in% 1999)
-
-EggaN_mat <- clean_mat_data(EggaN_mat)
-
-# nremoved <- sum(EggaN_mat$number) -
-#   EggaN_mat %>%
-#   mutate(len = as.numeric(gsub("len", "", length))) %>%
-#   filter(
-#     (grepl("^female_mat", maturity_stage) &
-#        len > stock_params$female_mat$min_possible_data_length) |
-#       (grepl("^female_imm", maturity_stage) &
-#          len <stock_params$female_imm$max_possible_data_length) |
-#       (grepl("^male_mat", maturity_stage) &
-#          len > stock_params$male_mat$min_possible_data_length) |
-#       (grepl("^male_imm", maturity_stage) &
-#          len < stock_params$male_imm$max_possible_data_length)
-#   ) %>% pull(number) %>% sum()
-
-# if(nremoved > 0) {
-#   message("Removed ", nremoved, " observations from EggaN maturity proportions to smooth the data going into likelihood")
-# }
-#
-# rm(nremoved)
-#
-# EggaN_mat <- EggaN_mat %>%
-#   mutate(len = as.numeric(gsub("len", "", length))) %>%
-#   filter(
-#     (grepl("^female_mat", maturity_stage) &
-#        len > stock_params$female_mat$min_possible_data_length) |
-#       (grepl("^female_imm", maturity_stage) &
-#          len < stock_params$female_imm$max_possible_data_length) |
-#       (grepl("^male_mat", maturity_stage) &
-#          len > stock_params$male_mat$min_possible_data_length) |
-#       (grepl("^male_imm", maturity_stage) &
-#          len < stock_params$male_imm$max_possible_data_length)
-#   )
-#
-# if(!is.na(stock_params$force_even_stock_distribution_length)) {
-#
-#   EggaN_mat <- EggaN_mat %>%
-#     filter(len > stock_params$force_even_stock_distribution_length) %>%
-#     bind_rows(
-#       tibble(year = unique(EggaN_mat$year),
-#              step = unique(EggaN_mat$step),
-#              area = unique(EggaN_mat$area)) %>%
-#         tidyr::expand(nesting(year, step, area),
-#                       maturity_stage = c("female_imm", "male_imm")) %>%
-#         mutate(age = unique(EggaN_mat$age)) %>%
-#         tidyr::expand(
-#           nesting(year, step, area, maturity_stage),
-#           length =
-#             names(
-#               mfdb_interval(
-#                 'len', seq(31, stock_params$male_mat$max_possible_data_length+6,
-#                            by = 5*stock_params$dl),
-#                 open_ended = c('lower','upper')))) %>%
-#         mutate(number = 1,
-#                len = as.numeric(gsub("len", "", length)))
-#     ) %>%
-#     arrange(year, step, area, maturity_stage, len)
-# }
-#
-# EggaN_mat <- EggaN_mat %>% dplyr::select(-len)
-
-
-png(file.path(base_dir, "figures/EggaN_maturity_data.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.mat(EggaN_mat))
-dev.off()
-
-png(file.path(base_dir, "figures/EggaN_maturity_data_proportions.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-print(plot.matp(EggaN_mat))
-dev.off()
-
-png(file.path(base_dir, "figures/Maturity_age_ldist_length_comparison.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-print(compare_mat_ldist(EggaN_ldist, EggaN_mat, rbind(EggaN_aldist_female %>% mutate(sex = "F"), EggaN_aldist_male %>% mutate(sex = "M"))))
-dev.off()
 
 ## Cheat matp ####
 
@@ -1298,114 +1289,6 @@ attributes(Cheat_mat) <- c(attributes(Cheat_mat),
   dev.off()
 }
 
-## EggaS ####
-
-# EggaS_mat <- mfdb_concatenate_results(
-#   mfdb_sample_count(
-#     mdb,
-#     c('maturity_stage','length'),
-#     list(
-#       length =
-#         mfdb_interval(
-#           'len', seq(31, 91, by = 5*stock_params$dl),
-#           open_ended = c('lower','upper')),
-#       maturity_stage = mfdb_group(male_imm = 1:2, male_mat = 3:5),
-#       sex = "M",
-#       data_source = "ldist-surveys-NOR",
-#       sampling_type = "ESS",
-#       timestep = model_params$timestep_fun,
-#       year = model_params$year_range
-#     ))[[1]],
-#
-#   mfdb_sample_count(
-#     mdb,
-#     c('maturity_stage','length'),
-#     list(
-#       length =
-#         mfdb_interval(
-#           'len', seq(31, 91, by = 5*stock_params$dl),
-#           open_ended = c('lower','upper')),
-#       maturity_stage = mfdb_group(female_imm = 1:2, female_mat = 3:5),
-#       sex = "F",
-#       data_source = "ldist-surveys-NOR",
-#       sampling_type = "ESS",
-#       timestep = model_params$timestep_fun,
-#       year = model_params$year_range
-#     ))[[1]]
-# )
-#
-# EggaS_mat <- clean_mat_data(EggaS_mat) %>% filter(!year %in% 2016)
-
-# nremoved <- sum(EggaS_mat$number) -
-#   EggaS_mat %>%
-#   mutate(len = as.numeric(gsub("len", "", length))) %>%
-#   filter(
-#     (grepl("^female_mat", maturity_stage) &
-#        len > stock_params$female_mat$min_possible_data_length) |
-#       (grepl("^female_imm", maturity_stage) &
-#          len <stock_params$female_imm$max_possible_data_length) |
-#       (grepl("^male_mat", maturity_stage) &
-#          len > stock_params$male_mat$min_possible_data_length) |
-#       (grepl("^male_imm", maturity_stage) &
-#          len < stock_params$male_imm$max_possible_data_length)
-#   ) %>% pull(number) %>% sum()
-#
-# if(nremoved > 0) {
-#   message("Removed ", nremoved, " observations from EggaS maturity proportions to smooth the data going into likelihood")
-# }
-#
-# rm(nremoved)
-#
-# EggaS_mat <- EggaS_mat %>%
-#   mutate(len = as.numeric(gsub("len", "", length))) %>%
-#   filter(
-#     (grepl("^female_mat", maturity_stage) &
-#        len > stock_params$female_mat$min_possible_data_length) |
-#       (grepl("^female_imm", maturity_stage) &
-#          len < stock_params$female_imm$max_possible_data_length) |
-#       (grepl("^male_mat", maturity_stage) &
-#          len > stock_params$male_mat$min_possible_data_length) |
-#       (grepl("^male_imm", maturity_stage) &
-#          len < stock_params$male_imm$max_possible_data_length)
-#   )
-#
-# if(!is.na(stock_params$force_even_stock_distribution_length)) {
-#
-#   EggaS_mat <- EggaS_mat %>%
-#     filter(len > stock_params$force_even_stock_distribution_length) %>%
-#     bind_rows(
-#       tibble(year = unique(EggaS_mat$year),
-#              step = unique(EggaS_mat$step),
-#              area = unique(EggaS_mat$area)) %>%
-#         tidyr::expand(nesting(year, step, area),
-#                       maturity_stage = c("female_imm", "male_imm")) %>%
-#         mutate(age = unique(EggaS_mat$age)) %>%
-#         tidyr::expand(
-#           nesting(year, step, area, maturity_stage, age),
-#           length =
-#             names(
-#               mfdb_interval(
-#                 'len',
-#                 seq(stock_params$minlength,
-#                     stock_params$force_even_stock_distribution_length,
-#                     by = 5*stock_params$dl)))) %>%
-#         mutate(number = 1,
-#                len = as.numeric(gsub("len", "", length)))
-#     ) %>%
-#     arrange(year, step, area, maturity_stage, age, len)
-# }
-#
-# EggaS_mat <- EggaS_mat %>% dplyr::select(-len) %>% filter(year != "2016")
-#
-# attributes(EggaS_mat)$age$all <- stock_params$minage:stock_params$maxage
-
-# png(file.path(base_dir, "figures/EggaS_maturity_data.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.mat(EggaS_mat))
-# dev.off()
-#
-# png(file.path(base_dir, "figures/EggaS_maturity_data_proportions.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
-# print(plot.matp(EggaS_mat))
-# dev.off()
 
 ###########
 # Save ####
