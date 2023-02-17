@@ -388,16 +388,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
-  g3l_abundancedistribution(
-    'EggaS_SI',
-          EggaS_SI %>%
-        dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
-    fleets = list(),
-    stocks = stocks,
-    area_group = c(all = 1),
-    g3l_distribution_surveyindices_log(beta = 1),
-    nll_breakdown = nll_breakdown,
-    report = lik_report),
+  # g3l_abundancedistribution(
+  #   'EggaS_SI',
+  #         EggaS_SI %>%
+  #       dplyr::filter(year <= max(model_params$year_range) - model_params$peel),
+  #   fleets = list(),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_surveyindices_log(beta = 1),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
 
   g3l_abundancedistribution(
     'EcoS_SI',

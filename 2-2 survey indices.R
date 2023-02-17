@@ -152,6 +152,7 @@ load("../ghl-gadget-data/data/in/surveys/EggaS_impute.rda")
 
 EggaS_SI <-
   EggaS_impute %>%
+  dplyr::filter(Year %in% model_params$year_range[model_params$year_range != 2020]) %>% 
   group_by(Year) %>%
   summarise(
     # Biomass=sum(Biomass,na.rm=TRUE),
@@ -167,6 +168,22 @@ EggaS_SI <-
   )
 
 rm(EggaS_impute)
+
+p <- ggplot(
+  EggaS_SI %>%
+    mutate(value = number),
+  aes(x = year, y = value/1e6)
+) +
+  geom_col() +
+  labs(
+    y = "Survey index abundance (millions)",
+    x = "Year") +
+  scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+  scale_y_continuous(expand = c(0, 0))
+
+png(file.path(base_dir, "figures/EggaS_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+print(p)
+dev.off()
 
 # Barents Sea Ecosystem Survey (BESS) index excluding the juvenile indices below ####
 
@@ -394,17 +411,26 @@ save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, # Juv_SI_3,
      file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
-### Plot all ####
+## Plot all ####
 
 p <- dplyr::bind_rows(
-  EggaN_SI_female %>%
+  EggaN_SI %>%
     mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
-    dplyr::mutate(index = "EggaN_SI_female",
+    dplyr::mutate(index = "EggaN_SI",
                   p = value/max(value)) %>%
+  # EggaN_SI_female %>%
+  #   mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
+  #   dplyr::mutate(index = "EggaN_SI_female",
+  #                 p = value/max(value)) %>%
+  #   dplyr::select(year, step, area, length, index, p),
+  # EggaN_SI_male %>%
+  #   mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
+  #   dplyr::mutate(index = "EggaN_SI_male",
+  #                 p = value/max(value)) %>%
     dplyr::select(year, step, area, length, index, p),
-  EggaN_SI_male %>%
-    mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
-    dplyr::mutate(index = "EggaN_SI_male",
+  EggaS_SI %>%
+    mutate(value = number) %>%
+    dplyr::mutate(index = "EggaS_SI",
                   p = value/max(value)) %>%
     dplyr::select(year, step, area, length, index, p),
   Juv_SI_1 %>%
