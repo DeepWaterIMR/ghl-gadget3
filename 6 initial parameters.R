@@ -106,30 +106,39 @@ tmb_param <-
                 value = init_sigma %>%
                   filter(grepl('_female_mat', stock)) %>%
                   filter(age %in%
-                           stock_params$female_mat$minage:
-                           stock_params$female_mat$maxage) %>%
+                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                                           tmb_param[grepl('_female_mat\\.init\\.sd',
+                                                           tmb_param$switch),]$switch))
+                         ) %>%
                   pull(ms),
                 lower = 0, upper = 20, optimise = FALSE) %>%
   g3_init_guess('_male_mat\\.init\\.sd',
                 init_sigma %>%
                   filter(grepl('_male_mat', stock)) %>%
-                  filter(age %in%
-                           stock_params$male_mat$minage:
-                           stock_params$male_mat$maxage) %>%
+                  filter(
+                    age %in%
+                      as.numeric(gsub("[^0-9.-]|\\.", "", 
+                                      tmb_param[grepl('_male_mat\\.init\\.sd',
+                                                      tmb_param$switch),]$switch))
+                    ) %>%
                   pull(ms), 0, 20, 0) %>%
   g3_init_guess('_female_imm\\.init\\.sd',
                 init_sigma %>%
                   filter(grepl('_female_imm', stock)) %>%
                   filter(age %in%
-                           stock_params$female_imm$minage:
-                           stock_params$female_imm$maxage) %>%
+                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                                           tmb_param[grepl('_female_imm\\.init\\.sd',
+                                                           tmb_param$switch),]$switch))
+                         ) %>%
                   pull(ms), 0, 20, 0) %>%
   g3_init_guess('_male_imm\\.init\\.sd',
                 init_sigma %>%
                   filter(grepl('_male_imm', stock)) %>%
                   filter(age %in%
-                           stock_params$male_imm$minage:
-                           stock_params$male_imm$maxage) %>%
+                           as.numeric(gsub("[^0-9.-]|\\.", "", 
+                                           tmb_param[grepl('_male_imm\\.init\\.sd',
+                                                           tmb_param$switch),]$switch))
+                         ) %>%
                   pull(ms), 0, 20, 0) %>%
   suppressWarnings()
 
@@ -162,13 +171,13 @@ if(set_weights) {
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   4.2376414
     '
   ), header = TRUE)
-
-
+  
+  
   param_order <- names(tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"])
-
+  
   tmb_param[na.omit(match(tmp_weights$comp,tmb_param$switch)), "value"] <-
     tmp_weights[na.omit(match(param_order, tmp_weights$comp)), "weight"]
-
+  
   rm(param_order)
 }
 
@@ -176,12 +185,12 @@ if(set_weights) {
 
 if(exists("prev_param") & previous_model_params_as_initial) {
   param_order <- names(tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"])
-
+  
   tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"] <-
     unname(prev_param[na.omit(match(param_order, names(prev_param)))])
-
+  
   rm(param_order)
-
+  
   # tmb_param[match(names(prev_param),tmb_param$switch), "value"] <- unname(prev_param)
 }
 
@@ -191,7 +200,7 @@ if(force_bound_params) {
   if(curl::has_internet()) {
     remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
   }
-
+  
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
   tmb_model <- g3_to_tmb(actions)
 }
