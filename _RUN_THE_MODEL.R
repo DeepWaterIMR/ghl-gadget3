@@ -480,6 +480,7 @@ if(run_retro) {
       y = "Total model population biomass (kt)",
       x='Year',col='Years\nremoved') +
     ggplot2::coord_cartesian(expand = FALSE) +
+    ggplot2::scale_color_viridis_c() +
     ggplot2::expand_limits(y = 0) +
     ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
     ggplot2::theme_classic(base_size = 8)
