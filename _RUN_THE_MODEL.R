@@ -172,6 +172,8 @@ file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
 ## Optimize model parameters ####
 if(!run_jitter & !run_iterative_only & !run_retro) {
 
+  dir.create(file.path(base_dir, "optim"))
+  
   if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
   time_optim_start <- Sys.time()
@@ -208,13 +210,13 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
 
   ### Save the model parameters
 
-  write.csv(as.data.frame(optim_param), file = file.path(base_dir, "data/Optimized TMB parameters.csv"))
-  save(optim_param, file = file.path(base_dir, "data/Optimized TMB parameters.rda"), compress = "xz")
+  write.csv(as.data.frame(optim_param), file = file.path(base_dir, "optim/Optimized TMB parameters.csv"))
+  save(optim_param, file = file.path(base_dir, "optim/Optimized TMB parameters.rda"), compress = "xz")
 
   ## Plots
 
   optim_fit <- g3_fit(model, optim_param)
-  save(optim_fit, file = file.path(base_dir, "data/Optimized TMB model fit.rda"), compress = "xz")
+  save(optim_fit, file = file.path(base_dir, "optim/Optimized TMB model fit.rda"), compress = "xz")
 
   if(plot_html) {
     tmppath <- file.path(getwd(), base_dir, "figures")
@@ -346,21 +348,21 @@ if(run_iterative | run_iterative_only) {
     model = tmb_model,
     params.in = tmb_param,
     grouping =
-      list(SI_Adults = c('log_EggaN_SI_female', 'log_EggaN_SI_male', 'log_EcoS_SI'),
+      list(SI_Adults = c('log_EggaN_SI', 'log_EcoS_SI'), #'log_EggaN_SI_female', 'log_EggaN_SI_male'
            SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
            TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
            OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
            TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
            # OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
            EcoS = c('EcoS_ldist', 'EcoS_aldist', 'EcoS_sexdist'),
-           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp')
-           # EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
+           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp'),
+           EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
       ),
     use_parscale = TRUE,
     control = list(maxit = 4000),
     cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
     shortcut = FALSE,
-    mc.cores = ceiling(0.4*parallel::detectCores())
+    mc.cores = ceiling(0.2*parallel::detectCores())
   )
 
   time_iter_end <- Sys.time()
@@ -381,13 +383,16 @@ if(run_iterative | run_iterative_only) {
 
   ### Save the model parameters
 
-  write.csv(as.data.frame(iter_param), file = file.path(base_dir, "data/Iterated TMB parameters.csv"))
-  save(iter_param, file = file.path(base_dir, "data/Iterated TMB parameters.rda"), compress = "xz")
+  write.csv(as.data.frame(iter_param), 
+            file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.csv"))
+  save(iter_param, 
+       file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.rda"), compress = "xz")
 
   ### Plots
 
   iter_fit <- g3_fit(model, iter_param)
-  save(iter_fit, file = file.path(base_dir, "data/Iterated TMB model fit.rda"), compress = "xz")
+  save(iter_fit, 
+       file = file.path(base_dir, "iterative_reweighting/Iterated TMB model fit.rda"), compress = "xz")
 
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
 
