@@ -195,7 +195,7 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
   message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
 
   ## Write the times to a file
-  info_file <- file(file.path(base_dir, "run_times.txt"))
+  info_file <- file(file.path(base_dir, "session/run_times.txt"))
   close(info_file)
   cat(
     c("Optimization:\n",
@@ -206,7 +206,7 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
       "   convergence: ", attributes(optim_param)$summary$convergence, "\n",
       "   iterations: ", attributes(optim_param)$summary$gd_calls, "\n",
       "   score: ", round(attributes(optim_param)$summary$score, 1), "\n\n"),
-    file = file.path(base_dir, "run_times.txt"), sep = "")
+    file = file.path(base_dir, "session/run_times.txt"), sep = "")
 
   ### Save the model parameters
 
@@ -223,10 +223,6 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
     gadget_plots(optim_fit, path = tmppath, file_type = "html")
     rm(tmppath)
   }
-
-  ## Save workspace
-  # save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
-
 }
 
 if(run_jitter & !run_iterative_only) {
@@ -291,7 +287,7 @@ if(run_jitter & !run_iterative_only) {
     lapply(jitter_fit, function(k) if(inherits(k, "try-error")) NULL else k)
   )
 
-  save(jitter_fit, file = file.path(base_dir, "jitter", 'jitter_fit.Rdata'))
+  save(jitter_fit, file = file.path(base_dir, "jitter", 'jitter_fit.rda'), compress = "xz")
 
   gadgetplots:::bind_fit_components(jitter_fit, 'score') %>%
     na.omit() %>%
@@ -369,8 +365,8 @@ if(run_iterative | run_iterative_only) {
   time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
   message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
 
-  if(run_iterative_only) {
-    info_file <- file(file.path(base_dir, "run_times.txt"))
+  if(!file.exists(file.path(base_dir, "session/run_times.txt"))) {
+    info_file <- file(file.path(base_dir, "session/run_times.txt"))
     close(info_file)
   }
 
@@ -379,7 +375,7 @@ if(run_iterative | run_iterative_only) {
       "   started ", as.character(time_iter_start), "\n",
       "   finished ", as.character(time_iter_end), "\n",
       "   time ", time_iter, " min", "\n\n"),
-    file = file.path(base_dir, "run_times.txt"), sep = "", append = TRUE)
+    file = file.path(base_dir, "session/run_times.txt"), sep = "", append = TRUE)
 
   ### Save the model parameters
 
@@ -408,6 +404,8 @@ if(run_iterative | run_iterative_only) {
 
 if(run_retro) {
 
+  dir.create(file.path(base_dir, "retro"))
+  
   if(exists("iter_param")) {
     init_retro_param <- iter_param
   } else if(exists("optim_param")) {
@@ -456,8 +454,8 @@ if(run_retro) {
 
   ### Save the model parameters
 
-  write.csv(lapply(retro_list, function(k) k$param) %>% bind_rows(), file = file.path(base_dir, "data/Retro parameters.csv"))
-  save(retro_list, file = file.path(base_dir, "data/Retro parameters and fit.rda"), compress = "xz")
+  write.csv(lapply(retro_list, function(k) k$param) %>% bind_rows(), file = file.path(base_dir, "retro/Retro parameters.csv"))
+  save(retro_list, file = file.path(base_dir, "retro/Retro parameters and fit.rda"), compress = "xz")
 
   # if(plot_html) {
   #   tmppath <- file.path(getwd(), base_dir, "figures")
@@ -497,8 +495,8 @@ if(run_retro) {
 
 ## Save workspace
 
-save.image(file = file.path(base_dir, "data/gadget_workspace.RData"), compress = "xz")
+savehistory(file = "session/.Rhistory")
+save.image(file = file.path(base_dir, "session/gadget_workspace.RData"), compress = "xz")
 message("Script finished ", Sys.time(), ". Saved to ", base_dir)
 
 ## When running Ctrl + Alt + B, run until here. The options should take care what gets evaluated.
-

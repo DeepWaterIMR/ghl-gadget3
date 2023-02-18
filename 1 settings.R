@@ -29,7 +29,7 @@ if(!dir.exists(base_dir)) {
   dir.create(file.path(base_dir, "data"), recursive = TRUE)
   dir.create(file.path(base_dir, "figures"))
   dir.create(file.path(base_dir, "scripts"))
-  # dir.create(file.path(base_dir, "iterative_reweighting"))
+  dir.create(file.path(base_dir, "session"))
 }
 
 ## Model settings
@@ -42,11 +42,11 @@ model_params$timestep_fun <- mfdb::mfdb_timestep_yearly
 model_params$female_stock <- c("female_imm", "female_mat")
 model_params$male_stock <- c("male_imm", "male_mat")
 model_params$stock_names <- c(model_params$female_stock, model_params$male_stock)
-model_params$trawl_fleets <- c("TrawlNor", "TrawlRus")
+model_params$trawl_fleets <- c("TrawlNor", "TrawlRus", "Internat")
 model_params$other_fleets <- c("OtherNor", "OtherRus")
-model_params$hist_fleets <- c("HistNor", "HistRus", "Internat")
+model_params$hist_fleets <- c("HistNor", "HistRus")
 model_params$survey_fleets <- c("EggaN", "EcoS", "WinterS", "RussianS")
-model_params$fleet_names <- c(model_params$trawl_fleets, model_params$other_fleets, model_params$hist_fleets, model_params$survey_fleets)
+model_params$fleet_names <- c(model_params$trawl_fleets, model_params$other_fleets, model_params$survey_fleets)
 model_params$species_name <- "Greenland halibut"
 model_params$species_code <- "GHL"
 
