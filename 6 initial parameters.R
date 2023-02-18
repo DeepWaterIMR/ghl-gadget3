@@ -67,7 +67,7 @@ tmb_param <-
   g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
   g3_init_guess('\\.p3$', .15, 0.01, 1, 1) %>%
   g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
-  g3_init_guess('init.F', 0.4, 0.1, 0.8, 1) %>%
+  g3_init_guess('init.F', 0.4, 0.01, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
   g3_init_guess('_male.M', 0.16, 0.001, 0.4, 0) %>%
@@ -154,23 +154,23 @@ if(set_weights) {
      cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    40.0
          cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   29.7
      cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    5.5
-    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    6000.0
+    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    300
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 2591.6
       cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  400.0
           cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03    9000.0
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02    2311.4
-  cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    6000.0
+  cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04    300
      cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02    15.0
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  7591.4
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03   1821.7
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   24.0
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   260.5
         adist_surveyindices_log_EggaN_SI_weight  6.397818e+02   300
-        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   100.0
-        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   100
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   600.0
+        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   300
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   78.2
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   45.2
-        adist_surveyindices_log_EggaS_SI_weight  0              300
+        adist_surveyindices_log_EggaS_SI_weight  0              1200
          cdist_sumofsquares_EggaS_aldist_weight  0              100
           cdist_sumofsquares_EggaS_ldist_weight  0              2000
            cdist_sumofsquares_EggaS_matp_weight  0              100

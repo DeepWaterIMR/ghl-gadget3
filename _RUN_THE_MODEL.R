@@ -495,7 +495,7 @@ if(run_retro) {
 
 ## Save workspace
 
-savehistory(file = "session/.Rhistory")
+savehistory(file = file.path(base_dir, "session/.Rhistory"))
 save.image(file = file.path(base_dir, "session/gadget_workspace.RData"), compress = "xz")
 message("Script finished ", Sys.time(), ". Saved to ", base_dir)
 
