@@ -49,7 +49,7 @@ tmb_param <-
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
-  g3_init_guess('_female.Linf', 90, 80, 120, 1) %>%
+  g3_init_guess('_female.Linf', 100.9, 80, 120, 0) %>%
   g3_init_guess('_male.Linf', 63.7, 40, 100, 0) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
   # g3_init_guess('ghl_K_sigma', 0.2, 0, 1, 0) %>%
@@ -165,9 +165,9 @@ if(set_weights) {
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03   1821.7
  adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03   24.0
    adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   260.5
-        adist_surveyindices_log_EggaN_SI_weight  6.397818e+02   200
+        adist_surveyindices_log_EggaN_SI_weight  6.397818e+02   300
         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   100.0
-        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   60.0
+        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   100
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   78.2
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   45.2
         adist_surveyindices_log_EggaS_SI_weight  0              300
