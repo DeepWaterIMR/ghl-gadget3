@@ -39,7 +39,7 @@ source("0 run first.R")
 ## General options
 reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
-base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
+base_dir <- "model_files_20230220_THIS_GOES_TO_JITTER" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 plot_html <- TRUE # Whether html model summary should be plotted. In most cases you want this TRUE unless you work on a server that doesn't have pandoc installed.
 
@@ -47,7 +47,7 @@ plot_html <- TRUE # Whether html model summary should be plotted. In most cases 
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
-previous_model_params_as_initial <- FALSE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
+previous_model_params_as_initial <- TRUE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
 
 ## Run options
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
@@ -236,9 +236,9 @@ if(run_jitter & !run_iterative_only) {
     model = tmb_model,
     params = tmb_param,
     njits = 10,
-    control = list(maxit = 4000 #, reltol = 1e-9
+    control = list(maxit = 3000 #, reltol = 1e-9
                    ),
-    ncores = 10)
+    ncores = 5)
 
   jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
     if(is.null(jitpar_out[[i]])) return(NULL)
@@ -280,7 +280,7 @@ if(run_jitter & !run_iterative_only) {
     if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
     try(g3_fit(model = tmb_model, params = jitpar_out[[i]]))
   },
-  mc.cores = 10)
+  mc.cores = 5)
 
   jitter_fit <- Filter(
     Negate(is.null),
