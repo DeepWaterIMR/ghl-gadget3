@@ -173,7 +173,7 @@ file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
 if(!run_jitter & !run_iterative_only & !run_retro) {
 
   dir.create(file.path(base_dir, "optim"))
-  
+
   if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
   time_optim_start <- Sys.time()
@@ -379,15 +379,15 @@ if(run_iterative | run_iterative_only) {
 
   ### Save the model parameters
 
-  write.csv(as.data.frame(iter_param), 
+  write.csv(as.data.frame(iter_param),
             file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.csv"))
-  save(iter_param, 
+  save(iter_param,
        file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.rda"), compress = "xz")
 
   ### Plots
 
   iter_fit <- g3_fit(model, iter_param)
-  save(iter_fit, 
+  save(iter_fit,
        file = file.path(base_dir, "iterative_reweighting/Iterated TMB model fit.rda"), compress = "xz")
 
   # gadget_plots(iter_fit, file.path(base_dir, "figures"))
@@ -405,7 +405,7 @@ if(run_iterative | run_iterative_only) {
 if(run_retro) {
 
   dir.create(file.path(base_dir, "retro"))
-  
+
   if(exists("iter_param")) {
     init_retro_param <- iter_param
   } else if(exists("optim_param")) {
@@ -483,7 +483,7 @@ if(run_retro) {
       y = "Total model population biomass (kt)",
       x='Year',col='Years\nremoved') +
     ggplot2::coord_cartesian(expand = FALSE) +
-    ggplot2::scale_color_viridis_c() +
+    ggplot2::scale_color_viridis_d() +
     ggplot2::expand_limits(y = 0) +
     ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
     ggplot2::theme_classic(base_size = 8)
