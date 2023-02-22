@@ -148,42 +148,42 @@ dev.off()
 
 # EggaS ####
 
-load("../ghl-gadget-data/data/in/surveys/EggaS_impute.rda")
-
-EggaS_SI <-
-  EggaS_impute %>%
-  dplyr::filter(Year %in% model_params$year_range[model_params$year_range != 2020]) %>% 
-  group_by(Year) %>%
-  summarise(
-    # Biomass=sum(Biomass,na.rm=TRUE),
-    Abundance=sum(Abundance,na.rm=TRUE)
-  ) %>%
-  dplyr::rename("year" = "Year", "number" = "Abundance") %>%
-  dplyr::mutate(step = "1", area = "all", length = "all28", .before = "number") %>%
-  add_g3_attributes(
-    list(length = mfdb_interval(
-      "all", c(28, stock_params$maxlength),
-      open_ended = c("upper")),
-      timestep = model_params$timestep_fun)
-  )
-
-rm(EggaS_impute)
-
-p <- ggplot(
-  EggaS_SI %>%
-    mutate(value = number),
-  aes(x = year, y = value/1e6)
-) +
-  geom_col() +
-  labs(
-    y = "Survey index abundance (millions)",
-    x = "Year") +
-  scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
-  scale_y_continuous(expand = c(0, 0))
-
-png(file.path(base_dir, "figures/EggaS_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
-print(p)
-dev.off()
+# load("../ghl-gadget-data/data/in/surveys/EggaS_impute.rda")
+#
+# EggaS_SI <-
+#   EggaS_impute %>%
+#   dplyr::filter(Year %in% model_params$year_range[model_params$year_range != 2020]) %>%
+#   group_by(Year) %>%
+#   summarise(
+#     # Biomass=sum(Biomass,na.rm=TRUE),
+#     Abundance=sum(Abundance,na.rm=TRUE)
+#   ) %>%
+#   dplyr::rename("year" = "Year", "number" = "Abundance") %>%
+#   dplyr::mutate(step = "1", area = "all", length = "all28", .before = "number") %>%
+#   add_g3_attributes(
+#     list(length = mfdb_interval(
+#       "all", c(28, stock_params$maxlength),
+#       open_ended = c("upper")),
+#       timestep = model_params$timestep_fun)
+#   )
+#
+# rm(EggaS_impute)
+#
+# p <- ggplot(
+#   EggaS_SI %>%
+#     mutate(value = number),
+#   aes(x = year, y = value/1e6)
+# ) +
+#   geom_col() +
+#   labs(
+#     y = "Survey index abundance (millions)",
+#     x = "Year") +
+#   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
+#   scale_y_continuous(expand = c(0, 0))
+#
+# png(file.path(base_dir, "figures/EggaS_index.png"), width = pagewidth, height = pagewidth*0.7, units = "mm", res = 300)
+# print(p)
+# dev.off()
 
 # Barents Sea Ecosystem Survey (BESS) index excluding the juvenile indices below ####
 
@@ -406,9 +406,9 @@ rm(p)
 
 ## Save ####
 
-save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, # Juv_SI_3,
-     EcoS_SI, Russian_SI, Rus_CPUE_SI, # WinterS_SI,
-     file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
+# save(EggaN_SI_female, EggaN_SI_male, Juv_SI_1, Juv_SI_2, # Juv_SI_3,
+#      EcoS_SI, Russian_SI, Rus_CPUE_SI, # WinterS_SI,
+#      file = file.path(base_dir, "data/Survey indices to Gadget.rda"))
 
 
 ## Plot all ####
@@ -428,11 +428,11 @@ p <- dplyr::bind_rows(
   #   dplyr::mutate(index = "EggaN_SI_male",
   #                 p = value/max(value)) %>%
     dplyr::select(year, step, area, length, index, p),
-  EggaS_SI %>%
-    mutate(value = number) %>%
-    dplyr::mutate(index = "EggaS_SI",
-                  p = value/max(value)) %>%
-    dplyr::select(year, step, area, length, index, p),
+  # EggaS_SI %>%
+  #   mutate(value = number) %>%
+  #   dplyr::mutate(index = "EggaS_SI",
+  #                 p = value/max(value)) %>%
+  #   dplyr::select(year, step, area, length, index, p),
   Juv_SI_1 %>%
     dplyr::mutate(index = "Juv_SI_1",
                   p = number/max(number)) %>%
@@ -462,7 +462,7 @@ p <- dplyr::bind_rows(
 ) %>%
   ggplot(aes(x = year, y = p, color = index)) +
   geom_line() +
-  labs(x = "Year", y = "Stadardized index", color = "Survey index") +
+  labs(x = "Year", y = "Standardized index", color = "Survey index") +
   scale_x_continuous(expand = c(0, 0), breaks = seq(1900, 2030, 2)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme(legend.position = "bottom")
