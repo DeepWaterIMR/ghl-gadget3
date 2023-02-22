@@ -11,22 +11,32 @@
 ##
 ## ---------------------------
 
+##################################################
+## Instructions to run the script in terminal ####
 ## You can only the model in one session / folder (computer) simultanously
 ## To run in terminal through screen on Eucleia, do:
-# screen -dmSL gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
+# screen -LS gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
+## Ctrl-a-d # to detach (close and let the process run)
+# screen -r gadgetrun # to reattach (look into the process)
+
+## Once done, you can kill inactive screen sessions (think before you do this):
+# pkill screen
+## Remember not to start another run in Rstudio server while the screen session is running
+## Also running two screen sessions using the same ghl-gadget-data is not possible because duckdb does not support multiple connections. Kill the old screen sessions for the same folder before starting a new one.
+
 ## You can also run the same script manually:
+## cd to the desired ghl-gadget3 folder and edit _RUN_THE_MODEL.R using Vim (vim _RUN_THE_MODEL.R)
 # screen -LS gadgetrun
 # /software/R-4.2.1/bin/R
 # setwd("ghl-gadget3")
 # source("_RUN_THE_MODEL.R", echo = TRUE)
-# Ctrl-a-d # to detach (close and let the process run)
-# screen -r gadgetrun # to reattach (look into the process)
-## Alternatively you can run it using nohup
+
+## Alternatively you can run it using nohup (this option does not seem to work)
 # cd to the desired ghl-gadget3 folder.
 # nohup /software/R-4.2.1/bin/R -e 'source("_RUN_THE_MODEL.R", echo=TRUE, chdir = TRUE)' &
-## Remember not to start another run in Rstudio server while the screen session is running
 
-## Source the run first script
+###################################
+## Source the run first script ####
 
 if(exists("mdb")) mfdb::mfdb_disconnect(mdb)
 
@@ -34,26 +44,30 @@ rm(list = ls())
 
 source("0 run first.R")
 
-## Model settings
+## Model settings ####
 
-## General options
+### General options ####
 reset_model <- TRUE # Change to TRUE to reset the model (delete all model files). ONLY do this if you really want to DELETE the existing model
 reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and the model folders (base_dir) exist, data are retrieved from the base_dir/data folder. Automatically set to TRUE if reset_model == TRUE or !dir.exists(base_dir)
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 plot_html <- TRUE # Whether html model summary should be plotted. In most cases you want this TRUE unless you work on a server that doesn't have pandoc installed.
 
-## Parameter and likelihood component options
+### Parameter and likelihood component options ####
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
 previous_model_params_as_initial <- TRUE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
 
-## Run options
+### Optimisation settings (adjust here and they'll change everywhere)
+ncores <- 5 # Number of cores to use for parallel operations. The number of available computer cores is often not a limiting factor when running gadget, but memory is because the entire model is copied to RAM multiple times. Use max ncores = 10 for Eucleia, and ncores = 1 or a few for other servers.
+maxit <- 3000 # Maximum number of iterations during an optimisation run.
+
+### Run options ####
+run_optim <- TRUE # Whether to run optimisation of parameters (the normal routine)
 run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
-run_iterative_only <- FALSE # Whether to skip the optimisation and proceed directly to iterative reweighting
+run_jitter <- FALSE # Run jittered optimisation. Repeats g3_optim multiple times with slightly different starting values.
 run_retro <- FALSE # Run retrospective analysis?
-run_jitter <- FALSE # Run jitter instead of optimisation
 run_bootstrap <- FALSE # Not implemented yet
 
 ## Optimisation mode (param_opt_mode), options:
@@ -66,7 +80,7 @@ run_bootstrap <- FALSE # Not implemented yet
 ## 0 - population is initialised at equilibrium
 ## 1 - parameter for each age group (across stocks)
 ## 2 - parameter for each age group of each stock
-## 4 - hack
+## 4 - two parameters: init_F and init.scalar. Population initiated 50/50 males/females, considers M and init_F for sexes.
 
 setup_options <- list(param_opt_mode = 1,
                       initial_abund_mode = 4)
@@ -74,8 +88,8 @@ setup_options <- list(param_opt_mode = 1,
 ## Whether or not to bound parameters internally
 setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FALSE)
 
-###########################
-### Modify reload_data ####
+##########################
+## Modify reload_data ####
 
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
@@ -87,7 +101,7 @@ if(reset_model | !dir.exists(base_dir)) {
   }
 }
 
-## Connect to the MFDB database
+### Connect to the MFDB database ####
 
 if(!exists("mdb") & reload_data) {
   # When the ghl-gadget-data repo is made public, this should work as mfdb_path "https://github.com/DeepWaterIMR/ghl-gadget-data/raw/main/data/mfdb/ghl.duckdb"
@@ -106,30 +120,30 @@ if(!exists("mdb") & reload_data) {
   }
 }
 
-## Model and stock parameters, setting up areas, time steps, etc.
+### Model and stock parameters, setting up areas, time steps, etc. ####
 
 source("1 settings.R")
 
-## Get data from MFDB
+### Get data from MFDB ####
 
 source("2-1 life history.R")
 source("2-2 survey indices.R")
 source("2-3 catch distribution.R")
 source("2-4 catches.R")
 
-## Setup the stocks
+### Setup the stocks ####
 
 source("3 stocks.R")
 
-## Add fleets and landings data
+### Add fleets and landings data ####
 
 source("4 fleets.R")
 
-## Setup likelihood components
+### Setup likelihood components ####
 
 source("5 likelihood.R")
 
-## Formulate R based model and define initial parameters
+### Formulate R based model and define initial parameters ####
 
 source("6 initial parameters.R")
 
@@ -168,13 +182,96 @@ source("6 initial parameters.R")
 ## Copy the R scripts used to compile the model
 file.copy(dir(pattern = "\\.R$"), file.path(getwd(), base_dir, "scripts"))
 
+
+#####################################################################
+## Iterative reweighting and optimization                        ####
+## Running this part takes a long time (3-10 hours on a server)  ####
+if(run_iterative) {
+
+  if(set_weights) {
+    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0,
+              c("value", "lower", "upper", "optimise")] <-
+      data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
+  }
+
+  time_iter_start <- Sys.time()
+  message("Iteration started ", time_iter_start)
+
+  iter_param <- g3_iterative(
+    gd = base_dir,
+    wgts = "iterative_reweighting",
+    model = tmb_model,
+    params.in = tmb_param,
+    grouping =
+      list(SI_Adults = c('log_EggaN_SI', 'log_EcoS_SI'), #'log_EggaN_SI_female', 'log_EggaN_SI_male'
+           SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
+           TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
+           OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
+           TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
+           # OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
+           EcoS = c('EcoS_ldist', 'EcoS_aldist', 'EcoS_sexdist'),
+           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp'),
+           EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
+      ),
+    use_parscale = TRUE,
+    control = list(maxit = maxit),
+    cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
+    shortcut = FALSE,
+    mc.cores = ncores
+  )
+
+  time_iter_end <- Sys.time()
+  time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
+  message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
+
+  if(!file.exists(file.path(base_dir, "session/run_times.txt"))) {
+    info_file <- file(file.path(base_dir, "session/run_times.txt"))
+    close(info_file)
+  }
+
+  cat(
+    c("Iteration:\n",
+      "   started ", as.character(time_iter_start), "\n",
+      "   finished ", as.character(time_iter_end), "\n",
+      "   time ", time_iter, " min", "\n\n"),
+    file = file.path(base_dir, "session/run_times.txt"), sep = "", append = TRUE)
+
+  ### Save the model parameters
+
+  write.csv(as.data.frame(iter_param),
+            file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.csv"))
+  save(iter_param,
+       file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.rda"), compress = "xz")
+
+  ### Plots
+
+  iter_fit <- g3_fit(model, iter_param)
+  save(iter_fit,
+       file = file.path(base_dir, "iterative_reweighting/Iterated TMB model fit.rda"), compress = "xz")
+
+  # gadget_plots(iter_fit, file.path(base_dir, "figures"))
+
+  if(plot_html) {
+    tmppath <- file.path(getwd(), base_dir, "figures")
+    make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
+    rm(tmppath)
+  }
+}
+
+
 #################################
 ## Optimize model parameters ####
-if(!run_jitter & !run_iterative_only & !run_retro) {
+if(run_optim) {
 
   dir.create(file.path(base_dir, "optim"))
 
-  if(nrow(tmb_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
+  if(exists("iter_param")) {
+    init_optim_param <- iter_param
+  } else {
+    init_optim_param <- tmb_param
+  }
+
+  if(nrow(init_optim_param %>% filter(optimise, lower >= upper)) > 0) warning("Parameter lower bounds higher than upper bounds. Expect trouble in optimization.")
 
   time_optim_start <- Sys.time()
   message("Optimization started ", time_optim_start)
@@ -183,11 +280,11 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
   ## a summary of the optimisation.
   ## The control argument is identical to control for optim
   optim_param <- g3_optim(model = tmb_model,
-                          params = tmb_param,
+                          params = init_optim_param,
                           use_parscale = TRUE,
                           method = 'BFGS',
-                          control = list(maxit = 3000 #, reltol = 1e-9
-                                         ),
+                          control = list(maxit = maxit #, reltol = 1e-9
+                          ),
                           print_status = TRUE
   )
   time_optim_end <- Sys.time()
@@ -195,8 +292,11 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
   message("Optimization finished ", time_optim_end, " after ", time_optim, " min")
 
   ## Write the times to a file
-  info_file <- file(file.path(base_dir, "session/run_times.txt"))
-  close(info_file)
+  if(!file.exists(file.path(base_dir, "session/run_times.txt"))) {
+    info_file <- file(file.path(base_dir, "session/run_times.txt"))
+    close(info_file)
+  }
+
   cat(
     c("Optimization:\n",
       "   started ", as.character(time_optim_start), "\n",
@@ -225,20 +325,27 @@ if(!run_jitter & !run_iterative_only & !run_retro) {
   }
 }
 
-if(run_jitter & !run_iterative_only) {
+#########################################################################
+## Jitter model parameters (takes 10/ncores times optimisation time) ####
+if(run_jitter) {
 
-  ###############################################
-  ## Jitter model parameters (takes forever) ####
+  if(exists("iter_param")) {
+    init_jitter_param <- iter_param
+  } else if(exists("optim_param")) {
+    init_jitter_param <- optim_param
+  } else {
+    init_jitter_param <- tmb_param
+  }
 
   jitpar_out <- gadgetutils::g3_jitter(
     gd = base_dir,
     outdir = "jitter",
     model = tmb_model,
-    params = tmb_param,
+    params = init_jitter_param,
     njits = 10,
-    control = list(maxit = 3000 #, reltol = 1e-9
-                   ),
-    ncores = 5)
+    control = list(maxit = maxit #, reltol = 1e-9
+    ),
+    ncores = ncores)
 
   jitpar_list <- lapply(seq_along(jitpar_out), function(i) {
     if(is.null(jitpar_out[[i]])) return(NULL)
@@ -280,7 +387,7 @@ if(run_jitter & !run_iterative_only) {
     if(inherits(jitpar_out[[i]], "try-error")) return(NULL)
     try(g3_fit(model = tmb_model, params = jitpar_out[[i]]))
   },
-  mc.cores = 5)
+  mc.cores = ncores)
 
   jitter_fit <- Filter(
     Negate(is.null),
@@ -298,105 +405,10 @@ if(run_jitter & !run_iterative_only) {
       cv = sd/mean) %>%
     write.g3.file(file.path(base_dir, "jitter"), 'jitter.nll.summary')
 
-  p <- lapply(seq_along(jitter_fit), function(i) {
-    jitter_fit[[i]]$res.by.year %>%
-      dplyr::group_by(.data$year) %>%
-      dplyr::summarise(value = sum(.data$total.biomass)/1e6) %>%
-      dplyr::mutate(run = i)
-  }) %>%
-    dplyr::bind_rows() %>%
-    ggplot2::ggplot(
-      ggplot2::aes(.data$year,
-                   .data$value,
-                   col=as.factor(.data$run))) +
-    ggplot2::geom_line() +
-    ggplot2::labs(
-      y = "Total model population biomass (kt)",
-      x='Year',col='Jitter run') +
-    ggplot2::coord_cartesian(expand = FALSE) +
-    ggplot2::expand_limits(y = 0) +
-    ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    ggplot2::theme_classic(base_size = 8)
-
   ggsave(file.path(base_dir, "figures/Jitter_model_biomass.png"),
-         plot = p, width = pagewidth, height = pagewidth*0.7, units = "mm")
+         plot = gadgetplots::plot_jitter(jitter_fit),
+         width = pagewidth, height = pagewidth*0.7, units = "mm")
 
-}
-
-#####################################################################
-## Iterative reweighting and optimization                        ####
-## Running this part takes a long time (3-10 hours on a server)  ####
-
-if(run_iterative | run_iterative_only) {
-
-  if(set_weights) {
-    tmb_param[grepl('weight$', tmb_param$switch) & tmb_param$value != 0,
-              c("value", "lower", "upper", "optimise")] <-
-      data.frame(value = 1, lower = NA, upper = NA, optimise = FALSE)
-  }
-
-  time_iter_start <- Sys.time()
-  message("Iteration started ", time_iter_start)
-
-  iter_param <- g3_iterative(
-    gd = base_dir,
-    wgts = "iterative_reweighting",
-    model = tmb_model,
-    params.in = tmb_param,
-    grouping =
-      list(SI_Adults = c('log_EggaN_SI', 'log_EcoS_SI'), #'log_EggaN_SI_female', 'log_EggaN_SI_male'
-           SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
-           TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
-           OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
-           TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
-           # OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
-           EcoS = c('EcoS_ldist', 'EcoS_aldist', 'EcoS_sexdist'),
-           EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp'),
-           EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
-      ),
-    use_parscale = TRUE,
-    control = list(maxit = 4000),
-    cv_floor = 4e-4, # Gives maximum weight of 1/cv_floor for survey indices
-    shortcut = FALSE,
-    mc.cores = ceiling(0.2*parallel::detectCores())
-  )
-
-  time_iter_end <- Sys.time()
-  time_iter <- round(as.numeric(time_iter_end - time_iter_start, units = "mins"), 1)
-  message("Iteration finished ", time_iter_end, " after ", time_iter, " min")
-
-  if(!file.exists(file.path(base_dir, "session/run_times.txt"))) {
-    info_file <- file(file.path(base_dir, "session/run_times.txt"))
-    close(info_file)
-  }
-
-  cat(
-    c("Iteration:\n",
-      "   started ", as.character(time_iter_start), "\n",
-      "   finished ", as.character(time_iter_end), "\n",
-      "   time ", time_iter, " min", "\n\n"),
-    file = file.path(base_dir, "session/run_times.txt"), sep = "", append = TRUE)
-
-  ### Save the model parameters
-
-  write.csv(as.data.frame(iter_param),
-            file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.csv"))
-  save(iter_param,
-       file = file.path(base_dir, "iterative_reweighting/Iterated TMB parameters.rda"), compress = "xz")
-
-  ### Plots
-
-  iter_fit <- g3_fit(model, iter_param)
-  save(iter_fit,
-       file = file.path(base_dir, "iterative_reweighting/Iterated TMB model fit.rda"), compress = "xz")
-
-  # gadget_plots(iter_fit, file.path(base_dir, "figures"))
-
-  if(plot_html) {
-    tmppath <- file.path(getwd(), base_dir, "figures")
-    make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
-    rm(tmppath)
-  }
 }
 
 #########################
@@ -414,11 +426,11 @@ if(run_retro) {
     init_retro_param <- tmb_param
   }
 
-  retro_list <- parallel::mclapply(0:5, function(peel) {
+  retro_model <- list()
+  retro_params <- list()
 
-    # print(paste0("Peel: ", peel))
+  for(peel in 0:5){
 
-    model_params$peel <- peel
     source("5 likelihood.R")
 
     if(force_bound_params) {
@@ -426,30 +438,36 @@ if(run_retro) {
         time_actions, stock_actions, fleet_actions, likelihood_actions,
         list(g3experiments::g3l_bounds_penalty(tmb_param))
       )
-      retro_model <- g3_to_tmb(retro_actions)
+
+      retro_model[[peel]] <- g3_to_tmb(retro_actions)
     } else {
       retro_actions <- c(time_actions, stock_actions, fleet_actions, likelihood_actions)
-      retro_model <- g3_to_tmb(retro_actions)
+      retro_model[[peel]] <- g3_to_tmb(retro_actions)
     }
 
+    retro_params[[peel]] <- init_retro_param
     init_retro_param$value$retro_years <- peel
+  }
+
+
+  retro_list <- parallel::mclapply(0:5, function(peel) {
 
     # message("Running g3_optim for ", peel)
-    param <- g3_optim(model = retro_model,
-             params = init_retro_param,
-             use_parscale = TRUE,
-             method = 'BFGS',
-             control = list(maxit = 4000),
-             print_status = TRUE
+    param <- g3_optim(model = retro_model[[peel]],
+                      params = retro_params[[peel]],
+                      use_parscale = TRUE,
+                      method = 'BFGS',
+                      control = list(maxit = maxit),
+                      print_status = TRUE
     )
     #message("g3_optim for ", peel, " finished. Running g3_fit")
 
-    fit <- g3_fit(retro_model, param)
+    fit <- g3_fit(retro_model[[peel]], param)
 
     # message("Peel ", peel, " finished.")
 
     return(list(peel = peel, param = param, fit = fit))
-  }, mc.cores = 6
+  }, mc.cores = ifelse(ncores >= 5, 6, ncores)
   )
 
   ### Save the model parameters
@@ -471,7 +489,7 @@ if(run_retro) {
     retro_fit[[i]]$res.by.year %>%
       dplyr::group_by(.data$year) %>%
       dplyr::summarise(value = sum(.data$total.biomass)/1e6) %>%
-      dplyr::mutate(run = i-1)
+      dplyr::mutate(run = i)
   }) %>%
     dplyr::bind_rows() %>%
     ggplot2::ggplot(

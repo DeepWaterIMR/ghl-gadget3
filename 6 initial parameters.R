@@ -36,6 +36,10 @@ tmb_param <- attr(tmb_model, "parameter_template")
 #   bind_rows(init_sigma %>%
 #               filter(stock == "ghl_female_mat") %>%
 #               mutate(stock = "ghl_female_imm"))
+## Set initial population sd to same than recl.sd
+# if(!tmb_param[grep('rec.sd', tmb_param$switch),"optimise"]) {
+#   init_sigma[init_sigma$age == 1, "ms"] <- unname(unlist(tmb_param[grep('rec.sd', tmb_param$switch),]$value))
+# }
 
 ## Define the initial parameters
 
@@ -185,7 +189,7 @@ if(set_weights) {
 
 ## Add the previous optimized model parameters as initial values (control using the previous_model_params_as_initial argument)
 
-if(exists("prev_param") & previous_model_params_as_initial) {
+if(exists("prev_param") & previous_model_params_as_initial & !run_iterative) {
   param_order <- names(tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"])
 
   tmb_param[na.omit(match(names(prev_param),tmb_param$switch)), "value"] <-
@@ -216,12 +220,6 @@ model <- g3_to_r(actions)
 ### Rearrange parameters to follow the model order (fixed a bug that occurs sometimes)
 
 tmb_param <- tmb_param[match(names(attr(model,'parameter_template')), tmb_param$switch),]
-
-### Set initial population sd to same than recl.sd
-
-if(!tmb_param[grep('rec.sd', tmb_param$switch),"optimise"]) {
-  init_sigma[init_sigma$age == 1, "ms"] <- unname(unlist(tmb_param[grep('rec.sd', tmb_param$switch),]$value))
-}
 
 ## Write the parameters to a csv file
 
