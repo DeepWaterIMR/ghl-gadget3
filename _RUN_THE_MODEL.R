@@ -517,4 +517,10 @@ savehistory(file = file.path(base_dir, "session/.Rhistory"))
 save.image(file = file.path(base_dir, "session/gadget_workspace.RData"), compress = "xz")
 message("Script finished ", Sys.time(), ". Saved to ", base_dir)
 
+if(exists("optim_fit") & exists("time_optim")) {
+  message("Optimisation", ifelse(attributes(optim_fit)$summary$convergence, " converged.", " did not converge."), 
+          " It took ", attributes(optim_fit)$summary$gd_calls, 
+          " iterations and ", round(time_optim/60, 1), " hours to run.")
+}
+
 ## When running Ctrl + Alt + B, run until here. The options should take care what gets evaluated.
