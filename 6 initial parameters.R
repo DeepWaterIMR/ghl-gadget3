@@ -53,8 +53,8 @@ tmb_param <-
   g3_init_guess('rec.2021', 1, 0, 100, 0) %>%
   g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
-  g3_init_guess('_female.Linf', 100.9, 80, 120, 0) %>%
-  g3_init_guess('_male.Linf', 63.7, 40, 100, 0) %>%
+  g3_init_guess('_female.Linf', 100.9, 80, 120, 1) %>%
+  g3_init_guess('_male.Linf', 75, 40, 100, 0) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
   # g3_init_guess('ghl_K_sigma', 0.2, 0, 1, 0) %>%
   # g3_init_guess('rnd_weight', 1, 1, 100, 0) %>%
@@ -156,14 +156,14 @@ if(set_weights) {
          cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03 5521.799725
           cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   97.429536
           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03 2869.607127
-         cdist_sumofsquares_EcoS_aldist_weight  9.251693e+03   33.133902
+         cdist_sumofsquares_EcoS_aldist_weight  9.251693e+03   0 # 33.133902
     cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    4.254094
         cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   55.096546
     cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    4.515705
    cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    78.55533
       cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 2134.226793
      cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  164.880376
-         cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 7245.487901
+         cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 10000 # 7245.487901
         cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04   83.758179
        cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02 1886.475247
  cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04   56.474408
@@ -172,9 +172,11 @@ if(set_weights) {
       cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03 2963.858763
        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   15.044909
         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   51.403904
-       adist_surveyindices_log_EggaN_SI_weight  8.550591e+02   54.003922
-    adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   25.728188
-       adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    17.86664
+     # adist_surveyindices_log_EggaN_SI_weight  8.550591e+02   100 # 54.003922
+adist_surveyindices_log_EggaN_SI_female_weight  8.550591e+02   50 # 54.003922
+ adist_surveyindices_log_EggaN_SI_male_weight  8.550591e+02   50 # 54.003922
+    adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   10 # 25.728188
+       adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   17.86664
     '
   ), header = TRUE)
 

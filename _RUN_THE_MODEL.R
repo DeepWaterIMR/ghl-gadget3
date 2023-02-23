@@ -15,21 +15,21 @@
 ## Instructions to run the script in terminal ####
 ## You can only the model in one session / folder (computer) simultanously
 ## To run in terminal through screen on Eucleia, do:
-# screen -LS gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
-## Ctrl-a-d # to detach (close and let the process run)
-# screen -r gadgetrun # to reattach (look into the process)
-
-## Once done, you can kill inactive screen sessions (think before you do this):
-# pkill screen
-## Remember not to start another run in Rstudio server while the screen session is running
-## Also running two screen sessions using the same ghl-gadget-data is not possible because duckdb does not support multiple connections. Kill the old screen sessions for the same folder before starting a new one.
-
-## You can also run the same script manually:
 ## cd to the desired ghl-gadget3 folder and edit _RUN_THE_MODEL.R using Vim (vim _RUN_THE_MODEL.R)
 # screen -LS gadgetrun
 # /software/R-4.2.1/bin/R
 # setwd("ghl-gadget3")
 # source("_RUN_THE_MODEL.R", echo = TRUE)
+## Ctrl-a-d # to detach (close and let the process run)
+# screen -r gadgetrun # to reattach (look into the process)
+
+## You can also automise the process above, but plotting html does not work for some reason. Switch plot_html to FALSE and produce the plots later.
+# screen -LS gadgetrun bash -c '/software/R-4.2.1/bin/Rscript --verbose _RUN_THE_MODEL.R'
+
+## Once done, you can kill inactive screen sessions (think before you do this):
+# pkill screen
+## Remember not to start another run in Rstudio server while the screen session is running
+## Also running two screen sessions using the same ghl-gadget-data is not possible because duckdb does not support multiple connections. Kill the old screen sessions for the same folder before starting a new one.
 
 ## Alternatively you can run it using nohup (this option does not seem to work)
 # cd to the desired ghl-gadget3 folder.
@@ -57,7 +57,7 @@ plot_html <- TRUE # Whether html model summary should be plotted. In most cases 
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
-previous_model_params_as_initial <- TRUE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
+previous_model_params_as_initial <- FALSE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
 
 ### Optimisation settings (adjust here and they'll change everywhere)
 ncores <- 5 # Number of cores to use for parallel operations. The number of available computer cores is often not a limiting factor when running gadget, but memory is because the entire model is copied to RAM multiple times. Use max ncores = 10 for Eucleia, and ncores = 1 or a few for other servers.
@@ -203,7 +203,7 @@ if(run_iterative) {
     model = tmb_model,
     params.in = tmb_param,
     grouping =
-      list(SI_Adults = c('log_EggaN_SI', 'log_EcoS_SI'), #'log_EggaN_SI_female', 'log_EggaN_SI_male'
+      list(SI_Adults = c('log_EggaN_SI_female', 'log_EggaN_SI_male', 'log_EcoS_SI', 'log_Russian_SI'), #'log_EggaN_SI'
            SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
            TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
            OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),

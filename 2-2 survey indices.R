@@ -414,19 +414,19 @@ rm(p)
 ## Plot all ####
 
 p <- dplyr::bind_rows(
-  EggaN_SI %>%
+  # EggaN_SI %>%
+  #   mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
+  #   dplyr::mutate(index = "EggaN_SI",
+  #                 p = value/max(value)) %>%
+  EggaN_SI_female %>%
     mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
-    dplyr::mutate(index = "EggaN_SI",
+    dplyr::mutate(index = "EggaN_SI_female",
                   p = value/max(value)) %>%
-  # EggaN_SI_female %>%
-  #   mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
-  #   dplyr::mutate(index = "EggaN_SI_female",
-  #                 p = value/max(value)) %>%
-  #   dplyr::select(year, step, area, length, index, p),
-  # EggaN_SI_male %>%
-  #   mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
-  #   dplyr::mutate(index = "EggaN_SI_male",
-  #                 p = value/max(value)) %>%
+    dplyr::select(year, step, area, length, index, p),
+  EggaN_SI_male %>%
+    mutate(value = if(EggaN_SI_as_biomass_index) total_weight else number) %>%
+    dplyr::mutate(index = "EggaN_SI_male",
+                  p = value/max(value)) %>%
     dplyr::select(year, step, area, length, index, p),
   # EggaS_SI %>%
   #   mutate(value = number) %>%
@@ -454,11 +454,11 @@ p <- dplyr::bind_rows(
     dplyr::mutate(step = as.character(step),
                   index = "Russian_SI",
                   p = total_weight/max(total_weight)) %>%
-    dplyr::select(-total_weight),
-  Rus_CPUE_SI %>%
-    dplyr::mutate(index = "Rus_CPUE_SI",
-                  p = weight/max(weight)) %>%
-    dplyr::select(-weight)
+    dplyr::select(-total_weight) #,
+  # Rus_CPUE_SI %>%
+  #   dplyr::mutate(index = "Rus_CPUE_SI",
+  #                 p = weight/max(weight)) %>%
+  #   dplyr::select(-weight)
 ) %>%
   ggplot(aes(x = year, y = p, color = index)) +
   geom_line() +
