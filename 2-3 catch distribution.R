@@ -1162,7 +1162,7 @@ if(reload_data) {
         mfdb_interval(
           'len',
           seq(21, stock_params$male_mat$max_possible_data_length+6,
-              by = 5*stock_params$dl),
+              by = 2*stock_params$dl),
           open_ended = c('lower','upper')),
       sex = mfdb_group(female = 'F', male = 'M'),
       timestep = model_params$timestep_fun,
