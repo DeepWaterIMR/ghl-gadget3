@@ -68,9 +68,9 @@ tmb_param <-
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
-  g3_init_guess('\\.p1$', 0.5, 0, 1, 1) %>%
-  g3_init_guess('\\.p3$', .15, 0.01, 1, 1) %>%
-  g3_init_guess('\\.p4$', 35, 1e-6, 1e4, 1) %>%
+  g3_init_guess('\\.p1$', 0.5, 0, 3, 1) %>%
+  g3_init_guess('\\.p3$', 0.1, 0, 10, 1) %>%
+  g3_init_guess('\\.p4$', 0.01, 0, 1e3, 1) %>%
   g3_init_guess('init.F', 0.4, 0.001, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
@@ -173,8 +173,8 @@ if(set_weights) {
        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   15.044909
         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   51.403904
      # adist_surveyindices_log_EggaN_SI_weight  8.550591e+02   100 # 54.003922
-adist_surveyindices_log_EggaN_SI_female_weight  8.550591e+02   50 # 54.003922
- adist_surveyindices_log_EggaN_SI_male_weight  8.550591e+02   50 # 54.003922
+adist_surveyindices_log_EggaN_SI_female_weight  8.550591e+02   100 # 54.003922
+  adist_surveyindices_log_EggaN_SI_male_weight  8.550591e+02   100 # 54.003922
     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   10 # 25.728188
        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   17.86664
     '

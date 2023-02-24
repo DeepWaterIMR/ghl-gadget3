@@ -783,7 +783,7 @@ if(reload_data) {
       ),
     method = "est_n",
     verbose = FALSE
-  ) %>% rename("number" = "est_n") %>% filter(year != 2007)
+  ) %>% rename("number" = "est_n") %>% filter(!year %in% c(2001,2007))
   
   png(file.path(base_dir, "figures/EggaN_aldist_female.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)
   print(plot.aldist(EggaN_aldist_female, scales = "free_y"))
@@ -815,7 +815,7 @@ if(reload_data) {
       ),
     method = "est_n",
     verbose = FALSE
-  ) %>% rename("number" = "est_n")
+  ) %>% rename("number" = "est_n") %>% filter(!year %in% c(2001,2007))
   
   
   png(file.path(base_dir, "figures/EggaN_aldist_male.png"), width = pagewidth, height = pagewidth*2, units = "mm", res = 300)

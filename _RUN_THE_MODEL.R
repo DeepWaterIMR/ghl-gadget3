@@ -54,7 +54,7 @@ mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clo
 plot_html <- TRUE # Whether html model summary should be plotted. In most cases you want this TRUE unless you work on a server that doesn't have pandoc installed.
 
 ### Parameter and likelihood component options ####
-set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
 previous_model_params_as_initial <- FALSE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
@@ -200,12 +200,12 @@ if(run_iterative) {
     list(SI_Adults = c('log_EggaN_SI_female', 'log_EggaN_SI_male', 'log_EcoS_SI', 'log_RussianS_SI'), #'log_EggaN_SI'
          SI_Juv = c('log_Juv_SI_1', 'log_Juv_SI_2'),
          TrawlNor = c('TrawlNor_ldist', 'TrawlNor_sexdist'),
-         OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist', 'OtherNor_aldist'),
+         OtherNor = c('OtherNor_ldist', 'OtherNor_sexdist'), # , 'OtherNor_aldist'
          TrawlRus = c('TrawlRus_ldist', 'TrawlRus_sexdist'),
          # OtherRus = c('OtherRus_ldist', 'OtherRus_sexdist'),
-         EcoS = c('EcoS_ldist', 'EcoS_aldist', 'EcoS_sexdist'),
+         EcoS = c('EcoS_ldist', 'EcoS_sexdist'), # 'EcoS_aldist',
          EggaN = c('EggaN_aldist_female', 'EggaN_aldist_male', 'EggaN_ldist', 'EggaN_matp'),
-         EggaS = c('EggaS_aldist', 'EggaS_ldist', 'EggaS_matp')
+         EggaS = c('EggaS_ldist', 'EggaS_matp') # 'EggaS_aldist', 
     )
   
   ## Remove components not listed in component grouping to avoid crashes later in g3_iterative
