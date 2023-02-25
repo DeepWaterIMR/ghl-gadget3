@@ -150,33 +150,29 @@ tmb_param <-
 if(set_weights) {
   # Copy the /iterative_reweighting/weights.final as opened in Rstudio viewer under:
   tmp_weights <- read.table(textConnection(
-    '                                          comp approx_weight      weight
-          cdist_sumofsquares_EggaN_matp_weight  1.956147e+03  150.153399
-      cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03  3980.42291
-         cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03 5521.799725
-          cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   97.429536
-          cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03 2869.607127
-         cdist_sumofsquares_EcoS_aldist_weight  9.251693e+03   0 # 33.133902
-    cdist_sumofsquares_TrawlNor_sexdist_weight  3.411164e+02    4.254094
-        cdist_sumofsquares_EcoS_sexdist_weight  7.657220e+02   55.096546
-    cdist_sumofsquares_OtherNor_sexdist_weight  2.653991e+02    4.515705
-   cdist_sumofsquares_EggaN_aldist_male_weight  4.473190e+03    78.55533
-      cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02 2134.226793
-     cdist_sumofsquares_OtherNor_aldist_weight  1.899254e+04  164.880376
-         cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03 10000 # 7245.487901
-        cdist_sumofsquares_EggaS_aldist_weight  1.679432e+04   83.758179
-       cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02 1886.475247
- cdist_sumofsquares_EggaN_aldist_female_weight  1.366532e+04   56.474408
-    cdist_sumofsquares_TrawlRus_sexdist_weight  3.792818e+02    5.579828
-      cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03 3966.763179
-      cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03 2963.858763
-       adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28   15.044909
-        adist_surveyindices_log_EcoS_SI_weight  1.371257e+28   51.403904
-     # adist_surveyindices_log_EggaN_SI_weight  8.550591e+02   100 # 54.003922
-adist_surveyindices_log_EggaN_SI_female_weight  8.550591e+02   100 # 54.003922
-  adist_surveyindices_log_EggaN_SI_male_weight  8.550591e+02   100 # 54.003922
-    adist_surveyindices_log_RussianS_SI_weight  4.720994e+01   10 # 25.728188
-       adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28   17.86664
+    '                                           comp approx_weight       weight
+           cdist_sumofsquares_EggaN_matp_weight  1.956147e+03   171.128311
+       cdist_sumofsquares_TrawlRus_ldist_weight  5.507159e+03  7847.919932
+          cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03   6586.06904
+           cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   185.793672
+           cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  1958.397941
+     cdist_sumofsquares_TrawlNor_sexdist_weight  2.038440e+03    12.767695
+         cdist_sumofsquares_EcoS_sexdist_weight  3.125977e+03    86.940273
+     cdist_sumofsquares_OtherNor_sexdist_weight  1.575646e+03     5.291466
+    cdist_sumofsquares_EggaN_aldist_male_weight  8.876329e+03  6513.707945
+       cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02  2186.550833
+          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  7230.460965
+        cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02  1605.113415
+  cdist_sumofsquares_EggaN_aldist_female_weight  2.200984e+04 10898.676569
+     cdist_sumofsquares_TrawlRus_sexdist_weight  2.225234e+03     5.863625
+       cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03 10249.018274
+       cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03  1942.918377
+ adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03     25.13252
+        adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28    15.062407
+         adist_surveyindices_log_EcoS_SI_weight  1.371257e+28    29.723026
+     adist_surveyindices_log_RussianS_SI_weight  4.720994e+01     5.497719
+   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02   103.729042
+        adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    17.847584
     '
   ), header = TRUE)
 
