@@ -54,19 +54,19 @@ mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clo
 plot_html <- TRUE # Whether html model summary should be plotted. In most cases you want this TRUE unless you work on a server that doesn't have pandoc installed.
 
 ### Parameter and likelihood component options ####
-set_weights <- FALSE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
+set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
 force_bound_params <- TRUE # Whether parameters should be forced to their bounds.
 use_cheat_fleet <- FALSE # Whether average EggaN maturity/stock data should be used for 1980:1990 to correct for stock proportion issues in initial population
-previous_model_params_as_initial <- FALSE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
+previous_model_params_as_initial <- TRUE # Whether to use parameters optimised parameters as initial values for tmb_params. Speeds up the optimization, but also sets the model to a certain likelihood scape.
 
 ### Optimisation settings (adjust here and they'll change everywhere)
 ncores <- 10 # Number of cores to use for parallel operations. The number of available computer cores is often not a limiting factor when running gadget, but memory is because the entire model is copied to RAM multiple times. Use max ncores = 10 for Eucleia, and ncores = 1 or a few for other servers.
 maxit <- 3000 # Maximum number of iterations during an optimisation run.
 
 ### Run options ####
-run_optim <- FALSE # Whether to run optimisation of parameters (the normal routine)
-run_iterative <- TRUE # Whether to run iterative reweighting (takes 3-10 hours)
-run_jitter <- TRUE # Run jittered optimisation. Repeats g3_optim multiple times with slightly different starting values.
+run_optim <- TRUE # Whether to run optimisation of parameters (the normal routine)
+run_iterative <- FALSE # Whether to run iterative reweighting (takes 3-10 hours)
+run_jitter <- FALSE # Run jittered optimisation. Repeats g3_optim multiple times with slightly different starting values.
 run_retro <- FALSE # Run retrospective analysis?
 run_bootstrap <- FALSE # Not implemented yet
 
