@@ -220,15 +220,15 @@ likelihood_actions <- list(
 
   ## Sex distributions ####
 
-  # g3l_catchdistribution(
-  #   'TrawlNor_sexdist',
-  #   TrawlNor_sexratio %>% rename(stock_re = sex),
-  #   fleets = list(TrawlNor),
-  #   stocks = stocks,
-  #   area_group = c(all = 1),
-  #   g3l_distribution_sumofsquares(over = c('area', 'length')),
-  #   nll_breakdown = nll_breakdown,
-  #   report = lik_report),
+  g3l_catchdistribution(
+    'TrawlNor_sexdist',
+    TrawlNor_sexratio %>% rename(stock_re = sex),
+    fleets = list(TrawlNor),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
 
   g3l_catchdistribution(
     'OtherNor_sexdist',
@@ -240,15 +240,15 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
-  # g3l_catchdistribution(
-  #   'TrawlRus_sexdist',
-  #   TrawlRus_sexratio %>% rename(stock_re = sex),
-  #   fleets = list(TrawlRus),
-  #   stocks = stocks,
-  #   area_group = c(all = 1),
-  #   g3l_distribution_sumofsquares(over = c('area', 'length')),
-  #   nll_breakdown = nll_breakdown,
-  #   report = lik_report),
+  g3l_catchdistribution(
+    'TrawlRus_sexdist',
+    TrawlRus_sexratio %>% rename(stock_re = sex),
+    fleets = list(TrawlRus),
+    stocks = stocks,
+    area_group = c(all = 1),
+    g3l_distribution_sumofsquares(over = c('area', 'length')),
+    nll_breakdown = nll_breakdown,
+    report = lik_report),
 
   # g3l_catchdistribution(
   #   'OtherRus_sexdist',
