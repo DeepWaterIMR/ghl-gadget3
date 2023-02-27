@@ -54,7 +54,7 @@ tmb_param <-
   g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 100.9, 80, 120, 1) %>%
-  g3_init_guess('_male.Linf', 75, 40, 100, 0) %>%
+  g3_init_guess('_male.Linf', 68, 40, 100, 0) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
   # g3_init_guess('ghl_K_sigma', 0.2, 0, 1, 0) %>%
   # g3_init_guess('rnd_weight', 1, 1, 100, 0) %>%
@@ -68,9 +68,9 @@ tmb_param <-
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
-  g3_init_guess('\\.p1$', 0.5, 0, 3, 1) %>%
+  g3_init_guess('\\.p1$', log(2), 0, 3, 1) %>%
   g3_init_guess('\\.p3$', 0.1, 0, 10, 1) %>%
-  g3_init_guess('\\.p4$', 0.01, 0, 1e3, 1) %>%
+  g3_init_guess('\\.p4$', 0.02, 0, 1e3, 1) %>%
   g3_init_guess('init.F', 0.4, 0.001, 0.8, 1) %>%
   # g3_init_guess('\\.M', 0.1, 0.001, 1, 0) %>%
   g3_init_guess('_female.M', 0.12, 0.001, 0.4, 0) %>%
@@ -156,22 +156,22 @@ if(set_weights) {
           cdist_sumofsquares_EggaS_ldist_weight  4.640946e+03  5880.351031
            cdist_sumofsquares_EggaS_matp_weight  2.400939e+03   142.244013
            cdist_sumofsquares_EcoS_ldist_weight  1.985071e+03  2382.300742
-     cdist_sumofsquares_TrawlNor_sexdist_weight  2.038440e+03     5.782985
-         cdist_sumofsquares_EcoS_sexdist_weight  3.125977e+03    67.088102
-     cdist_sumofsquares_OtherNor_sexdist_weight  1.575646e+03     5.297271
+     cdist_sumofsquares_TrawlNor_sexdist_weight  2.038440e+03     15 #5.782985
+         cdist_sumofsquares_EcoS_sexdist_weight  3.125977e+03    10 # 67.088102
+     cdist_sumofsquares_OtherNor_sexdist_weight  1.575646e+03     10 # 5.297271
     cdist_sumofsquares_EggaN_aldist_male_weight  8.876329e+03  6322.201992
        cdist_sumofsquares_RussianS_ldist_weight  8.910168e+02   913.582872
-          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  7692.635027
+          cdist_sumofsquares_EggaN_ldist_weight  5.775529e+03  10000 # 7692.635027
         cdist_sumofsquares_WinterS_ldist_weight  8.141353e+02  1718.896373
   cdist_sumofsquares_EggaN_aldist_female_weight  2.200984e+04 10430.097865
-     cdist_sumofsquares_TrawlRus_sexdist_weight  2.225234e+03     4.670687
+     cdist_sumofsquares_TrawlRus_sexdist_weight  2.225234e+03     14 # 4.670687
        cdist_sumofsquares_OtherNor_ldist_weight  6.969325e+03  9851.695778
        cdist_sumofsquares_TrawlNor_ldist_weight  3.707740e+03  5724.301243
- adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03    23.910902
+ adist_surveyindices_log_EggaN_SI_female_weight  1.122509e+03    40 # 23.910902
         adist_surveyindices_log_Juv_SI_1_weight  2.300172e+28     15.05304
          adist_surveyindices_log_EcoS_SI_weight  1.371257e+28    25.472732
      adist_surveyindices_log_RussianS_SI_weight  4.720994e+01     5.176901
-   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02    75.476195
+   adist_surveyindices_log_EggaN_SI_male_weight  6.397818e+02    100 # 75.476195
         adist_surveyindices_log_Juv_SI_2_weight  1.901476e+28    17.858574
     '
   ), header = TRUE)

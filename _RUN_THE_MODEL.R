@@ -163,7 +163,7 @@ source("6 initial parameters.R")
 # result <- model(tmb_param$value)
 # result[[1]]
 
-# fit_init <- gadget3:::g3_fit(model,tmb_param)
+# fit_init <- gadgetutils::g3_fit(model,tmb_param)
 # gadget_plots(fit_init, file.path(base_dir, "figures"))
 
 # png(file.path(base_dir, "figures/Initial_annual_plot.png"), width = pagewidth, height = pagewidth, units = "mm", res = 300)
