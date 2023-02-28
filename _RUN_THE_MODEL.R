@@ -52,6 +52,7 @@ reload_data <- FALSE # Set this to true to reload data from MFDB. If FALSE and t
 base_dir <- "model_files" # All files and output of the currently run model will be placed in a folder with this name
 mfdb_path <- "../ghl-gadget-data/data/mfdb/ghl.duckdb" # Set MDFB path here. Clone ghl-gadget-data to your computer in the same base directory than ghl-gadget for the default path to work
 plot_html <- TRUE # Whether html model summary should be plotted. In most cases you want this TRUE unless you work on a server that doesn't have pandoc installed.
+plot_retro_html <- FALSE # Whether all 6 retro fit objects should be plotted to separate html files. Useful for debugging but takes 5*15 MB more space
 
 ### Parameter and likelihood component options ####
 set_weights <- TRUE # Whether to set manual weights for likelihood components from previous iterative reweighting. The weights are defined in 6 initial parameters.R
@@ -471,6 +472,10 @@ if(run_retro) {
   
   for(peel in 0:5){
     
+    retro_params[[peel+1]] <- init_retro_param
+    retro_params[[peel+1]]$value$retro_years <- peel
+    model_params$peel <- peel
+    
     source("5 likelihood.R")
     
     if(force_bound_params) {
@@ -479,22 +484,19 @@ if(run_retro) {
         list(g3experiments::g3l_bounds_penalty(tmb_param))
       )
       
-      retro_model[[peel]] <- g3_to_tmb(retro_actions)
+      retro_model[[peel+1]] <- g3_to_tmb(retro_actions)
     } else {
       retro_actions <- c(time_actions, stock_actions, fleet_actions, likelihood_actions)
-      retro_model[[peel]] <- g3_to_tmb(retro_actions)
+      retro_model[[peel+1]] <- g3_to_tmb(retro_actions)
     }
-    
-    retro_params[[peel]] <- init_retro_param
-    init_retro_param$value$retro_years <- peel
   }
   
-  
-  retro_list <- parallel::mclapply(0:5, function(peel) {
+  retro_list <- parallel::mclapply(seq_along(retro_params), function(i) {
     
-    # message("Running g3_optim for ", peel)
-    param <- g3_optim(model = retro_model[[peel]],
-                      params = retro_params[[peel]],
+    print(i-1)
+    # message("Running g3_optim for ", i-1)
+    param <- g3_optim(model = retro_model[[i]],
+                      params = retro_params[[i]],
                       use_parscale = TRUE,
                       method = 'BFGS',
                       control = list(maxit = maxit),
@@ -502,7 +504,7 @@ if(run_retro) {
     )
     #message("g3_optim for ", peel, " finished. Running g3_fit")
     
-    fit <- g3_fit(retro_model[[peel]], param)
+    fit <- g3_fit(retro_model[[i]], param)
     
     # message("Peel ", peel, " finished.")
     
@@ -515,21 +517,27 @@ if(run_retro) {
   write.csv(lapply(retro_list, function(k) k$param) %>% bind_rows(), file = file.path(base_dir, "retro/Retro parameters.csv"))
   save(retro_list, file = file.path(base_dir, "retro/Retro parameters and fit.rda"), compress = "xz")
   
-  # if(plot_html) {
-  #   tmppath <- file.path(getwd(), base_dir, "figures")
-  #   make_html(retro_fit, path = tmppath, file_name = "model_output_figures_retro.html")
-  #   rm(tmppath)
-  # }
-  
   # Plot
   
   retro_fit <- lapply(retro_list, function(k) k$fit)
+  
+  if(plot_retro_html) {
+    message("Plotting retro html files. This will take a while.")
+    tmppath <- file.path(getwd(), base_dir, "figures")
+    lapply(seq_along(retro_fit), function(i) {
+      make_html(
+        retro_fit[[i]], path = tmppath, 
+        file_name = paste0("model_output_figures_retro_peel_", i-1, ".html")
+      )
+    })
+    rm(tmppath)
+  }
   
   p <- lapply(seq_along(retro_fit), function(i) {
     retro_fit[[i]]$res.by.year %>%
       dplyr::group_by(.data$year) %>%
       dplyr::summarise(value = sum(.data$total.biomass)/1e6) %>%
-      dplyr::mutate(run = i)
+      dplyr::mutate(run = i-1)
   }) %>%
     dplyr::bind_rows() %>%
     ggplot2::ggplot(
