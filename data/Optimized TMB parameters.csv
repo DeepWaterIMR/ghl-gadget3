@@ -1,6 +1,6 @@
 "","switch","type","value","optimise","random","lower","upper","parscale"
 "retro_years","retro_years","",0,FALSE,FALSE,NA,NA,NA
-"ghl.init.scalar","ghl.init.scalar","",2.18243679038777,TRUE,FALSE,1,100,99
+"ghl.init.scalar","ghl.init.scalar","",2.18243679038776,TRUE,FALSE,1,100,99
 "ghl_female.M","ghl_female.M","",0.12,FALSE,FALSE,0.001,0.4,0.399
 "ghl.init.F","ghl.init.F","",0.0262024212777343,TRUE,FALSE,0.001,0.8,0.799
 "ghl_female.mat_initial_alpha","ghl_female.mat_initial_alpha","",0.421,FALSE,FALSE,0.001,3,2.999
@@ -114,7 +114,7 @@
 "ghl_male.ecos.survey.l50","ghl_male.ecos.survey.l50","",5.00054351122472,TRUE,FALSE,5,50,45
 "ghl_female.eggan.survey.alpha","ghl_female.eggan.survey.alpha","",0.397752787024315,TRUE,FALSE,0.1,20,19.9
 "ghl_female.eggan.survey.l50","ghl_female.eggan.survey.l50","",40.5762358871811,TRUE,FALSE,5,80,75
-"ghl_male.eggan.survey.alpha","ghl_male.eggan.survey.alpha","",0.436072647231704,TRUE,FALSE,0.1,20,19.9
+"ghl_male.eggan.survey.alpha","ghl_male.eggan.survey.alpha","",0.436072647231705,TRUE,FALSE,0.1,20,19.9
 "ghl_male.eggan.survey.l50","ghl_male.eggan.survey.l50","",39.4707375570894,TRUE,FALSE,5,80,75
 "ghl_female.eggas.survey.alpha","ghl_female.eggas.survey.alpha","",0.256068062227925,TRUE,FALSE,0.1,20,19.9
 "ghl_female.eggas.survey.l50","ghl_female.eggas.survey.l50","",46.1327660500049,TRUE,FALSE,5,80,75
