@@ -3,6 +3,6 @@
 !.gitignore
 !README.Rmd
 !README.md
-!data
-!R
+!data/*
+!R/*
 .Rproj.user
