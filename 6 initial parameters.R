@@ -54,7 +54,7 @@ tmb_param <-
   g3_init_guess('rec.scalar', 1, 1, 100, 0) %>%
   g3_init_guess('init.scalar', 35, 1, 100, 1) %>%
   g3_init_guess('_female.Linf', 100.9, 80, 120, 1) %>%
-  g3_init_guess('_male.Linf', 75, 40, 100, 0) %>%
+  g3_init_guess('_male.Linf', 68, 40, 100, 0) %>%
   g3_init_guess('\\.K', 200, 20, 500, 1) %>%
   # g3_init_guess('ghl_K_sigma', 0.2, 0, 1, 0) %>%
   # g3_init_guess('rnd_weight', 1, 1, 100, 0) %>%
@@ -68,7 +68,7 @@ tmb_param <-
   g3_init_guess('andersen.p0$', 0, NA, NA, 0) %>%
   g3_init_guess('andersen.p2$', 1, NA, NA, 0) %>%
   g3_init_guess('andersen.L$', stock_params$maxlength, NA, NA, 0) %>%
-  g3_init_guess('\\.p1$', 0.5, 0, 3, 1) %>%
+  g3_init_guess('\\.p1$', log(2), 0, 3, 1) %>%
   g3_init_guess('\\.p3$', 0.1, 0, 10, 1) %>%
   g3_init_guess('\\.p4$', 0.01, 0, 1e3, 1) %>%
   g3_init_guess('init.F', 0.4, 0.001, 0.8, 1) %>%
