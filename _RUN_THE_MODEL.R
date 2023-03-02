@@ -92,6 +92,10 @@ setup_options$bound_params <- ifelse(setup_options$param_opt_mode == 1, TRUE, FA
 ##########################
 ## Modify reload_data ####
 
+if(run_iterative) {
+  previous_model_params_as_initial <- FALSE
+}
+
 if(reset_model | !dir.exists(base_dir)) {
   reload_data <- TRUE
   
