@@ -16,6 +16,8 @@ likelihood_actions <- list(
 
   ## Length distributions ####
 
+  ### TrawlNor ####
+  
   g3l_catchdistribution(
     'TrawlNor_ldist',
     TrawlNor_ldist,
@@ -26,6 +28,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_catchdistribution(
+  #   'TrawlNor_ldist',
+  #   TrawlNor_ldist_sex %>% rename(stock_re = sex),
+  #   fleets = list(TrawlNor),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'sex')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  
   # g3l_catchdistribution(
   #   'TrawlNor_ldist_male',
   #   TrawlNor_ldist_male,
@@ -46,6 +58,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### TrawlRus ####
+  
   g3l_catchdistribution(
     'TrawlRus_ldist',
     TrawlRus_ldist,
@@ -56,6 +70,16 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  # g3l_catchdistribution(
+  #   'TrawlRus_ldist',
+  #   TrawlRus_ldist_sex %>% rename(stock_re = sex),
+  #   fleets = list(TrawlRus),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'sex')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  
   # g3l_catchdistribution(
   #   'TrawlRus_ldist_female',
   #   TrawlRus_ldist_female,
@@ -76,6 +100,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### OtherNor ####
+  
   g3l_catchdistribution(
     'OtherNor_ldist',
     OtherNor_ldist,
@@ -87,6 +113,18 @@ likelihood_actions <- list(
     report = lik_report),
 
   # g3l_catchdistribution(
+  #   'OtherNor_ldist',
+  #   OtherNor_ldist_sex %>% rename(stock_re = sex),
+  #   fleets = list(OtherNor),
+  #   stocks = stocks,
+  #   area_group = c(all = 1),
+  #   g3l_distribution_sumofsquares(over = c('area', 'sex')),
+  #   nll_breakdown = nll_breakdown,
+  #   report = lik_report),
+  
+  ### OtherRus ####
+  
+  # g3l_catchdistribution(
   #   'OtherRus_ldist',
   #   OtherRus_ldist,
   #   fleets = list(OtherRus),
@@ -96,6 +134,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### EggaN ####
+  
   g3l_catchdistribution(
     'EggaN_ldist',
     EggaN_ldist,
@@ -106,6 +146,8 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  ### EggaS ####
+  
   g3l_catchdistribution(
     'EggaS_ldist',
     EggaS_ldist,
@@ -116,6 +158,8 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  ### EcoS ####
+  
   g3l_catchdistribution(
     'EcoS_ldist',
     EcoS_ldist,
@@ -126,6 +170,8 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  ### WinterS ####
+  
   g3l_catchdistribution(
     'WinterS_ldist',
     WinterS_ldist,
@@ -136,6 +182,8 @@ likelihood_actions <- list(
     nll_breakdown = nll_breakdown,
     report = lik_report),
 
+  ### RussianS ####
+  
   g3l_catchdistribution(
     'RussianS_ldist',
     RussianS_ldist,
@@ -337,6 +385,8 @@ likelihood_actions <- list(
 
   ## Survey indices ####
 
+  ### EggaN ####
+  
   g3l_abundancedistribution(
     'EggaN_SI_female',
     if("total_weight" %in% colnames(EggaN_SI_female)) {
@@ -388,6 +438,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### EggaS ####
+  
   # g3l_abundancedistribution(
   #   'EggaS_SI',
   #         EggaS_SI %>%
@@ -399,6 +451,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### EcoS ####
+  
   g3l_abundancedistribution(
     'EcoS_SI',
     EcoS_SI %>%
@@ -455,6 +509,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### WinterS ####
+  
   # g3l_abundancedistribution(
   #   'WinterS_SI',
   #   WinterS_SI,
@@ -465,6 +521,8 @@ likelihood_actions <- list(
   #   nll_breakdown = nll_breakdown,
   #   report = lik_report),
 
+  ### RussianS ####
+  
   g3l_abundancedistribution(
     'RussianS_SI',
     Russian_SI %>%
