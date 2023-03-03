@@ -512,7 +512,7 @@ if(run_retro) {
     
     # message("Peel ", peel, " finished.")
     
-    return(list(peel = peel, param = param, fit = fit))
+    return(list(peel = i-1, param = param, fit = fit))
   }, mc.cores = ifelse(ncores >= 5, 6, ncores)
   )
   
