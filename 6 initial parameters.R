@@ -228,4 +228,5 @@ save(tmb_param, file = file.path(base_dir, "data/Initial TMB parameters.rda"))
 
 if(!run_retro) {
   save(model, file = file.path(base_dir, "data/R model.rda"), compress = "xz")
+  save(tmb_model, file = file.path(base_dir, "data/TMB model.rda"), compress = "xz")
 }
