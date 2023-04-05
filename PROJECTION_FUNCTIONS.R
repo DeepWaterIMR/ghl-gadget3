@@ -77,72 +77,162 @@ proj_stock_actions2 <- function(num_project_years,
   
 }
 
-
-runfun <- function(adfun, pars, mat, imm = NULL){
-  
-  age_range <- min(g3_stock_def(mat, 'maxage'))
-  
-  if (is.null(imm)) imm <- mat
-  
+runfun <- function(adfun, pars, age_range){
+  #browser()
+  ## Schedule
   schedule <- 
     expand.grid(year = min(year_range):(max(year_range)+num_project_years),
                 step = 1:length(defaults$timestep)) %>% 
     arrange_all() %>% 
     mutate(time = as.character(1:nrow(.)))
   
+  ## Retrieve reports
+  res <- adfun$report(gadget3::g3_tmb_par(pars))
   
-  reports <- adfun$report(gadget3::g3_tmb_par(pars))
   
-  ## Collect recruitment
-  immname <- paste0('proj_', gadgetutils::g3_stock_name(imm))
-  matname <- paste0('proj_', gadgetutils::g3_stock_name(mat))
-  
-  rec <- 
-    reports[[paste0(immname, '__num')]] %>% 
-    as.data.frame.table(stringsAsFactors = FALSE) %>% 
+  ## Recruitment
+  rec <- res[names(res)[grepl('^proj_(.+)_spawnednum$', names(res))]] %>% 
+    map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)[,c('time','Freq')]) %>% 
+    bind_rows(.id = 'comp') %>% 
+    mutate(stock = gsub('proj_(.+.)_dummy__spawnednum$', '\\1', comp)) %>% 
+    group_by(stock, time) %>% 
+    summarise(rec = sum(Freq), .groups = 'drop') %>% 
     left_join(schedule, by = 'time') %>% 
-    filter(age == paste0('age', gadget3::g3_stock_def(imm, 'minage')+1)) %>% 
-    filter(year > start_year) %>% 
-    group_by(year, step) %>% 
-    summarise(rec = sum(Freq), .groups = 'drop')
-  
-  tmp <-
-    list(num = reports$proj_cdred_mat__num,
-         wgt = reports$proj_cdred_mat__wgt, 
-         comm = reports$proj_cdred_mat__predby_comm_proj) %>% 
-    map(as.data.frame.table, stringsAsFactors = FALSE) %>% 
-    map(as_tibble) %>% 
-    bind_rows(.id='var') %>% 
-    left_join(schedule, by = 'time') %>%
-    filter(!is.na(Freq)) %>% 
-    pivot_wider(names_from = var, values_from = Freq) %>% 
+    select(stock, year, step, rec)
+
+  tmp <- 
+    
+    ## Catches
+    res[names(res)[grepl('^proj_(.+)__predby_(.+)_proj$', names(res))]] %>% 
+      map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>% 
+      bind_rows(.id = 'comp') %>% 
+      mutate(stock = gsub('^proj_(.+)__predby_(.+)_proj$', '\\1', comp)) %>% 
+      group_by(stock, length, age, time) %>% 
+      summarise(catch = sum(Freq, na.rm = T), .groups = 'drop') %>% 
+      
+      left_join(
+        
+        ## Stock weight and numbers
+        res[names(res)[grepl('^proj_(.+)_(imm|mat)__(wgt$|num$)', names(res))]] %>%
+          map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>% 
+          bind_rows(.id = 'comp') %>% 
+          mutate(stock = gsub('^proj_(.+)__(wgt$|num$)', '\\1', comp),
+                 var = gsub('^proj_(.+)_(.+)_(.+)__(.+)', '\\4', comp)) %>% 
+          select(-comp) %>% 
+          pivot_wider(names_from = var, values_from = Freq) %>% 
+          select(-area)
+        
+      , by = c('stock', 'length', 'age', 'time')) %>% 
+    left_join(schedule, by = 'time') %>% 
+    mutate(age = gsub('age', '', age)) %>% 
     gadgetutils:::split_length() %>% 
-    mutate(length = (ifelse(is.infinite(upper),lower + 1, upper) + lower )/2,
-           age = gsub('age','',age) %>% as.numeric()) %>% 
-    dplyr::select(-c(lower, upper, time))
-  
+    select(-time, -length) 
+
   out <- 
     tmp %>% 
-    filter(year > start_year) %>% 
-    group_by(year, step) %>% 
-    summarise(catch = sum(comm, na.rm = TRUE),
-              ssb = sum((num*wgt)[step == 1], na.rm = TRUE), .groups = 'drop') %>% 
+    filter(year >= start_year) %>% 
+    group_by(year, step, stock) %>% 
+    summarise(catch = sum(catch),
+              biomass = sum(num*wgt, na.rm = TRUE), .groups = 'drop') %>% 
     left_join(
-      tmp %>%
-        mutate(catchnum = ifelse(wgt == 0, 0, comm/wgt)) %>% 
-        filter(age %in% age_range) %>% 
+      tmp %>% 
+        filter(age %in% min(age_range):max(age_range)) %>% 
         group_by(year, age) %>% 
-        summarise(N0 = sum(num[step == 1], na.rm = TRUE), 
-                  catch = sum(catchnum), .groups = 'keep') %>% 
+        summarise(N0 = sum(num, na.rm = TRUE),
+                  catch = sum(catch/wgt, na.rm = TRUE), .groups = 'keep') %>% 
         mutate(fbar = -log(1 - catch/N0)) %>% 
         replace_na(list(fbar = 0)) %>% 
         group_by(year) %>% 
         summarise(fbar = mean(fbar), .groups = 'drop') %>% 
-        dplyr::select(year,fbar),
+        select(year, fbar),
       by = 'year'
     ) %>% 
-    left_join(rec, by = c('year', 'step'))
+    left_join(rec, by = c('stock', 'year', 'step'))
   
   return(out)
   
 }
+
+
+################################################################################
+## Wills function
+################################################################################
+
+# runfun <- function(adfun, pars){
+#   browser()
+#   age_range <- min(g3_stock_def(mat, 'maxage'))
+#   
+#   if (is.null(imm)) imm <- mat
+#   
+#   schedule <- 
+#     expand.grid(year = min(year_range):(max(year_range)+num_project_years),
+#                 step = 1:length(defaults$timestep)) %>% 
+#     arrange_all() %>% 
+#     mutate(time = as.character(1:nrow(.)))
+#   
+#   
+#   reports <- adfun$report(gadget3::g3_tmb_par(pars))
+#   
+#   ## Collect recruitment
+#   immname <- c(paste0('proj_', gadgetutils::g3_stock_name(female_imm), '__num'),
+#                paste0('proj_', gadgetutils::g3_stock_name(male_imm), '__num'))
+#   matname <- paste0('proj_', gadgetutils::g3_stock_name(mat))
+#   
+#   rec_f <- 
+#     reports[[immname[[1]]]]  %>% 
+#     as.data.frame.table(stringsAsFactors = FALSE) %>% 
+#     left_join(schedule, by = 'time') %>% 
+#     filter(age == paste0('age', gadget3::g3_stock_def(female_imm, 'minage')+1)) %>% ## Female imm and male imm minages are the same
+#     filter(year > start_year) %>% 
+#     group_by(year, step) %>% 
+#     summarise(rec = sum(Freq), .groups = 'drop')
+#   
+#   rec_m <- 
+#     reports[[immname[[2]]]]  %>% 
+#     as.data.frame.table(stringsAsFactors = FALSE) %>% 
+#     left_join(schedule, by = 'time') %>% 
+#     filter(age == paste0('age', gadget3::g3_stock_def(male_imm, 'minage')+1)) %>% ## Female imm and male imm minages are the same
+#     filter(year > start_year) %>% 
+#     group_by(year, step) %>% 
+#     summarise(rec = sum(Freq), .groups = 'drop')
+#   
+#   tmp <-
+#     list(num = reports$proj_cdred_mat__num,
+#          wgt = reports$proj_cdred_mat__wgt, 
+#          comm = reports$proj_cdred_mat__predby_comm_proj) %>% 
+#     map(as.data.frame.table, stringsAsFactors = FALSE) %>% 
+#     map(as_tibble) %>% 
+#     bind_rows(.id='var') %>% 
+#     left_join(schedule, by = 'time') %>%
+#     filter(!is.na(Freq)) %>% 
+#     pivot_wider(names_from = var, values_from = Freq) %>% 
+#     gadgetutils:::split_length() %>% 
+#     mutate(length = (ifelse(is.infinite(upper),lower + 1, upper) + lower )/2,
+#            age = gsub('age','',age) %>% as.numeric()) %>% 
+#     dplyr::select(-c(lower, upper, time))
+#   
+#   out <- 
+#     tmp %>% 
+#     filter(year > start_year) %>% 
+#     group_by(year, step) %>% 
+#     summarise(catch = sum(comm, na.rm = TRUE),
+#               ssb = sum((num*wgt)[step == 1], na.rm = TRUE), .groups = 'drop') %>% 
+#     left_join(
+#       tmp %>%
+#         mutate(catchnum = ifelse(wgt == 0, 0, comm/wgt)) %>% 
+#         filter(age %in% age_range) %>% 
+#         group_by(year, age) %>% 
+#         summarise(N0 = sum(num[step == 1], na.rm = TRUE), 
+#                   catch = sum(catchnum), .groups = 'keep') %>% 
+#         mutate(fbar = -log(1 - catch/N0)) %>% 
+#         replace_na(list(fbar = 0)) %>% 
+#         group_by(year) %>% 
+#         summarise(fbar = mean(fbar), .groups = 'drop') %>% 
+#         dplyr::select(year,fbar),
+#       by = 'year'
+#     ) %>% 
+#     left_join(rec, by = c('year', 'step'))
+#   
+#   return(out)
+#   
+# }

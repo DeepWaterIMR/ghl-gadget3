@@ -18,7 +18,10 @@ library(g3experiments)
 #if (!dir.exists(outpath)) dir.create(outpath)
 
 load("~/DeepWaterIMR/ghl-gadget3/gadget_workspace.RData")
-source("R/proj_functions_tmp.R")
+source("~/DeepWaterIMR/ghl-gadget3/PROJECTION_FUNCTIONS.R", echo=TRUE)
+
+outpath <- 'PROJ'
+if(!dir.exists(outpath)) dir.create(outpath)
 
 ## Load the desired model, params and fit
 # load(file = file.path(base_dir, vers, 'fit.Rdata'))
@@ -37,15 +40,27 @@ end_year <- max(year_range)
 start_year <- end_year + 1
 num_steps <- length(unique(fit$stock.full$step))
 
+## Recruitment will be re-sampled from this year onwards
 rec_start_year <- min(fit$res.by.year$year) ## 1992
-num_project_years <- 10
-harvest_rates <- 0.1 #seq(0.00, 1, by = 0.01)
-hr_trials <- 1 #10
+
+## How many years to project forward
+num_project_years <- 100
+
+## A sequence of harvest rates to test, typically try #seq(0.00, 1, by = 0.01)
+harvest_rates <- seq(0.00, 1, by = 0.01)
+
+## How many trials per harvest rate (each trial will have a unique recruitment series 
+## and a unique annual harvest rate sequence (if assessment error is present))
+hr_trials <- 10 #10
 recstep <- 1
+
+## Age range for calculating fbar
+age_range <- c(1,25)
+
 
 #blim <- #138650858          # 125629491
 
-## Median SSB for 2000:2005 (see TR)
+## Blim in tonnes
 blim <- round(min(fit$res.by.year$total.biomass)/1e3)
 bpa <- blim * 1.4
 btrigger <- bpa
@@ -70,6 +85,7 @@ btrigger <- bpa
 #   names = names(defaults$area))
 
 
+## Setup the stocks
 female_imm <- g3_stock(
   c(species = tolower(defaults$species), sex = 'female', 'imm'),
   lengthgroups = seq(stock_params$female_imm$minlength,
@@ -139,25 +155,10 @@ proj_actions0 <-
 ## -----------------------------------------------------------------------------
 
 proj_TrawlNor <- g3_fleet(c("TrawlNor", "proj")) %>% g3s_livesonareas(areas[c('1')])
-
 proj_OtherNor <- g3_fleet(c("OtherNor", "proj")) %>% g3s_livesonareas(areas[c('1')])
-
-# if(nrow(HistNor_catches) > 0) {
-#   HistNor <- g3_fleet(c("HistNor", "proj")) %>%
-#     g3s_livesonareas(areas[c('1')])
-# }
-
 proj_TrawlRus <- g3_fleet(c("TrawlRus", "proj")) %>% g3s_livesonareas(areas[c('1')])
-
 proj_OtherRus <- g3_fleet(c("OtherRus", "proj")) %>% g3s_livesonareas(areas[c('1')])
-
-# if(nrow(HistRus_catches) > 0) {
-#   HistRus <- g3_fleet(c("HistRus", "proj")) %>%
-#     g3s_livesonareas(areas[c('1')])
-# }
-
 proj_Internat <- g3_fleet(c("Internat", "proj")) %>% g3s_livesonareas(areas[c('1')])
-
 
 proj_effort_scalar <-
   structure(expand.grid(year=start_year:(start_year + num_project_years),
@@ -166,6 +167,7 @@ proj_effort_scalar <-
                         scalar=1),
             area_group = list(`1` = 1))
 
+## Setup a time-varying parameter table for harvest rates
 hr_vec <- 
   gadget3:::f_substitute(~g3_param_table('project_hr',
                                          expand.grid(cur_year = seq(end_year, 
@@ -201,7 +203,7 @@ proj_fleet_actions <-
                                                                                 E = g3_timeareadata('trawlnor_proj',
                                                                                                     proj_effort_scalar, 
                                                                                                     value_field = 'scalar'),
-                                                                                sum_stocks = stocks),
+                                                                                sum_stocks = list(female_mat)),
            run_f = ~cur_year_projection),
        
        proj_OtherNor %>%  
@@ -221,7 +223,7 @@ proj_fleet_actions <-
                                                                                 E = g3_timeareadata('othernor_proj',
                                                                                                     proj_effort_scalar, 
                                                                                                     value_field = 'scalar'),
-                                                                                sum_stocks = stocks),
+                                                                                sum_stocks = list(female_mat)),
            run_f = ~cur_year_projection),
        
        proj_TrawlRus %>%  
@@ -241,7 +243,7 @@ proj_fleet_actions <-
                                                                                 E = g3_timeareadata('trawlrus_proj',
                                                                                                     proj_effort_scalar, 
                                                                                                     value_field = 'scalar'),
-                                                                                sum_stocks = stocks),
+                                                                                sum_stocks = list(female_mat)),
            run_f = ~cur_year_projection),
        
        proj_OtherRus %>%  
@@ -261,7 +263,7 @@ proj_fleet_actions <-
                                                                                 E = g3_timeareadata('OtherRus_proj',
                                                                                                     proj_effort_scalar, 
                                                                                                     value_field = 'scalar'),
-                                                                                sum_stocks = stocks),
+                                                                                sum_stocks = list(female_mat)),
            run_f = ~cur_year_projection),
        
        proj_Internat %>%  
@@ -281,7 +283,7 @@ proj_fleet_actions <-
                                                                                 E = g3_timeareadata('Internat_proj',
                                                                                                     proj_effort_scalar, 
                                                                                                     value_field = 'scalar'),
-                                                                                sum_stocks = stocks),
+                                                                                sum_stocks = list(female_mat)),
            run_f = ~cur_year_projection)
        )
   
@@ -374,12 +376,12 @@ results_pre <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_pre[[x]], cdredmat, cdredimmat) ## NEED TO FIX STOCKS
+            out <- runfun(fun_fun, projpar_pre[[x]], age_range) ## NEED TO FIX STOCKS
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-            }, mc.cores = parallel::detectCores(logical = TRUE))
+            }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
           )
 
 save(results_pre, file = file.path(outpath, 'results_pre.Rdata'))
@@ -412,12 +414,12 @@ results_msy_nobtrigger <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_msy_nobtrigger), names(projpar_msy_nobtrigger)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_msy_nobtrigger[[x]], cdredmat, cdredimmat)
+            out <- runfun(fun_fun, projpar_msy_nobtrigger[[x]], age_range)
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-            }, mc.cores = parallel::detectCores(logical = TRUE))
+            }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
           )
 
 save(results_msy_nobtrigger, file = file.path(outpath, 'results_msy_nobtrigger.Rdata'))
@@ -449,12 +451,12 @@ results_msy <-
   do.call('rbind', 
           parallel::mclapply(setNames(names(projpar_msy), names(projpar_msy)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_msy[[x]], cdredmat, cdredimmat)
+            out <- runfun(fun_fun, projpar_msy[[x]], age_range)
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-          }, mc.cores = parallel::detectCores(logical = TRUE))
+          }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
   )
 
 save(results_msy, file = file.path(outpath, 'results_msy.Rdata'))
@@ -462,13 +464,13 @@ save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
 
 ## -----------------------------------------------------------------------------
 
-# results_pre %>% 
-#   filter(year > 2170) %>% 
-#   group_by(year, hr_target, trial) %>% 
-#   summarise(c = sum(catch), ssb = mean(ssb[step == 1]), fbar = median(fbar[step == 1])) %>% 
-#   group_by(hr_target) %>% 
-#   summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>% 
-#   ggplot(aes(fbar, yield)) + geom_point()
+ # results_msy %>% 
+ #    filter(year > 2070) %>% 
+ #    group_by(year, hr_target, trial) %>% 
+ #     summarise(c = sum(catch), ssb = mean(biomass[stock == 'ghl_female_mat']), fbar = max(fbar)) %>% 
+ #     group_by(hr_target) %>% 
+ #     summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>% 
+ #     ggplot(aes(fbar, yield)) + geom_point()
 # 
 # results_msy %>% 
 #   filter(year > 2170) %>% 
