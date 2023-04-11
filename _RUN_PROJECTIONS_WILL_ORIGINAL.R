@@ -18,14 +18,10 @@ library(g3experiments)
 #if (!dir.exists(outpath)) dir.create(outpath)
 
 load("gadget_workspace.RData")
-source("PROJECTION_FUNCTIONS.R")
+source("PROJECTION_FUNCTIONS.R", echo=TRUE)
 
-
-base_dir <- "model_files"
-
-outpath <- file.path(base_dir, "projections")
+outpath <- 'PROJ'
 if(!dir.exists(outpath)) dir.create(outpath)
-
 
 ## Load the desired model, params and fit
 # load(file = file.path(base_dir, vers, 'fit.Rdata'))
@@ -90,44 +86,44 @@ btrigger <- bpa
 
 
 ## Setup the stocks
-# female_imm <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'female', 'imm'),
-#   lengthgroups = seq(stock_params$female_imm$minlength,
-#                      stock_params$female_imm$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$female_imm$minage,
-#           maxage = stock_params$female_imm$maxage)
-#
-# male_imm <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'male', 'imm'),
-#   lengthgroups = seq(stock_params$male_imm$minlength,
-#                      stock_params$male_imm$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$male_imm$minage,
-#           maxage = stock_params$male_imm$maxage)
-#
-# female_mat <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'female', 'mat'),
-#   lengthgroups = seq(stock_params$female_mat$minlength,
-#                      stock_params$female_mat$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$female_mat$minage,
-#           maxage = stock_params$female_mat$maxage)
-#
-# male_mat <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'male', 'mat'),
-#   lengthgroups = seq(stock_params$male_mat$minlength,
-#                      stock_params$male_mat$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$male_mat$minage,
-#           maxage = stock_params$male_mat$maxage)
-#
-# ## List of stocks
-# stocks <- list(female_imm,female_mat,male_imm,male_mat)
+female_imm <- g3_stock(
+  c(species = tolower(defaults$species), sex = 'female', 'imm'),
+  lengthgroups = seq(stock_params$female_imm$minlength,
+                     stock_params$female_imm$maxlength,
+                     stock_params$dl)) %>%
+  g3s_livesonareas(areas[c('1')]) %>%
+  g3s_age(minage = stock_params$female_imm$minage,
+          maxage = stock_params$female_imm$maxage)
+
+male_imm <- g3_stock(
+  c(species = tolower(defaults$species), sex = 'male', 'imm'),
+  lengthgroups = seq(stock_params$male_imm$minlength,
+                     stock_params$male_imm$maxlength,
+                     stock_params$dl)) %>%
+  g3s_livesonareas(areas[c('1')]) %>%
+  g3s_age(minage = stock_params$male_imm$minage,
+          maxage = stock_params$male_imm$maxage)
+
+female_mat <- g3_stock(
+  c(species = tolower(defaults$species), sex = 'female', 'mat'),
+  lengthgroups = seq(stock_params$female_mat$minlength,
+                     stock_params$female_mat$maxlength,
+                     stock_params$dl)) %>%
+  g3s_livesonareas(areas[c('1')]) %>%
+  g3s_age(minage = stock_params$female_mat$minage,
+          maxage = stock_params$female_mat$maxage)
+
+male_mat <- g3_stock(
+  c(species = tolower(defaults$species), sex = 'male', 'mat'),
+  lengthgroups = seq(stock_params$male_mat$minlength,
+                     stock_params$male_mat$maxlength,
+                     stock_params$dl)) %>%
+  g3s_livesonareas(areas[c('1')]) %>%
+  g3s_age(minage = stock_params$male_mat$minage,
+          maxage = stock_params$male_mat$maxage)
+
+## List of stocks
+stocks <- list(female_imm,female_mat,male_imm,male_mat)
 
 ## SSB rec relationship
 recage <- gadget3::g3_stock_def(male_imm, 'minage')
@@ -158,32 +154,26 @@ proj_actions0 <-
 ## Setup projection fleets
 ## -----------------------------------------------------------------------------
 
-proj_TrawlNor <- g3_fleet(c("TrawlNor", "proj")) %>%
-  g3s_livesonareas(areas[c('1')])
-proj_OtherNor <- g3_fleet(c("OtherNor", "proj")) %>%
-  g3s_livesonareas(areas[c('1')])
-proj_TrawlRus <- g3_fleet(c("TrawlRus", "proj")) %>%
-  g3s_livesonareas(areas[c('1')])
-proj_OtherRus <- g3_fleet(c("OtherRus", "proj")) %>%
-  g3s_livesonareas(areas[c('1')])
-proj_Internat <- g3_fleet(c("Internat", "proj")) %>%
-  g3s_livesonareas(areas[c('1')])
+proj_TrawlNor <- g3_fleet(c("TrawlNor", "proj")) %>% g3s_livesonareas(areas[c('1')])
+proj_OtherNor <- g3_fleet(c("OtherNor", "proj")) %>% g3s_livesonareas(areas[c('1')])
+proj_TrawlRus <- g3_fleet(c("TrawlRus", "proj")) %>% g3s_livesonareas(areas[c('1')])
+proj_OtherRus <- g3_fleet(c("OtherRus", "proj")) %>% g3s_livesonareas(areas[c('1')])
+proj_Internat <- g3_fleet(c("Internat", "proj")) %>% g3s_livesonareas(areas[c('1')])
 
 proj_effort_scalar <-
-  structure(expand.grid(
-    year = start_year:(start_year + num_project_years),
-    step = 1,
-    area = 1,
-    scalar = 1),
-    area_group = list(`1` = 1))
+  structure(expand.grid(year=start_year:(start_year + num_project_years),
+                        step=1,
+                        area=1,
+                        scalar=1),
+            area_group = list(`1` = 1))
 
 ## Setup a time-varying parameter table for harvest rates
 hr_vec <-
-  gadget3:::f_substitute(
-    ~g3_param_table('project_hr',
-                    expand.grid(cur_year = seq(end_year, end_year + py)),
-                    ifmissing = 0),
-    list(py = num_project_years))
+  gadget3:::f_substitute(~g3_param_table('project_hr',
+                                         expand.grid(cur_year = seq(end_year,
+                                                                    end_year + py)),
+                                         ifmissing = 0),
+                         list(py = num_project_years))
 
 
 exponentiate_fleets <- FALSE
@@ -196,133 +186,105 @@ if (TRUE){
 
   proj_fleet_actions <-
 
-    list(
+    list(proj_TrawlNor %>%
+           g3a_predate_fleet(
+             stocks,
+             suitabilities =
+               stocks %>%
+               set_names(.,map(.,'name')) %>%
+               map(function(x) g3_suitability_exponentiall50(
+                 g3_parameterized('trawlnor.alpha', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets),
+                 g3_parameterized('trawlnor.l50', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets))),
+             catchability_f = g3experiments::g3a_predate_catchability_hockeyfleet(btrigger = g3_parameterized('btrigger'),
+                                                                                  hr = gadget3:::f_substitute(~a*b, list(a = hr_vec, b= g3_parameterized('trawlnor_prop'))),
+                                                                                  proportion_f = ~1,
+                                                                                  E = g3_timeareadata('trawlnor_proj',
+                                                                                                      proj_effort_scalar,
+                                                                                                      value_field = 'scalar'),
+                                                                                  sum_stocks = list(female_mat)),
+             run_f = ~cur_year_projection),
 
-      proj_TrawlNor %>%
-        g3a_predate_fleet(
-          stocks,
-          suitabilities =
-            stocks %>%
-            set_names(.,map(.,'name')) %>%
-            map(function(x) g3_suitability_exponentiall50(
-              g3_parameterized('trawlnor.alpha',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('trawlnor.l50',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets))),
-          catchability_f =
-            g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
-              hr = gadget3:::f_substitute(
-                ~a*b, list(a = hr_vec, b = g3_parameterized('trawlnor_prop'))
-              ),
-              proportion_f = ~1,
-              E = g3_timeareadata('TrawlNor_proj',
-                                  proj_effort_scalar,
-                                  value_field = 'scalar'),
-              sum_stocks = list(female_mat)),
-          run_f = ~cur_year_projection),
+         proj_OtherNor %>%
+           g3a_predate_fleet(
+             stocks,
+             suitabilities =
+               stocks %>%
+               set_names(.,map(.,'name')) %>%
+               map(function(x) g3_suitability_exponentiall50(
+                 g3_parameterized('othernor.alpha', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets),
+                 g3_parameterized('othernor.l50', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets))),
+             catchability_f = g3experiments::g3a_predate_catchability_hockeyfleet(btrigger = g3_parameterized('btrigger'),
+                                                                                  hr = gadget3:::f_substitute(~a*b, list(a = hr_vec, b= g3_parameterized('othernor_prop'))),
+                                                                                  proportion_f = ~1,
+                                                                                  E = g3_timeareadata('othernor_proj',
+                                                                                                      proj_effort_scalar,
+                                                                                                      value_field = 'scalar'),
+                                                                                  sum_stocks = list(female_mat)),
+             run_f = ~cur_year_projection),
 
-      proj_OtherNor %>%
-        g3a_predate_fleet(
-          stocks,
-          suitabilities =
-            stocks %>%
-            set_names(.,map(.,'name')) %>%
-            map(function(x) g3_suitability_exponentiall50(
-              g3_parameterized('othernor.alpha',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('othernor.l50',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets))),
-          catchability_f =
-            g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
-              hr = gadget3:::f_substitute(
-                ~a*b, list(a = hr_vec, b = g3_parameterized('othernor_prop'))),
-              proportion_f = ~1,
-              E = g3_timeareadata('OtherNor_proj',
-                                  proj_effort_scalar,
-                                  value_field = 'scalar'),
-              sum_stocks = list(female_mat)),
-          run_f = ~cur_year_projection),
+         proj_TrawlRus %>%
+           g3a_predate_fleet(
+             stocks,
+             suitabilities =
+               stocks %>%
+               set_names(.,map(.,'name')) %>%
+               map(function(x) g3_suitability_exponentiall50(
+                 g3_parameterized('trawlrus.alpha', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets),
+                 g3_parameterized('trawlrus.l50', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets))),
+             catchability_f = g3experiments::g3a_predate_catchability_hockeyfleet(btrigger = g3_parameterized('btrigger'),
+                                                                                  hr = gadget3:::f_substitute(~a*b, list(a = hr_vec, b= g3_parameterized('trawlrus_prop'))),
+                                                                                  proportion_f = ~1,
+                                                                                  E = g3_timeareadata('trawlrus_proj',
+                                                                                                      proj_effort_scalar,
+                                                                                                      value_field = 'scalar'),
+                                                                                  sum_stocks = list(female_mat)),
+             run_f = ~cur_year_projection),
 
-      proj_TrawlRus %>%
-        g3a_predate_fleet(
-          stocks,
-          suitabilities =
-            stocks %>%
-            set_names(.,map(.,'name')) %>%
-            map(function(x) g3_suitability_exponentiall50(
-              g3_parameterized('trawlrus.alpha',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('trawlrus.l50',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets))),
-          catchability_f =
-            g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
-              hr = gadget3:::f_substitute(
-                ~a*b, list(a = hr_vec, b = g3_parameterized('trawlrus_prop'))),
-              proportion_f = ~1,
-              E = g3_timeareadata('TrawlRus_proj',
-                                  proj_effort_scalar,
-                                  value_field = 'scalar'),
-              sum_stocks = list(female_mat)),
-          run_f = ~cur_year_projection),
+         proj_OtherRus %>%
+           g3a_predate_fleet(
+             stocks,
+             suitabilities =
+               stocks %>%
+               set_names(.,map(.,'name')) %>%
+               map(function(x) g3_suitability_exponentiall50(
+                 g3_parameterized('othernor.alpha', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets),
+                 g3_parameterized('othernor.l50', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets))),
+             catchability_f = g3experiments::g3a_predate_catchability_hockeyfleet(btrigger = g3_parameterized('btrigger'),
+                                                                                  hr = gadget3:::f_substitute(~a*b, list(a = hr_vec, b= g3_parameterized('OtherRus_prop'))),
+                                                                                  proportion_f = ~1,
+                                                                                  E = g3_timeareadata('OtherRus_proj',
+                                                                                                      proj_effort_scalar,
+                                                                                                      value_field = 'scalar'),
+                                                                                  sum_stocks = list(female_mat)),
+             run_f = ~cur_year_projection),
 
-      proj_OtherRus %>%
-        g3a_predate_fleet(
-          stocks,
-          suitabilities =
-            stocks %>%
-            set_names(.,map(.,'name')) %>%
-            map(function(x) g3_suitability_exponentiall50(
-              g3_parameterized('othernor.alpha',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('othernor.l50',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets))),
-          catchability_f =
-            g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
-              hr = gadget3:::f_substitute(
-                ~a*b, list(a = hr_vec, b = g3_parameterized('otherrus_prop'))),
-              proportion_f = ~1,
-              E = g3_timeareadata('OtherRus_proj',
-                                  proj_effort_scalar,
-                                  value_field = 'scalar'),
-              sum_stocks = list(female_mat)),
-          run_f = ~cur_year_projection),
-
-      proj_Internat %>%
-        g3a_predate_fleet(
-          stocks,
-          suitabilities =
-            stocks %>%
-            set_names(.,map(.,'name')) %>%
-            map(function(x) g3_suitability_exponentiall50(
-              g3_parameterized('trawlnor.alpha',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets),
-              g3_parameterized('trawlnor.l50',
-                               by_stock = c('species', 'sex'),
-                               exponentiate = exponentiate_fleets))),
-          catchability_f =
-            g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
-              hr = gadget3:::f_substitute(
-                ~a*b, list(a = hr_vec, b = g3_parameterized('internat_prop'))),
-              proportion_f = ~1,
-              E = g3_timeareadata('Internat_proj',
-                                  proj_effort_scalar,
-                                  value_field = 'scalar'),
-              sum_stocks = list(female_mat)),
-          run_f = ~cur_year_projection)
+         proj_Internat %>%
+           g3a_predate_fleet(
+             stocks,
+             suitabilities =
+               stocks %>%
+               set_names(.,map(.,'name')) %>%
+               map(function(x) g3_suitability_exponentiall50(
+                 g3_parameterized('trawlnor.alpha', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets),
+                 g3_parameterized('trawlnor.l50', by_stock = c('species', 'sex'),
+                                  exponentiate = exponentiate_fleets))),
+             catchability_f = g3experiments::g3a_predate_catchability_hockeyfleet(btrigger = g3_parameterized('btrigger'),
+                                                                                  hr = gadget3:::f_substitute(~a*b, list(a = hr_vec, b= g3_parameterized('Internat_prop'))),
+                                                                                  proportion_f = ~1,
+                                                                                  E = g3_timeareadata('Internat_proj',
+                                                                                                      proj_effort_scalar,
+                                                                                                      value_field = 'scalar'),
+                                                                                  sum_stocks = list(female_mat)),
+             run_f = ~cur_year_projection)
     )
 
 }
@@ -345,29 +307,12 @@ base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
 base.par.proj$value$project_years <- num_project_years
 base.par.proj$value$blim <- blim*1e3
 
-## THE PROPORTION PER FLEET
-
-n_catch_years <- 4
-
-catch_props <- fit$fleet.info %>%
-  dplyr::filter(amount > 1,
-                year > max(model_params$year_range) - n_catch_years) %>%
-  dplyr::mutate(fleet = gsub("_fishery", "", fleet)) %>%
-  dplyr::group_by(fleet) %>%
-  dplyr::summarise(amount = sum(amount)) %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(prop = amount/sum(amount))
-
-base.par.proj$value$trawlnor_prop <- catch_props %>%
-  filter(fleet == "TrawlNor") %>% pull(prop)
-base.par.proj$value$othernor_prop <- catch_props %>%
-  filter(fleet == "OtherNor") %>% pull(prop)
-base.par.proj$value$trawlrus_prop <- catch_props %>%
-  filter(fleet == "TrawlRus") %>% pull(prop)
-base.par.proj$value$otherrus_prop <- catch_props %>%
-  filter(fleet == "OtherRus") %>% pull(prop)
-base.par.proj$value$internat_prop <- catch_props %>%
-  filter(fleet == "Internat") %>% pull(prop)
+## THE PROPORTION PER FLEET, NEED TO CHANGE THIS
+base.par.proj$value$trawlnor_prop <- 0.2
+base.par.proj$value$othernor_prop <- 0.2
+base.par.proj$value$trawlrus_prop <- 0.2
+base.par.proj$value$OtherRus_prop <- 0.2
+base.par.proj$value$Internat_prop <- 0.2
 
 ## This is how Bjarki did it:
 # fleet_props <-
@@ -386,22 +331,10 @@ base.par.proj$value$internat_prop <- catch_props %>%
 par.proj <- base.par.proj
 par.proj <-
   par.proj %>%
-  g3p_project_rec(recruitment = fit$stock.recruitment %>%
-                    filter(year >= rec_start_year,
-                           year <= max(model_params$year) - 4),
-                  method = 'bootstrap') %>%
+  g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year,
+                                                                 year <= max(model_params$year) - 4), method = 'bootstrap') %>%
   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
   g3_init_guess('btrigger', 1)
-
-## Nassukka
-model <- g3_to_r(proj_actions)
-result <- model(par.proj$value)
-result[[1]]
-test_fit <- gadgetutils::g3_fit(model,par.proj)
-tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
-## end Nassukka
-
 
 fun_fun <- g3_tmb_adfun(tmb_proj, par.proj, type = 'Fun')
 #fun_fun <- g3_tmb_adfun(tmb_proj, par.proj)
@@ -555,4 +488,3 @@ save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
 #   summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
 #   ggplot(aes(fbar, yield)) + geom_point()
 #
-
