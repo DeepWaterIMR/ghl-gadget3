@@ -1,9 +1,11 @@
-*
+/*
+/*/
 !*.R
 !.gitignore
 !README.Rmd
 !README.md
-!data/
+!/data/
 !benchmark_model/
-!R/
+!R
 .Rproj.user
+*.DS_Store
