@@ -11,8 +11,8 @@
 
 packages <- c(
   "remotes", "tidyverse", "reshape2", "data.table", "DBI", "duckdb", "mfdb",
-  "Matrix", "TMB", "gadget3", "gadgetutils", "cowplot", "fishmethods", 
-  "ggFishPlots", "gadgetplots", "curl", "rmarkdown")
+  "Matrix", "TMB", "gadget3", "gadgetutils", "gadgetplots", "g3experiments",
+  "cowplot", "ggFishPlots", "curl", "rmarkdown")
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -31,6 +31,7 @@ if(curl::has_internet()){
   remotes::install_github("gadget-framework/gadget3", upgrade = "never", quiet = TRUE)
   remotes::install_github("gadget-framework/gadgetutils", upgrade = "never", quiet = TRUE)
   remotes::install_github("gadget-framework/gadgetplots", upgrade = "never", quiet = TRUE)
+  remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
 }
 
 if (any(installed_packages == FALSE)) {

@@ -201,10 +201,6 @@ if(exists("prev_param") & previous_model_params_as_initial & !run_iterative) {
 ### Force parameter bounds (experimental)
 
 if(force_bound_params) {
-  if(curl::has_internet()) {
-    remotes::install_github("gadget-framework/g3experiments", upgrade = "never", quiet = TRUE)
-  }
-
   actions <- c(actions, list(g3experiments::g3l_bounds_penalty(tmb_param)))
   tmb_model <- g3_to_tmb(actions)
 }

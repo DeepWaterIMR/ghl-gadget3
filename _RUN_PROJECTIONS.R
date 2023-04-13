@@ -4,12 +4,7 @@
 ##
 ## -----------------------------------------------------------------------------
 
-library(mfdb)
-library(gadget3)
-library(gadgetutils)
-library(gadgetplots)
-library(tidyverse)
-library(g3experiments)
+source("0 run first.R")
 
 #base_dir <- 'exploratory_models/gadget3'
 #vers <- 'models/301-BNCHMK_base_simpleinit'
@@ -394,12 +389,12 @@ par.proj <-
   g3_init_guess('btrigger', 1)
 
 ## Nassukka
-model <- g3_to_r(proj_actions)
-result <- model(par.proj$value)
-result[[1]]
-test_fit <- gadgetutils::g3_fit(model,par.proj)
-tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
+# model <- g3_to_r(proj_actions)
+# result <- model(par.proj$value)
+# result[[1]]
+# test_fit <- gadgetutils::g3_fit(model,par.proj)
+# tmppath <- file.path(getwd(), base_dir, "figures")
+# make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
 ## end Nassukka
 
 
