@@ -4,5 +4,6 @@
 !README.Rmd
 !README.md
 !data/*
+!benchmark_model/*
 !R/*
 .Rproj.user
