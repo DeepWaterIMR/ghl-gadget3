@@ -13,7 +13,7 @@ source("0 run first.R")
 #if (!dir.exists(outpath)) dir.create(outpath)
 
 load("data/gadget_workspace.RData")
-source("PROJECTION_FUNCTIONS.R")
+source("R/projection_functions.R")
 
 
 base_dir <- "model_files"
@@ -39,8 +39,8 @@ end_year <- max(year_range)
 start_year <- end_year + 1
 num_steps <- length(unique(fit$stock.full$step))
 
-## Recruitment will be re-sampled from this year onwards
-rec_start_year <- min(fit$res.by.year$year) ## 1992
+## Recruitment will be re-sampled from this year onward
+rec_start_year <- 1990 ## min(fit$res.by.year$year)
 
 ## How many years to project forward
 num_project_years <- 100
@@ -50,17 +50,20 @@ harvest_rates <- seq(0.00, 1, by = 0.01)
 
 ## How many trials per harvest rate (each trial will have a unique recruitment series
 ## and a unique annual harvest rate sequence (if assessment error is present))
-hr_trials <- 10 #10
+hr_trials <- 10 # For real run make 100
 recstep <- 1
 
 ## Age range for calculating fbar
-age_range <- c(1,25)
-
+age_range <- c(7,25)
 
 #blim <- #138650858          # 125629491
 
 ## Blim in tonnes
-blim <- round(min(fit$res.by.year$total.biomass)/1e3)
+blim <- fit$res.by.year %>% 
+  filter(year == 1992, stock == "ghl_female_mat") %>% 
+  pull(total.biomass) %>% 
+  {round(./1e3, 2)} # round(min(fit$res.by.year$total.biomass)/1e3)
+
 bpa <- blim * 1.4
 btrigger <- bpa
 
@@ -188,11 +191,11 @@ exponentiate_fleets <- FALSE
 ## -----------------------------------------------------------------------------
 
 if (TRUE){
-
+  
   proj_fleet_actions <-
-
+    
     list(
-
+      
       proj_TrawlNor %>%
         g3a_predate_fleet(
           stocks,
@@ -218,7 +221,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-
+      
       proj_OtherNor %>%
         g3a_predate_fleet(
           stocks,
@@ -243,7 +246,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-
+      
       proj_TrawlRus %>%
         g3a_predate_fleet(
           stocks,
@@ -268,7 +271,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-
+      
       proj_OtherRus %>%
         g3a_predate_fleet(
           stocks,
@@ -293,7 +296,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-
+      
       proj_Internat %>%
         g3a_predate_fleet(
           stocks,
@@ -319,7 +322,7 @@ if (TRUE){
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection)
     )
-
+  
 }
 
 ## -------------------------------------------------------------------------------
@@ -416,21 +419,21 @@ hr_list <-
 ## Create a list of input parameters with modified annual recruitment parameters (future ones)
 ## annual harvest rates, and btrigger
 projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-
+  
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim*1e3
-
+  
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0) %>%
     g3_init_guess('btrigger', 1)
-
+  
   return(out)
-
+  
 })
 
 ## This command loops over each parameter list, runs the model and collates the output
@@ -443,32 +446,37 @@ results_pre <-
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-          }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
+          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
 save(results_pre, file = file.path(outpath, 'results_pre.Rdata'))
 save(projpar_pre, file = file.path(outpath, 'projpar_pre.Rdata'))
+
+# Notes
+## - Calculate the risk of going below Blim
+## - Interannual variation in catch
+
 
 ## -----------------------------------------------------------------------------
 ## MSY reference points (fmsy, fp0.5): assessment error and no btrigger
 ## -----------------------------------------------------------------------------
 
 projpar_msy_nobtrigger <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-
+  
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim*1e3
-
+  
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0.212) %>%
     g3_init_guess('btrigger', 1)
-
+  
   return(out)
-
+  
 })
 
 
@@ -481,7 +489,7 @@ results_msy_nobtrigger <-
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-          }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
+          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
 save(results_msy_nobtrigger, file = file.path(outpath, 'results_msy_nobtrigger.Rdata'))
@@ -492,20 +500,20 @@ save(projpar_msy_nobtrigger, file = file.path(outpath, 'projpar_msy_nobtrigger.R
 ## -----------------------------------------------------------------------------
 
 projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-
+  
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim*1e3
-
+  
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0.212)  %>%
     g3_init_guess('btrigger', btrigger*1e3)
-
+  
   return(out)
-
+  
 })
 
 
@@ -518,36 +526,10 @@ results_msy <-
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
             return(out)
-          }, mc.cores = 50)#parallel::detectCores(logical = TRUE))
+          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
 save(results_msy, file = file.path(outpath, 'results_msy.Rdata'))
 save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
 
 ## -----------------------------------------------------------------------------
-
-results_msy %>%
-   #filter(year > 2070) %>%
-   group_by(year, hr_target, trial) %>%
-    summarise(c = sum(catch), ssb = mean(biomass[stock == 'ghl_female_mat']), fbar = max(fbar)) %>%
-    group_by(hr_target) %>%
-    summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
-    ggplot(aes(fbar, yield)) + geom_point()
-
-# results_msy %>%
-#   filter(year > 2170) %>%
-#   group_by(year, hr_target, boot, trial) %>%
-#   summarise(c = sum(catch), ssb = mean(ssb[step == 1]), fbar = median(fbar[step == 1])) %>%
-#   group_by(hr_target) %>%
-#   summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
-#   ggplot(aes(fbar, yield)) + geom_point()
-
-results_msy_nobtrigger %>%
-  filter(year > 2170) %>%
-  group_by(year, hr_target, boot, trial) %>%
-  summarise(c = sum(catch), ssb = mean(ssb[step == 1]), fbar = median(fbar[step == 1])) %>%
-  group_by(hr_target) %>%
-  summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
-  ggplot(aes(fbar, yield)) + geom_point()
-
-
