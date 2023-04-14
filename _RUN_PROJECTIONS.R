@@ -12,7 +12,7 @@ source("0 run first.R")
 #outpath <- file.path(base_dir, vers, 'PROJ2')
 #if (!dir.exists(outpath)) dir.create(outpath)
 
-load("gadget_workspace.RData")
+load("data/gadget_workspace.RData")
 source("PROJECTION_FUNCTIONS.R")
 
 
@@ -526,14 +526,14 @@ save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
 
 ## -----------------------------------------------------------------------------
 
-# results_msy %>%
-#    filter(year > 2070) %>%
-#    group_by(year, hr_target, trial) %>%
-#     summarise(c = sum(catch), ssb = mean(biomass[stock == 'ghl_female_mat']), fbar = max(fbar)) %>%
-#     group_by(hr_target) %>%
-#     summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
-#     ggplot(aes(fbar, yield)) + geom_point()
-#
+results_msy %>%
+   #filter(year > 2070) %>%
+   group_by(year, hr_target, trial) %>%
+    summarise(c = sum(catch), ssb = mean(biomass[stock == 'ghl_female_mat']), fbar = max(fbar)) %>%
+    group_by(hr_target) %>%
+    summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
+    ggplot(aes(fbar, yield)) + geom_point()
+
 # results_msy %>%
 #   filter(year > 2170) %>%
 #   group_by(year, hr_target, boot, trial) %>%
@@ -541,13 +541,13 @@ save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
 #   group_by(hr_target) %>%
 #   summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
 #   ggplot(aes(fbar, yield)) + geom_point()
-#
-# results_msy_nobtrigger %>%
-#   filter(year > 2170) %>%
-#   group_by(year, hr_target, boot, trial) %>%
-#   summarise(c = sum(catch), ssb = mean(ssb[step == 1]), fbar = median(fbar[step == 1])) %>%
-#   group_by(hr_target) %>%
-#   summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
-#   ggplot(aes(fbar, yield)) + geom_point()
-#
+
+results_msy_nobtrigger %>%
+  filter(year > 2170) %>%
+  group_by(year, hr_target, boot, trial) %>%
+  summarise(c = sum(catch), ssb = mean(ssb[step == 1]), fbar = median(fbar[step == 1])) %>%
+  group_by(hr_target) %>%
+  summarise(yield = median(c), ssb = median(ssb), fbar = median(fbar)) %>%
+  ggplot(aes(fbar, yield)) + geom_point()
+
 
