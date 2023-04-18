@@ -150,7 +150,7 @@ source("5 likelihood.R")
 
 ### Formulate R based model and define initial parameters ####
 
-source("6 initial parameters.R")
+source("6 parameters.R")
 
 ### Turn off likelihood components
 # tmb_param <- tmb_param %>% g3_init_guess('aldist', 0, NA, NA, 0)

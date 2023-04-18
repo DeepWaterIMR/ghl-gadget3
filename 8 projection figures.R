@@ -138,6 +138,8 @@ rp_tab <- tibble::tibble(
 ###############
 ## Figures ####
 
+## Simulation plot
+
 x_axis1 <- tibble(RP = c("Fmsy", "Fpa"), 
                   value = c(Emsy$f, Epa$f))
 x_axis2 <- tibble(RP = c("Fmsy"), 
@@ -221,29 +223,34 @@ p2 <- ssb_dat %>%
   labs(y="SSB (kt)", x = 'F', color = "Reference\npoint") +
   theme(legend.position = c(0.9,0.8))
 
-tmp <- tibble(
-  ssb = seq(0,600,by=10), 
-  rec = pmin(1,(ssb)/(blim*1e3))*
-    fit$res.by.year %>% 
-    filter(year >= 1985) %>% 
-    pull(recruitment) %>% 
-    mean(.,na.rm = T)
-)
-
-p3 <- results_msy_nobtrigger %>% 
-  filter(year > (max(year) -50), step==1, hr_target == Emsy$hr_target) %>%
+tmp1 <- results_msy_nobtrigger %>% 
+  # filter(year > (max(year) -50)) %>% 
+  filter(step==1, hr_target == Emsy$hr_target) %>%
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
             ssb = mean(biomass[stock == 'ghl_female_mat']),
             f = mean(fbar[step == 1]),
-            rec = sum(rec, na.rm = TRUE)) %>% 
-  ggplot(aes(ssb/1e3, rec/1e3))  + 
+            rec = sum(rec, na.rm = TRUE))
+
+tmp2 <- tibble(
+  ssb = seq(0,round(max(tmp1$ssb)),by=1e4), 
+  rec = pmin(1,(ssb)/(blim*1e3))*
+    fit$res.by.year %>% 
+    filter(year >= rec_start_year) %>% 
+    pull(recruitment) %>% 
+    mean(.,na.rm = T)
+)
+
+p3 <- tmp1 %>% 
+  ggplot(aes(ssb/1e6, rec/1e6))  + 
   geom_point(alpha = 0.1) + 
-  labs(y='Recruitment (millions)', x="SSB (kt)") + 
-  geom_vline(xintercept = blim/1e3, col = 'red') + 
-  geom_line(data = tmp,
-            aes(x = ssb, y = rec),
-            col = 'blue') 
+  labs(y='Recruitment (millions)', x="SSB (kt)", color = "Reference\npoint") + 
+  geom_vline(
+    data = y_axis2[1,], 
+    aes(xintercept = value/1e3, color = RP)) + 
+  scale_color_manual(values = rp_cols) +
+  geom_line(data = tmp2, col = 'blue') +
+  theme(legend.position = c(0.9,0.7))
 
 p4 <- Pbref %>% 
   rename(Bpa = pbpa, Blim = pblim) %>% 
@@ -255,7 +262,32 @@ p4 <- Pbref %>%
   scale_color_manual(values = rp_cols) +
   theme(legend.position = c(0.8,0.3))
 
-
 ggsave(plot = print(cowplot::plot_grid(p1,p2,p3,p4)), 
        filename = file.path(base_dir, "figures/Simulation_plots.png"), 
        units = 'in', width = pagewidth_in, height = pagewidth_in)
+
+## Histogram of draws fit
+fithist <- 
+  fit$stock.recruitment %>% 
+  mutate(rec = recruitment/1e6) %>% 
+  filter(year >= rec_start_year) %>% 
+  pull(rec) %>% hist(breaks = seq(0, 200, by = 25))
+
+simhist <- 
+  results_msy_nobtrigger %>% 
+  filter(year > 2025, hr_target == 0.06) %>% 
+  mutate(rec = rec/1e6) %>% 
+  pull(rec) %>% hist(breaks = seq(0, 500, by = 25))
+
+recounts <- data.frame(Type = 'Base_fit', c = fithist$counts/sum(fithist$counts), mids = fithist$mids) %>% 
+  bind_rows(
+    data.frame(Type = 'Simulation', c = simhist$counts/sum(simhist$counts), mids = simhist$mids)
+  ) %>% 
+  ggplot(aes(mids, c, fill = Type)) + 
+  geom_bar(stat = 'identity', position = 'dodge') + 
+  labs(x = "Recruitment (millions)", y = "Proportion")
+
+ggsave(plot = recounts, 
+       filename = file.path(base_dir, "figures/Simulation_recruitment_counts.png"), 
+       units = 'in', width = pagewidth_in, height = pagewidth_in*0.6)
+
