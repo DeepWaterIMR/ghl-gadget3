@@ -1,5 +1,5 @@
 
-# A standardized Gadget 3 model for Northeast Atlantic Greenland halibut
+# Gadget3 model for Northeast Atlantic Greenland halibut
 
 **Institute of Marine Research, Norway** and **Marine and Freshwater
 Research Institute, Iceland**
