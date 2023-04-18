@@ -381,18 +381,88 @@ base.par.proj$value$internat_prop <- catch_props %>%
 #   {set_names(as.list(.$m),.$fleet)}
 
 ## Fill in recruitment and harvest rates to build the ad function
+
+################################################################################
+##
+## NOTE, FEMALE_MAT SPAWNS INTO A DUMMY STOCK WHICH SUBSEQUENTLY AGES INTO
+## FEMALE_IMM AND MALE_IMM AT A 50:50 RATIO. THE AMOUNT SPAWNED IS TAKEN 
+## FROM THE BASE FIT, THEREFORE THE VALUE SHOULD BE THE TOTAL RECRUITMENT
+## FOR EACH YEAR I.E. MALE.REC + FEMALE.REC BECAUSE IT WILL SUBEQUENTLY 
+## BE SPLIT BETWEEN THE TWO IMMATURE STOCKS
+##
+################################################################################
+
+
 par.proj <- base.par.proj
 par.proj <-
   par.proj %>%
   g3p_project_rec(recruitment = fit$stock.recruitment %>%
                     filter(year >= rec_start_year,
-                           year <= max(model_params$year) - 4),
+                           year <= max(model_params$year) - 4), ## ADD A SUMMARISE YEAR TO AGGREGATE OVER STOCKS
                   method = 'bootstrap') %>%
   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
   g3_init_guess('btrigger', 1)
 
 ## Nassukka
-# model <- g3_to_r(proj_actions)
+r_proj <- g3_to_r(proj_actions)
+
+################################################################################
+## Checks
+################################################################################
+
+## Test to check spawning is working
+test_par <- par.proj
+test_par <- 
+  test_par %>% 
+  ## CONSTANT REC
+#  g3p_project_rec(recruitment = fit$stock.recruitment %>% 
+#                    filter(year == 2020) %>% 
+#                    summarise(recruitment = sum(recruitment)), method = 'constant') %>% 
+  ## VARIABLE REC
+  g3p_project_rec(recruitment = fit$stock.recruitment %>%
+                    filter(year >= rec_start_year,
+                           year <= max(model_params$year) - 4), ## ADD A SUMMARISE YEAR TO AGGREGATE OVER STOCKS
+                  method = 'bootstrap') %>%
+  g3p_project_advice_error(hr_target = 0.1, advice_cv = 0) 
+
+## TEST RUN
+tmp <- attributes(r_proj(test_par$value))
+
+## Plot recruitment
+bind_rows(
+  
+  fit$stock.recruitment %>% 
+    group_by(year) %>% 
+    summarise(rec = sum(recruitment), .groups = 'drop'),
+  
+  tmp$proj_ghl_dummy__spawnednum %>% 
+    as.data.frame.table() %>% 
+    group_by(time) %>% 
+    summarise(rec = sum(Freq)) %>%
+    gadgetutils:::extract_year_step() %>% 
+    filter(year > max(fit$stock.recruitment$year %>% max()))
+  
+) %>% ggplot(aes(year, rec/1e6)) + geom_bar(stat = 'identity')
+
+## Check female and male immature
+tmp$proj_ghl_female_imm__num %>% 
+  as.data.frame.table() %>% 
+  mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
+  gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
+  group_by(year, age) %>% summarise(female = sum(Freq)) %>% 
+  left_join(
+    tmp$proj_ghl_male_imm__num %>% 
+      as.data.frame.table() %>% 
+      mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
+      gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
+      group_by(year, age) %>% summarise(male = sum(Freq)) 
+  ) %>% view
+
+
+################################################################################
+
+
+
 # result <- model(par.proj$value)
 # result[[1]]
 # test_fit <- gadgetutils::g3_fit(model,par.proj)
@@ -441,7 +511,7 @@ results_pre <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_pre[[x]], age_range) ## NEED TO FIX STOCKS
+            out <- runfun(fun_fun, projpar_pre[[x]]) ## NEED TO FIX STOCKS
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
@@ -484,7 +554,7 @@ results_msy_nobtrigger <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_msy_nobtrigger), names(projpar_msy_nobtrigger)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_msy_nobtrigger[[x]], age_range)
+            out <- runfun(fun_fun, projpar_msy_nobtrigger[[x]])
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
@@ -521,7 +591,7 @@ results_msy <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_msy), names(projpar_msy)), function(x){
             print(x)
-            out <- runfun(fun_fun, projpar_msy[[x]], age_range)
+            out <- runfun(fun_fun, projpar_msy[[x]])
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
