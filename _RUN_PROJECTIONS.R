@@ -137,10 +137,16 @@ schedule <-
 ## -----------------------------------------------------------------------------
 ## Use bootstrap parameters and recruitment TS'
 
-param_list <- c(list(base = fit$params))
-rec_list <- c(list(base = fit$stock.recruitment)) %>%
-  map(filter, recruitment > 0, year >= rec_start_year, step == recstep)
-
+# param_list <- c(list(base = fit$params))
+rec_list <- c(list(
+  base = 
+    fit$stock.recruitment %>% 
+    filter(recruitment > 0, year >= rec_start_year, 
+           year <= max(model_params$year) - 4, step == recstep) %>% 
+    group_by(year) %>% 
+    summarise(recruitment = sum(recruitment))
+  )) #map(filter, recruitment > 0, year >= rec_start_year, step == recstep) %>% 
+  
 ## ------------------------------------------------------------------------------
 
 ## STOCK ACTIONS
@@ -338,8 +344,15 @@ base.par.proj <- attributes(tmb_proj)$parameter_template
 
 ## Initial parameters, fill in everything except for btrigger, HRs and recruitment
 ## Update values
-#par.proj <- base.par.proj
 base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
+
+## Other columns
+base.par.proj <- base.par.proj %>%
+  mutate(optimise = FALSE) %>% 
+  mutate(across(any_of(names(optim_fit$params)[-1:-3]),
+                ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x))) 
+
+# New columns
 base.par.proj$value$project_years <- num_project_years
 base.par.proj$value$blim <- blim*1e3
 
@@ -392,83 +405,83 @@ base.par.proj$value$internat_prop <- catch_props %>%
 ##
 ################################################################################
 
-
 par.proj <- base.par.proj
 par.proj <-
   par.proj %>%
-  g3p_project_rec(recruitment = fit$stock.recruitment %>%
-                    filter(year >= rec_start_year,
-                           year <= max(model_params$year) - 4), ## ADD A SUMMARISE YEAR TO AGGREGATE OVER STOCKS
-                  method = 'bootstrap') %>%
+  g3p_project_rec(
+    recruitment = fit$stock.recruitment %>%
+      filter(year >= rec_start_year,
+             year <= max(model_params$year) - 4) %>% 
+      group_by(year) %>% 
+      summarise(recruitment = sum(recruitment)),
+    method = 'bootstrap') %>%
   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
   g3_init_guess('btrigger', 1)
 
-## Nassukka
-r_proj <- g3_to_r(proj_actions)
+# r_proj <- g3_to_r(proj_actions)
 
 ################################################################################
 ## Checks
 ################################################################################
 
 ## Test to check spawning is working
-test_par <- par.proj
-test_par <- 
-  test_par %>% 
-  ## CONSTANT REC
-#  g3p_project_rec(recruitment = fit$stock.recruitment %>% 
-#                    filter(year == 2020) %>% 
-#                    summarise(recruitment = sum(recruitment)), method = 'constant') %>% 
-  ## VARIABLE REC
-  g3p_project_rec(recruitment = fit$stock.recruitment %>%
-                    filter(year >= rec_start_year,
-                           year <= max(model_params$year) - 4), ## ADD A SUMMARISE YEAR TO AGGREGATE OVER STOCKS
-                  method = 'bootstrap') %>%
-  g3p_project_advice_error(hr_target = 0.1, advice_cv = 0) 
-
-## TEST RUN
-tmp <- attributes(r_proj(test_par$value))
-
-## Plot recruitment
-bind_rows(
-  
-  fit$stock.recruitment %>% 
-    group_by(year) %>% 
-    summarise(rec = sum(recruitment), .groups = 'drop'),
-  
-  tmp$proj_ghl_dummy__spawnednum %>% 
-    as.data.frame.table() %>% 
-    group_by(time) %>% 
-    summarise(rec = sum(Freq)) %>%
-    gadgetutils:::extract_year_step() %>% 
-    filter(year > max(fit$stock.recruitment$year %>% max()))
-  
-) %>% ggplot(aes(year, rec/1e6)) + geom_bar(stat = 'identity')
-
-## Check female and male immature
-tmp$proj_ghl_female_imm__num %>% 
-  as.data.frame.table() %>% 
-  mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
-  gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
-  group_by(year, age) %>% summarise(female = sum(Freq)) %>% 
-  left_join(
-    tmp$proj_ghl_male_imm__num %>% 
-      as.data.frame.table() %>% 
-      mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
-      gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
-      group_by(year, age) %>% summarise(male = sum(Freq)) 
-  ) %>% view
+# test_par <- par.proj
+# test_par <- 
+#   test_par %>% 
+#   ## CONSTANT REC
+#   # g3p_project_rec(
+#   #   recruitment = fit$stock.recruitment %>%
+#   #     filter(year == 2020) %>%
+#   #     summarise(recruitment = sum(recruitment)), method = 'constant') %>%
+#   ## VARIABLE REC
+#   g3p_project_rec(
+#     recruitment = fit$stock.recruitment %>%
+#       filter(year >= rec_start_year,
+#              year <= max(model_params$year) - 4) %>% 
+#       group_by(year) %>% 
+#       summarise(recruitment = sum(recruitment)), 
+#     method = 'bootstrap') %>%
+#   g3p_project_advice_error(hr_target = 0.1, advice_cv = 0) 
+# 
+# ## TEST RUN
+# tmp <- attributes(r_proj(test_par$value))
+# 
+# ## Plot recruitment
+# bind_rows(
+#   fit$stock.recruitment %>% 
+#     group_by(year) %>% 
+#     summarise(rec = sum(recruitment), .groups = 'drop'),
+#   tmp$proj_ghl_dummy__spawnednum %>% 
+#     as.data.frame.table() %>% 
+#     group_by(time) %>% 
+#     summarise(rec = sum(Freq)) %>%
+#     gadgetutils:::extract_year_step() %>% 
+#     filter(year > max(fit$stock.recruitment$year %>% max()))
+# ) %>% ggplot(aes(year, rec/1e6)) + geom_bar(stat = 'identity')
+# 
+# ## Check female and male immature
+# tmp$proj_ghl_female_imm__num %>% 
+#   as.data.frame.table() %>% 
+#   mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
+#   gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
+#   group_by(year, age) %>% summarise(female = sum(Freq)) %>% 
+#   left_join(
+#     tmp$proj_ghl_male_imm__num %>% 
+#       as.data.frame.table() %>% 
+#       mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
+#       gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
+#       group_by(year, age) %>% summarise(male = sum(Freq)) 
+#   ) %>% view
 
 
 ################################################################################
 
-
-
+## Plot the model using 
 # result <- model(par.proj$value)
 # result[[1]]
 # test_fit <- gadgetutils::g3_fit(model,par.proj)
 # tmppath <- file.path(getwd(), base_dir, "figures")
 # make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
-## end Nassukka
 
 
 fun_fun <- g3_tmb_adfun(tmb_proj, par.proj, type = 'Fun')

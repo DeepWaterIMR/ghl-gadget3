@@ -18,7 +18,7 @@ proj_stock_actions2 <- function(num_project_years,
                                          min(gadget3::g3_stock_def(imm_F, 'dl')))) %>% 
     gadget3::g3s_livesonareas(areas[c('1')]) %>% 
     gadget3::g3s_age(minage = 0, maxage = gadget3::g3_stock_def(imm_F, 'minage')-1)
-    
+  
   
   ## Ageing:
   ## To ensure the numbers match, the spawned population should transition when recruitment occurs
@@ -38,12 +38,14 @@ proj_stock_actions2 <- function(num_project_years,
         output_stocks = list(dummy_stock),
         recruitment_f = 
           g3a_spawn_recruitment_hockeystick(
-            r0 = gadget3:::f_substitute(~scale * g3_param_table('project_rec',
-                                                                expand.grid(cur_year = seq(end_year - minage, 
-                                                                                           end_year + py)), ifmissing = 0),
-                                        list(py = num_project_years,
-                                             minage = gadget3::g3_stock_def(imm_F, 'minage'),
-                                             scale = 1e4)),
+            r0 = gadget3:::f_substitute(
+              ~scale * g3_param_table('project_rec',
+                                      expand.grid(
+                                        cur_year = seq(end_year - minage, 
+                                                       end_year + py)), ifmissing = 0),
+              list(py = num_project_years,
+                   minage = gadget3::g3_stock_def(imm_F, 'minage'),
+                   scale = 1e4)),
             blim = g3_parameterized('blim')), 
         proportion_f = 1,
         mean_f = g3_parameterized('recl', by_stock = 'species'),
@@ -84,7 +86,7 @@ runfun <- function(adfun, pars, hr_len = 45){
     left_join(schedule, by = 'time') %>% 
     select(year, rec) %>% 
     mutate(year = year + 1) ## NOTE, DOING THIS AS SPAWNING OCCURSR IN THE YEAR BEFORE RECRUITMENT
-
+  
   ## Catches
   tmp <- 
     res[names(res)[grepl('^proj_(.+)__predby_(.+)_proj$', names(res))]] %>% 
@@ -115,7 +117,7 @@ runfun <- function(adfun, pars, hr_len = 45){
     pivot_wider(names_from = var, values_from = Freq) %>% 
     select(-area) %>% 
     mutate(biomass = wgt*num)
-    
+  
   out <- 
     WL %>% 
     group_by(time) %>% 
@@ -134,8 +136,8 @@ runfun <- function(adfun, pars, hr_len = 45){
     select(year, step, catch, hr_catch, hrbar, ssb, rec) %>% 
     arrange(year) %>% 
     filter(year >= local(start_year))
-    
-        
+  
+  
   return(out)
   
 }

@@ -41,10 +41,15 @@ rp_cols <- c("Fmsy" = "#449BCF", "MSY" = "#056A89", "Fpa" = "#D696C8", "Blim" = 
 
 # Reference point calculus
 
+results_pre %>% 
+  ggplot(aes(x = year, y = ssb, color = hr_target)) + geom_point()
+  group_by(hr_target, year) %>% 
+  summarise()
+
 ## Precautionary reference points
 res_pre <- 
   results_pre %>% 
-  filter(year > (max(year) -50), step == 1, hr_target <= 0.3, stock == 'ghl_female_mat') %>% 
+  filter(year > (max(year) -50), step == 1, hr_target <= 0.3) %>% # stock == 'ghl_female_mat'
   group_by(hr_target) %>% 
   reframe(f = round(mean(fbar), digits = f_round),
           quantile_df(biomass, 1e3)) 
@@ -64,7 +69,8 @@ yield_dat <-
   filter(year > (max(year) -50), hr_target <= 0.3) %>% 
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
-            ssb = mean(biomass[stock == 'ghl_female_mat']),
+            ssb = mean(ssb),
+            # ssb = mean(biomass[stock == 'ghl_female_mat']),
             f = mean(fbar[step == 1])) %>% 
   group_by(hr_target) %>% 
   reframe(f = round(mean(f), digits = f_round),
