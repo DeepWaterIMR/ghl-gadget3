@@ -101,7 +101,7 @@ runfun <- function(adfun, pars, hr_len = 45){
     summarise(catch = sum(Freq, na.rm = TRUE), .groups = 'drop') %>% 
     left_join(
       tmp %>%
-        filter(length > hr_len) %>% 
+        filter(length >= hr_len) %>% 
         group_by(time) %>% 
         summarise(hr_catch = sum(Freq, na.rm = TRUE), .groups = 'drop')
       , c('time'))
@@ -130,10 +130,12 @@ runfun <- function(adfun, pars, hr_len = 45){
       , by = 'time') %>% 
     left_join(catch, by = c('time')) %>%
     mutate(hrbar = hr_catch/total_biomass) %>% 
+    mutate(hr = catch/total_biomass) %>% 
     replace_na(list(hrbar = 0)) %>% 
     left_join(schedule, by = 'time') %>% 
     left_join(rec, by = 'year') %>% 
-    select(year, step, catch, hr_catch, hrbar, ssb, rec) %>% 
+    select(year, step, catch, hr_catch, hr, hrbar, ssb, rec) %>% 
+    rename(catch_bar = hr_catch) %>% 
     arrange(year) %>% 
     filter(year >= local(start_year))
   

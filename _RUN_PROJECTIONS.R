@@ -348,9 +348,9 @@ base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
 
 ## Other columns
 base.par.proj <- base.par.proj %>%
-  mutate(optimise = FALSE) %>% 
-  mutate(across(any_of(names(optim_fit$params)[-1:-3]),
-                ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x))) 
+  # mutate(optimise = FALSE) %>%
+  mutate(across(any_of(names(optim_fit$params)[-1:-4]),
+                ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x)))
 
 # New columns
 base.par.proj$value$project_years <- num_project_years
@@ -476,14 +476,15 @@ par.proj <-
 
 ################################################################################
 
-## Plot the model using 
+## Plot the model
 # result <- model(par.proj$value)
 # result[[1]]
-# test_fit <- gadgetutils::g3_fit(model,par.proj)
+# r_proj <- g3_to_r(proj_actions)
+# test_fit <- gadgetutils::g3_fit(r_proj,projpar_pre[[45]])
 # tmppath <- file.path(getwd(), base_dir, "figures")
 # make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
 
-
+## So much fun...
 fun_fun <- g3_tmb_adfun(tmb_proj, par.proj, type = 'Fun')
 #fun_fun <- g3_tmb_adfun(tmb_proj, par.proj)
 
@@ -523,7 +524,7 @@ projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
 results_pre <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
-            print(x)
+            # print(x)
             out <- runfun(fun_fun, projpar_pre[[x]]) ## NEED TO FIX STOCKS
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
@@ -555,7 +556,8 @@ projpar_msy_nobtrigger <- lapply(setNames(names(hr_list), names(hr_list)), funct
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0.212) %>%
+    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
+                             advice_cv = 0.212) %>%
     g3_init_guess('btrigger', 1)
   
   return(out)
@@ -592,7 +594,8 @@ projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0.212)  %>%
+    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
+                             advice_cv = 0.212)  %>%
     g3_init_guess('btrigger', btrigger*1e3)
   
   return(out)
