@@ -210,7 +210,7 @@ p1 <- yield_dat %>%
   scale_x_continuous(expand = expansion(mult = c(0, .04)), n.breaks = 10) +
   scale_color_manual(values = rp_cols) +
   scale_fill_manual(values = rp_cols, guide = "none") +
-  labs(y="Catch (kt)", x = 'Harvest rate (>= 45 cm)', color = "Reference\npoint") +
+  labs(y="Catch (kt)", x = 'Harvest rate (\u2265 45 cm)', color = "Reference\npoint") +
   theme(legend.position = "none")
 
 p2 <- ssb_dat %>% 
@@ -248,7 +248,7 @@ p2 <- ssb_dat %>%
   scale_x_continuous(expand = expansion(mult = c(0, .04)), n.breaks = 8) +
   scale_color_manual(values = rp_cols) +
   scale_fill_manual(values = rp_cols, guide = "none") +
-  labs(y="SSB (kt)", x = 'Harvest rate (>= 45 cm)', color = "Reference\npoint") +
+  labs(y="SSB (kt)", x = 'Harvest rate (\u2265 45 cm)', color = "Reference\npoint") +
   theme(legend.position = "none")
 
 tmp1 <- results_msy_nobtrigger %>% 
@@ -294,7 +294,7 @@ p4 <- Pbref %>%
   geom_vline(data = x_axis1,
              aes(xintercept = value, color = RP), alpha = 0.5) +
   geom_line(aes(col = rp)) +
-  labs(y = 'Prob < Ref. point', x = 'Harvest rate (>= 45 cm)', 
+  labs(y = 'Prob < Ref. point', x = 'Harvest rate (\u2265 45 cm)', 
        col = "Reference\npoint") + 
   coord_cartesian(xlim = c(0.08, 0.16)) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +

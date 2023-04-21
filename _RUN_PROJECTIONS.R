@@ -408,18 +408,18 @@ base.par.proj$value$internat_prop <- catch_props %>%
 
 ## 2023-04-21: Things to fix: par.proj project_rec should start from 2021? (2022 for real but we set 2021 rec to 0 to avoid spikes). Project HR should start from 2022.
 
-par.proj <- base.par.proj
-par.proj <-
-  par.proj %>%
-  g3p_project_rec(
-    recruitment = fit$stock.recruitment %>%
-      filter(year >= rec_start_year,
-             year <= max(model_params$year) - 4) %>% 
-      group_by(year) %>% 
-      summarise(recruitment = sum(recruitment)),
-    method = 'bootstrap') %>%
-  g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
-  g3_init_guess('btrigger', 1)
+# par.proj <- base.par.proj
+# par.proj <-
+#   par.proj %>%
+#   g3p_project_rec(
+#     recruitment = fit$stock.recruitment %>%
+#       filter(year >= rec_start_year,
+#              year <= max(model_params$year) - 4) %>% 
+#       group_by(year) %>% 
+#       summarise(recruitment = sum(recruitment)),
+#     method = 'bootstrap') %>%
+#   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
+#   g3_init_guess('btrigger', 1)
 
 # r_proj <- g3_to_r(proj_actions)
 
@@ -624,3 +624,9 @@ save(results_msy, file = file.path(outpath, 'results_msy.Rdata'), compress = "xz
 save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'), compress = "xz")
 
 ## -----------------------------------------------------------------------------
+
+r_proj <- g3_to_r(proj_actions)
+msy_fit <- gadgetutils::g3_fit(r_proj,projpar_msy[[2101]])
+tmppath <- file.path(getwd(), base_dir, "figures")
+make_html(msy_fit, path = tmppath, file_name = "model_output_figures_proj_msy.html")
+
