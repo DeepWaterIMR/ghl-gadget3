@@ -50,7 +50,7 @@ harvest_rates <- seq(0.00, 1, by = 0.01)
 
 ## How many trials per harvest rate (each trial will have a unique recruitment series
 ## and a unique annual harvest rate sequence (if assessment error is present))
-hr_trials <- 10 # For real run make 100
+hr_trials <- 100 
 recstep <- 1
 
 ## Age range for calculating fbar
@@ -405,6 +405,9 @@ base.par.proj$value$internat_prop <- catch_props %>%
 ##
 ################################################################################
 
+
+## 2023-04-21: Things to fix: par.proj project_rec should start from 2021? (2022 for real but we set 2021 rec to 0 to avoid spikes). Project HR should start from 2022.
+
 par.proj <- base.par.proj
 par.proj <-
   par.proj %>%
@@ -533,8 +536,8 @@ results_pre <-
           }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
-save(results_pre, file = file.path(outpath, 'results_pre.Rdata'))
-save(projpar_pre, file = file.path(outpath, 'projpar_pre.Rdata'))
+save(results_pre, file = file.path(outpath, 'results_pre.Rdata'), compress = "xz")
+save(projpar_pre, file = file.path(outpath, 'projpar_pre.Rdata'), compress = "xz")
 
 # Notes
 ## - Calculate the risk of going below Blim
@@ -577,8 +580,10 @@ results_msy_nobtrigger <-
           }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
-save(results_msy_nobtrigger, file = file.path(outpath, 'results_msy_nobtrigger.Rdata'))
-save(projpar_msy_nobtrigger, file = file.path(outpath, 'projpar_msy_nobtrigger.Rdata'))
+save(results_msy_nobtrigger, 
+     file = file.path(outpath, 'results_msy_nobtrigger.Rdata'), compress = "xz")
+save(projpar_msy_nobtrigger, 
+     file = file.path(outpath, 'projpar_msy_nobtrigger.Rdata'), compress = "xz")
 
 ## -----------------------------------------------------------------------------
 ## MSY reference points (fmsy, fp0.5): assessment error and btrigger
@@ -615,7 +620,7 @@ results_msy <-
           }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
-save(results_msy, file = file.path(outpath, 'results_msy.Rdata'))
-save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'))
+save(results_msy, file = file.path(outpath, 'results_msy.Rdata'), compress = "xz")
+save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'), compress = "xz")
 
 ## -----------------------------------------------------------------------------

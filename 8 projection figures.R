@@ -17,27 +17,39 @@ quantile_df <- function(x, scale = 1, probs = c(0.05,0.25, 0.5, 0.75, 0.95)) {
 }
 
 ### Calculate fbar from a fit object
-fbar_func <- function(fit, fbar_ages){
-  fit$stock.prey %>% 
-    filter(age %in% fbar_ages) %>% 
-    group_by(year,age) %>% 
-    summarise(c=sum(number_consumed), 
-              n=sum(number[step==1]),
-              catch_mass = sum(biomass_consumed)) %>% 
-    mutate(f=-log(1-c/n)) %>% 
-    group_by(year) %>% 
-    summarise(fbar = mean(f, na.rm = TRUE), 
-              catch_n = sum(c, na.rm = TRUE),
-              catch_mass = sum(catch_mass, na.rm = TRUE))
-}
+# fbar_func <- function(fit, fbar_ages){
+#   fit$stock.prey %>% 
+#     filter(age %in% fbar_ages) %>% 
+#     group_by(year,age) %>% 
+#     summarise(c=sum(number_consumed), 
+#               n=sum(number[step==1]),
+#               catch_mass = sum(biomass_consumed)) %>% 
+#     mutate(f=-log(1-c/n)) %>% 
+#     group_by(year) %>% 
+#     summarise(fbar = mean(f, na.rm = TRUE), 
+#               catch_n = sum(c, na.rm = TRUE),
+#               catch_mass = sum(catch_mass, na.rm = TRUE))
+# }
 # ggplot(fbar_func(fit), aes(x = year, y = fbar)) + geom_path()
+
+### ggplot theme
+
+theme_cust <- theme_classic(base_size = 11) %+replace%
+  theme(strip.background = element_blank(),
+        panel.background = element_blank(),
+        plot.background = element_blank(),
+        legend.background = element_blank(),
+        legend.box.background = element_blank(),
+        plot.margin = margin(c(5.5, 10, 5.5, 5.5)))
+
+theme_set(theme_cust) # Set default theme globally for the entire project
 
 ## Read data
 
 ## Variables and definitions
 
 f_round <- 3
-rp_cols <- c("HRmsy" = "#449BCF", "MSY" = "#056A89", "HRpa" = "#D696C8", "HRlim" = "#6CA67A", "Blim" = "#82C893", "Bpa" = "#FF5F68")
+rp_cols <- c("MSY" = "#6CA67A", "HRmsy" = "#82C893", "Bpa" = "#056A89", "HRpa" = "#449BCF", "Blim" = "#D44F56", "HRlim" = "#FF5F68")
 
 # Reference point calculus
 
@@ -145,7 +157,7 @@ save(rp_tab, file = file.path(base_dir, "projections/reference_point_table.rda")
 ###############
 ## Figures ####
 
-## Simulation plot
+## Simulation plot ####
 
 x_axis1 <- tibble(RP = c("HRmsy", "HRpa", "HRlim"), 
                   value = c(Emsy$f, Epa$f, Elim$flim))
@@ -156,6 +168,13 @@ x_axis2 <- tibble(RP = c("HRmsy"),
 
 y_axis1 <- tibble(RP = c("MSY"), value = c(Emsy$value))
 y_axis2 <- tibble(RP = c("Blim", "Bpa"), value = c(blim/1e3, bpa/1e3))
+
+leg_p <- ggplot() +
+  geom_vline(data = x_axis1, aes(xintercept = value, color = RP)) +
+  geom_hline(data = y_axis1, aes(yintercept = value, color = RP)) +
+  geom_hline(data = y_axis2, aes(yintercept = value, color = RP)) +
+  scale_color_manual("Reference\npoint", values = rp_cols, breaks = names(rp_cols)) +
+  theme(legend.position = "bottom")
 
 p1 <- yield_dat %>% 
   filter(prob==0.5) %>% 
@@ -192,7 +211,7 @@ p1 <- yield_dat %>%
   scale_color_manual(values = rp_cols) +
   scale_fill_manual(values = rp_cols, guide = "none") +
   labs(y="Catch (kt)", x = 'Harvest rate (>= 45 cm)', color = "Reference\npoint") +
-  theme(legend.position = c(0.9,0.8))
+  theme(legend.position = "none")
 
 p2 <- ssb_dat %>% 
   filter(prob==0.5) %>% 
@@ -230,11 +249,11 @@ p2 <- ssb_dat %>%
   scale_color_manual(values = rp_cols) +
   scale_fill_manual(values = rp_cols, guide = "none") +
   labs(y="SSB (kt)", x = 'Harvest rate (>= 45 cm)', color = "Reference\npoint") +
-  theme(legend.position = c(0.9,0.8))
+  theme(legend.position = "none")
 
 tmp1 <- results_msy_nobtrigger %>% 
-  filter(rec > 0) %>% 
-  # filter(year > (max(year) -50)) %>% 
+  # filter(rec > 0) %>% 
+  filter(year > (max(year) -50)) %>% 
   filter(step==1, hr_target == Emsy$hr_target) %>%
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
@@ -245,43 +264,57 @@ tmp1 <- results_msy_nobtrigger %>%
 tmp2 <- tibble(
   ssb = seq(0,round(max(tmp1$ssb)),by=1e5), 
   rec = pmin(1,(ssb)/(blim*1e3))*
-    fit$res.by.year %>% 
+    optim_fit$res.by.year %>% 
     filter(year >= rec_start_year) %>% 
+    group_by(year) %>% 
+    summarise(recruitment = sum(recruitment, na.rm = TRUE)) %>% 
     pull(recruitment) %>% 
     mean(.,na.rm = T)
 )
 
 p3 <- tmp1 %>% 
   ggplot(aes(ssb/1e6, rec/1e6))  + 
-  geom_point(alpha = 0.3) + 
+  geom_point(alpha = 0.1) + 
   labs(y='Recruitment (millions)', x="SSB (kt)", color = "Reference\npoint") + 
   geom_vline(
     data = y_axis2[1,], 
     aes(xintercept = value, color = RP)) + 
   scale_color_manual(values = rp_cols) +
+  geom_line(data = tmp2, col = 'white', linewidth = 1.5) +
   geom_line(data = tmp2, col = 'blue') +
-  theme(legend.position = c(0.9,0.7))
+  scale_y_continuous(expand = expansion(mult = c(0, .1))) +
+  scale_x_continuous(expand = expansion(mult = c(0, .04)), n.breaks = 8) +
+  theme(legend.position = "none")
 
 p4 <- Pbref %>% 
   rename(Bpa = pbpa, Blim = pblim) %>% 
   pivot_longer(names_to = 'rp', cols = c('Bpa', 'Blim')) %>% 
   ggplot(aes(f,value)) + 
-  geom_line(aes(col = rp)) +
-  geom_hline(yintercept = 0.05) +
+  geom_hline(yintercept = 0.05, color = "grey") +
   geom_vline(data = x_axis1,
-             aes(xintercept = value, color = RP)) +
-  labs(y = 'Prob < Ref. point', x = 'Harvest rate (>= 45 cm)', col = "Reference\npoint") + 
+             aes(xintercept = value, color = RP), alpha = 0.5) +
+  geom_line(aes(col = rp)) +
+  labs(y = 'Prob < Ref. point', x = 'Harvest rate (>= 45 cm)', 
+       col = "Reference\npoint") + 
+  coord_cartesian(xlim = c(0.08, 0.16)) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
-  scale_x_continuous(expand = expansion(mult = c(0, .04)), n.breaks = 8) +
+  scale_x_continuous(expand = expansion(mult = c(0, .05)), n.breaks = 10) +
   scale_color_manual(values = rp_cols) +
-  theme(legend.position = c(0.8,0.3))
+  theme(legend.position = "none")
 
-ggsave(plot = print(cowplot::plot_grid(p1,p2,p3,p4)), 
-       filename = file.path(base_dir, "figures/Simulation_plots.png"), 
-       units = 'in', width = pagewidth_in, height = pagewidth_in,
-       bg = "white")
+ggsave(
+  plot = 
+    print(
+      cowplot::plot_grid(
+        cowplot::plot_grid(p1,p2,p3,p4, labels = "AUTO"), 
+        cowplot::get_legend(leg_p),
+        ncol = 1, rel_heights = c(9,1)
+      )),
+  filename = file.path(base_dir, "figures/Simulation_plots.png"), 
+  units = 'in', width = pagewidth_in, height = pagewidth_in*1.1,
+  bg = "white")
 
-## Histogram of draws fit
+## Histogram of draws fit ####
 fithist <- 
   fit$stock.recruitment %>% 
   mutate(rec = recruitment/1e6) %>% 
