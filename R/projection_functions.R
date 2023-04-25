@@ -75,7 +75,6 @@ runfun <- function(adfun, pars, hr_len = 45){
   ## Retrieve reports
   res <- adfun$report(gadget3::g3_tmb_par(pars))
   
-  
   ## Recruitment
   rec <- res[names(res)[grepl('^proj_(.+)_spawnednum$', names(res))]] %>% 
     map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)[,c('time','Freq')]) %>% 
@@ -85,7 +84,7 @@ runfun <- function(adfun, pars, hr_len = 45){
     summarise(rec = sum(Freq), .groups = 'drop') %>% 
     left_join(schedule, by = 'time') %>% 
     select(year, rec) %>% 
-    mutate(year = year + 1) ## NOTE, DOING THIS AS SPAWNING OCCURSR IN THE YEAR BEFORE RECRUITMENT
+    mutate(year = year) 
   
   ## Catches
   tmp <- 
@@ -98,15 +97,17 @@ runfun <- function(adfun, pars, hr_len = 45){
   catch <- 
     tmp %>%
     group_by(time) %>% 
-    summarise(catch = sum(Freq, na.rm = TRUE), .groups = 'drop') %>% 
-    left_join(
-      tmp %>%
-        filter(length >= hr_len) %>% 
-        group_by(time) %>% 
-        summarise(hr_catch = sum(Freq, na.rm = TRUE), .groups = 'drop')
-      , c('time'))
-  
-  WL <- 
+    summarise(catch = sum(Freq, na.rm = TRUE), .groups = 'drop') 
+  # %>% 
+  #   left_join(
+  #     tmp %>%
+  #       filter(length >= hr_len) %>% 
+  #       group_by(time) %>% 
+  #       summarise(hr_catch = sum(Freq, na.rm = TRUE), .groups = 'drop')
+  #     , c('time'))
+  # 
+ 
+   WL <- 
     ## Stock weight and numbers
     res[names(res)[grepl('^proj_(.+)_(imm|mat)__(wgt$|num$)', names(res))]] %>%
     map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>% 
@@ -120,8 +121,12 @@ runfun <- function(adfun, pars, hr_len = 45){
   
   out <- 
     WL %>% 
+    gadgetutils:::split_length() %>% 
+    mutate(length = (ifelse(is.infinite(upper), lower + 1, upper) + lower )/2,) %>% 
     group_by(time) %>% 
-    summarise(total_biomass = sum(biomass, na.rm = TRUE), .groups = 'drop') %>% 
+    summarise(total_biomass = sum(biomass, na.rm = TRUE), 
+              hr_biomass = sum(biomass[length >= hr_len], na.rm = TRUE), 
+              .groups = 'drop') %>% 
     left_join(
       WL %>% 
         filter(stock == 'ghl_female_mat') %>% 
@@ -129,13 +134,13 @@ runfun <- function(adfun, pars, hr_len = 45){
         summarise(ssb = sum(biomass, na.rm = TRUE), .groups = 'drop')
       , by = 'time') %>% 
     left_join(catch, by = c('time')) %>%
-    mutate(hrbar = hr_catch/total_biomass) %>% 
+    mutate(hrbar = catch/hr_biomass) %>% 
     mutate(hr = catch/total_biomass) %>% 
     replace_na(list(hrbar = 0)) %>% 
     left_join(schedule, by = 'time') %>% 
     left_join(rec, by = 'year') %>% 
-    select(year, step, catch, hr_catch, hr, hrbar, ssb, rec) %>% 
-    rename(catch_bar = hr_catch) %>% 
+    select(year, step, catch, hrbar, ssb, rec) %>% 
+    rename(hr = hrbar) %>% 
     arrange(year) %>% 
     filter(year >= local(start_year))
   

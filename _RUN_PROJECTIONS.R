@@ -6,28 +6,15 @@
 
 source("0 run first.R")
 
-#base_dir <- 'exploratory_models/gadget3'
-#vers <- 'models/301-BNCHMK_base_simpleinit'
-
-#outpath <- file.path(base_dir, vers, 'PROJ2')
-#if (!dir.exists(outpath)) dir.create(outpath)
-
 load("data/gadget_workspace.RData")
 source("R/projection_functions.R")
 
-
-base_dir <- "model_files"
+base_dir <- "model_files2"
 
 outpath <- file.path(base_dir, "projections")
 if(!dir.exists(outpath)) dir.create(outpath)
 
-
 ## Load the desired model, params and fit
-# load(file = file.path(base_dir, vers, 'fit.Rdata'))
-# load(file = file.path(base_dir, vers, 'tmb_model.Rdata'))
-# load(file = file.path(base_dir, vers, 'WGTS/params_final.Rdata'))
-# load(file = file.path(base_dir, vers, 'BOOTSTRAP/boot_fit.Rdata'))
-
 fit <- optim_fit
 
 ## -----------------------------------------------------------------------------
@@ -50,7 +37,7 @@ harvest_rates <- seq(0.00, 1, by = 0.01)
 
 ## How many trials per harvest rate (each trial will have a unique recruitment series
 ## and a unique annual harvest rate sequence (if assessment error is present))
-hr_trials <- 100 
+hr_trials <- 100
 recstep <- 1
 
 ## Age range for calculating fbar
@@ -145,12 +132,11 @@ rec_list <- c(list(
            year <= max(model_params$year) - 4, step == recstep) %>% 
     group_by(year) %>% 
     summarise(recruitment = sum(recruitment))
-  )) #map(filter, recruitment > 0, year >= rec_start_year, step == recstep) %>% 
+  )) 
   
 ## ------------------------------------------------------------------------------
 
 ## STOCK ACTIONS
-## Warning is produced here, should check with Jamie
 proj_actions0 <-
   c(attributes(tmb_model)$actions,
     proj_stock_actions2(num_project_years,
@@ -185,10 +171,9 @@ proj_effort_scalar <-
 hr_vec <-
   gadget3:::f_substitute(
     ~g3_param_table('project_hr',
-                    expand.grid(cur_year = seq(end_year, end_year + py)),
+                    expand.grid(cur_year = seq(end_year + 1, end_year + py)),
                     ifmissing = 0),
     list(py = num_project_years))
-
 
 exponentiate_fleets <- FALSE
 
@@ -217,7 +202,7 @@ if (TRUE){
                                exponentiate = exponentiate_fleets))),
           catchability_f =
             g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
+              btrigger = g3_parameterized('btrigger', optimise = FALSE),
               hr = gadget3:::f_substitute(
                 ~a*b, list(a = hr_vec, b = g3_parameterized('trawlnor_prop'))
               ),
@@ -243,7 +228,7 @@ if (TRUE){
                                exponentiate = exponentiate_fleets))),
           catchability_f =
             g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
+              btrigger = g3_parameterized('btrigger', optimise = FALSE),
               hr = gadget3:::f_substitute(
                 ~a*b, list(a = hr_vec, b = g3_parameterized('othernor_prop'))),
               proportion_f = ~1,
@@ -268,7 +253,7 @@ if (TRUE){
                                exponentiate = exponentiate_fleets))),
           catchability_f =
             g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
+              btrigger = g3_parameterized('btrigger', optimise = FALSE),
               hr = gadget3:::f_substitute(
                 ~a*b, list(a = hr_vec, b = g3_parameterized('trawlrus_prop'))),
               proportion_f = ~1,
@@ -293,7 +278,7 @@ if (TRUE){
                                exponentiate = exponentiate_fleets))),
           catchability_f =
             g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
+              btrigger = g3_parameterized('btrigger', optimise = FALSE),
               hr = gadget3:::f_substitute(
                 ~a*b, list(a = hr_vec, b = g3_parameterized('otherrus_prop'))),
               proportion_f = ~1,
@@ -318,7 +303,7 @@ if (TRUE){
                                exponentiate = exponentiate_fleets))),
           catchability_f =
             g3experiments::g3a_predate_catchability_hockeyfleet(
-              btrigger = g3_parameterized('btrigger'),
+              btrigger = g3_parameterized('btrigger', optimise = FALSE),
               hr = gadget3:::f_substitute(
                 ~a*b, list(a = hr_vec, b = g3_parameterized('internat_prop'))),
               proportion_f = ~1,
@@ -348,13 +333,13 @@ base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
 
 ## Other columns
 base.par.proj <- base.par.proj %>%
-  # mutate(optimise = FALSE) %>%
-  mutate(across(any_of(names(optim_fit$params)[-1:-4]),
+    mutate(across(any_of(names(optim_fit$params)[-1:-4]),
                 ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x)))
 
 # New columns
 base.par.proj$value$project_years <- num_project_years
 base.par.proj$value$blim <- blim*1e3
+base.par.proj[base.par.proj$switch=="btrigger","optimise"]<-TRUE
 
 ## THE PROPORTION PER FLEET
 
@@ -488,7 +473,7 @@ base.par.proj$value$internat_prop <- catch_props %>%
 # make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
 
 ## So much fun...
-fun_fun <- g3_tmb_adfun(tmb_proj, par.proj, type = 'Fun')
+fun_fun <- g3_tmb_adfun(tmb_proj, base.par.proj, type = 'Fun')
 #fun_fun <- g3_tmb_adfun(tmb_proj, par.proj)
 
 ## Set up the harvest rates and trials-per-harvest-rate
@@ -516,7 +501,7 @@ projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, advice_cv = 0) %>%
+    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0, advice_cv = 0) %>%
     g3_init_guess('btrigger', 1)
   
   return(out)
@@ -528,7 +513,7 @@ results_pre <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
             # print(x)
-            out <- runfun(fun_fun, projpar_pre[[x]]) ## NEED TO FIX STOCKS
+            out <- runfun(fun_fun, projpar_pre[[x]]) 
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
