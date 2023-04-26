@@ -9,10 +9,10 @@ source("0 run first.R")
 load("data/gadget_workspace.RData")
 source("R/projection_functions.R")
 
-base_dir <- "model_files2"
+base_dir <- "projections"
 
 outpath <- file.path(base_dir, "projections")
-if(!dir.exists(outpath)) dir.create(outpath)
+if(!dir.exists(outpath)) dir.create(outpath, recursive = TRUE)
 
 ## Load the desired model, params and fit
 fit <- optim_fit
@@ -40,16 +40,12 @@ harvest_rates <- seq(0.00, 1, by = 0.01)
 hr_trials <- 100
 recstep <- 1
 
-## Age range for calculating fbar
-age_range <- c(7,25)
-
 #blim <- #138650858          # 125629491
 
 ## Blim in tonnes
-blim <- fit$res.by.year %>% 
+blim <- optim_fit$res.by.year %>% 
   filter(year == 1992, stock == "ghl_female_mat") %>% 
-  pull(total.biomass) %>% 
-  {round(./1e3, 2)} # round(min(fit$res.by.year$total.biomass)/1e3)
+  pull(total.biomass) 
 
 bpa <- blim * 1.4
 btrigger <- bpa
@@ -132,8 +128,8 @@ rec_list <- c(list(
            year <= max(model_params$year) - 4, step == recstep) %>% 
     group_by(year) %>% 
     summarise(recruitment = sum(recruitment))
-  )) 
-  
+)) 
+
 ## ------------------------------------------------------------------------------
 
 ## STOCK ACTIONS
@@ -333,13 +329,13 @@ base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
 
 ## Other columns
 base.par.proj <- base.par.proj %>%
-    mutate(across(any_of(names(optim_fit$params)[-1:-4]),
+  mutate(across(any_of(names(optim_fit$params)[-1:-4]),
                 ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x)))
 
 # New columns
 base.par.proj$value$project_years <- num_project_years
-base.par.proj$value$blim <- blim*1e3
-base.par.proj[base.par.proj$switch=="btrigger","optimise"]<-TRUE
+base.par.proj$value$blim <- blim
+base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
 
 ## THE PROPORTION PER FLEET
 
@@ -484,6 +480,14 @@ hr_list <-
   mutate(id = paste0('h', id)) %>%
   split(f = as.factor(.$id))
 
+
+save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_years, 
+     harvest_rates, hr_trials, recstep, blim, bpa, btrigger, hr_list, rec_list, recage,
+     base.par.proj,
+     file = file.path(outpath, 'projection_defintions.Rdata'), compress = "xz"
+)
+
+
 # ## -----------------------------------------------------------------------------
 # ## Precautionary reference points (flim): no assessment error and no Btrigger
 # ## -----------------------------------------------------------------------------
@@ -495,14 +499,14 @@ projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
-  #par.proj$value$blim <- blim*1e3
+  #par.proj$value$blim <- blim
   
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0, advice_cv = 0) %>%
-    g3_init_guess('btrigger', 1)
+    g3_init_guess('btrigger', value = 1, optimise = TRUE)
   
   return(out)
   
@@ -546,7 +550,7 @@ projpar_msy_nobtrigger <- lapply(setNames(names(hr_list), names(hr_list)), funct
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
                              advice_cv = 0.212) %>%
-    g3_init_guess('btrigger', 1)
+    g3_init_guess('btrigger', value = 1, optimise = TRUE)
   
   return(out)
   
@@ -586,7 +590,7 @@ projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
                              advice_cv = 0.212)  %>%
-    g3_init_guess('btrigger', btrigger*1e3)
+    g3_init_guess('btrigger', value = btrigger, optimise = TRUE)
   
   return(out)
   

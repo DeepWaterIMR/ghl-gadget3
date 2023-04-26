@@ -46,44 +46,64 @@ theme_set(theme_cust) # Set default theme globally for the entire project
 
 ## Read data
 
+if(!exists("base_dir")) base_dir <- "projections"
+outpath <- file.path(base_dir, "projections")
+
+if(!exists("optim_fit")) load("data/Optimized TMB model fit.rda")
+fit <- optim_fit
+
+if(!exists("results_pre")) load(file.path(outpath, 'results_pre.Rdata'))
+if(!exists("results_msy_nobtrigger")) load(file.path(outpath, 'results_msy_nobtrigger.Rdata'))
+if(!exists("results_msy")) load(file.path(outpath, 'results_msy.Rdata'))
+
+if(!exists("blim")) {
+  blim <- optim_fit$res.by.year %>% 
+    filter(year == 1992, stock == "ghl_female_mat") %>% 
+    pull(total.biomass) 
+  
+  bpa <- blim * 1.4
+  btrigger <- bpa
+}
+
 ## Variables and definitions
 
 f_round <- 3
 rp_cols <- c("MSY" = "#6CA67A", "HRmsy" = "#82C893", "Bpa" = "#056A89", "HRpa" = "#449BCF", "Blim" = "#D44F56", "HRlim" = "#FF5F68")
 
-# Reference point calculus
+###############################
+# Reference point calculus ####
+# All weights turned to kilotons and abundances to millions
 
 # results_pre %>% 
 #   ggplot(aes(x = year, y = ssb, color = hr_target)) + geom_point()
 #   group_by(hr_target, year) %>% 
 #   summarise()
 
-## Precautionary reference points
+## Precautionary reference points (HR(>45cm) is called f)
 res_pre <- 
   results_pre %>% 
-  filter(year > (max(year) -50), step == 1) %>% #, hr_target <= 0.3
+  filter(year > (max(year) -50)) %>% #, hr_target <= 0.3
   group_by(hr_target) %>% 
-  reframe(f = round(mean(hrbar), digits = f_round),
+  reframe(f = round(mean(hr), digits = f_round),
           quantile_df(ssb, 1e6)) 
 
-### Flim
-Elim <- 
+### HRlim (called flim)
+HRlim <- 
   res_pre %>% 
-  filter(prob == 0.5, value > local(blim/1e3)) %>% 
+  filter(prob == 0.5, value > local(blim/1e6)) %>% 
   filter(hr_target == max(hr_target)) %>% 
   rename(hr_lim = hr_target, flim = f)
 
 ## MSY reference points
 
-## Yield curve no btrigger
+## Yield curve no btrigger (HR(>45cm) is called f)
 yield_dat <- 
   results_msy_nobtrigger %>% 
-  filter(year > (max(year) -50)) %>% # , hr_target <= 0.3
+  filter(year > (max(year) -50)) %>% 
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
             ssb = mean(ssb),
-            # ssb = mean(biomass[stock == 'ghl_female_mat']),
-            f = mean(hrbar[step == 1])) %>% 
+            f = mean(hr)) %>% 
   group_by(hr_target) %>% 
   reframe(f = round(mean(f), digits = f_round),
           ssb = mean(ssb)/1e6,
@@ -91,9 +111,11 @@ yield_dat <-
 #  ggplot(yield_dat %>% filter(prob == 0.5), aes(x = ssb, y = value)) + geom_point()
 
 ## Median yield
-Emsy <- yield_dat %>% filter(prob == 0.5) %>% filter(value == max(value))
+HRmsy <- yield_dat %>% 
+  filter(prob == 0.5) %>% 
+  filter(value == max(value))
 
-Emsy_range <- yield_dat %>% 
+HRmsy_range <- yield_dat %>% 
   filter(prob == 0.5) %>% 
   filter(value > 0.95*max(value)) %>% 
   filter(hr_target == min(hr_target) | hr_target == max(hr_target))
@@ -101,35 +123,42 @@ Emsy_range <- yield_dat %>%
 ## SSB quantiles from yield_dat
 ssb_dat <- 
   results_msy %>% 
-  filter(year > (max(year) -50), step==1, hr_target <= 0.3) %>% 
+  filter(year > (max(year) -50)) %>% # , hr_target <= 0.3
   group_by(year, hr_target, trial) %>% 
   summarise(ssb = mean(ssb), 
-            f = mean(hrbar[step == 1])) %>% 
+            f = mean(hr)) %>% 
   group_by(hr_target) %>% 
   reframe(f = round(mean(f), digits = f_round),
           quantile_df(ssb, 1e6)) 
 # ggplot(ssb_dat %>% filter(prob == 0.5), aes(x = f, y = value)) + geom_point()
 
-Epa <- 
+### HRpa the complex ICES way
+# results_msy %>% 
+#   filter(year > (max(year) - 50)) %>%
+#   mutate(pass = ssb > blim*1e3) %>% 
+#   group_by(hr_target) %>% 
+#   summarise(
+#     HRpa = mean(hrbar),
+#     prop = sum(pass)/length(pass)) %>% 
+#   View()
+### end
+
+HRpa <- 
   ssb_dat %>% 
   filter(prob == 0.05) %>% 
-  filter(value > blim/1e3) %>% 
+  filter(value > blim/1e6) %>% 
   filter(hr_target == max(hr_target))
-
-if(nrow(Epa) == 0) {
-  Epa <- tibble(hr_target = 0, f = 0, value = 0, prob = 0.05)
-}
 
 Pbref <- 
   results_msy %>% 
-  filter(year > (max(year) -50), step==1) %>% # , hr_target <= 0.3 
+  filter(year > (max(year) -50)) %>% 
   group_by(year, hr_target, trial) %>% 
   summarise(ssb = mean(ssb), 
-            f = mean(hrbar[step == 1])) %>% 
+            f = mean(hr)) %>% 
   group_by(hr_target) %>% 
   summarise(f = round(mean(f), digits = f_round),
-            pbpa = mean(ssb < bpa * 1e3),
-            pblim = mean(ssb < blim * 1e3))
+            pbpa = mean(ssb < bpa),
+            pblim = mean(ssb < blim))
 
 ##############
 ## Tables ####
@@ -138,7 +167,7 @@ rp_tab <- tibble::tibble(
   `Reference point` = 
     c("Blim", "Bpa", "Btrigger", "MSY", "HR(bar)lim", "HR(bar)msy", "HR(bar)pa", "HR(target)lim", "HR(target)msy", "HR(target)pa"),
   Value = 
-    c(blim, bpa, btrigger, Emsy$value*1e3, Elim$flim, Emsy$f, Epa$f, Elim$hr_lim, Emsy$hr_target, Epa$hr_target),
+    c(blim/1e6, bpa/1e6, btrigger/1e6, HRmsy$value, HRlim$flim, HRmsy$f, HRpa$f, HRlim$hr_lim, HRmsy$hr_target, HRpa$hr_target),
   Basis = c("Lowest modelled mature female substock biomass",
             "Blim x 1.4",
             "Bpa",
@@ -160,14 +189,14 @@ save(rp_tab, file = file.path(base_dir, "projections/reference_point_table.rda")
 ## Simulation plot ####
 
 x_axis1 <- tibble(RP = c("HRmsy", "HRpa", "HRlim"), 
-                  value = c(Emsy$f, Epa$f, Elim$flim))
+                  value = c(HRmsy$f, HRpa$f, HRlim$flim))
 x_axis2 <- tibble(RP = c("HRmsy"), 
                   type = c("min", "max"),
-                  value = c(Emsy_range$f)) %>% 
+                  value = c(HRmsy_range$f)) %>% 
   pivot_wider(names_from = type, values_from = value)
 
-y_axis1 <- tibble(RP = c("MSY"), value = c(Emsy$value))
-y_axis2 <- tibble(RP = c("Blim", "Bpa"), value = c(blim/1e3, bpa/1e3))
+y_axis1 <- tibble(RP = c("MSY"), value = c(HRmsy$value))
+y_axis2 <- tibble(RP = c("Blim", "Bpa"), value = c(blim/1e6, bpa/1e6))
 
 leg_p <- ggplot() +
   geom_vline(data = x_axis1, aes(xintercept = value, color = RP)) +
@@ -254,16 +283,16 @@ p2 <- ssb_dat %>%
 tmp1 <- results_msy_nobtrigger %>% 
   # filter(rec > 0) %>% 
   filter(year > (max(year) -50)) %>% 
-  filter(step==1, hr_target == Emsy$hr_target) %>%
+  filter(step==1, hr_target == HRmsy$hr_target) %>%
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
             ssb = mean(ssb),
-            f = mean(hrbar[step == 1]),
+            f = mean(hr),
             rec = sum(rec, na.rm = TRUE))
 
 tmp2 <- tibble(
   ssb = seq(0,round(max(tmp1$ssb)),by=1e5), 
-  rec = pmin(1,(ssb)/(blim*1e3))*
+  rec = pmin(1,(ssb)/(blim))*
     optim_fit$res.by.year %>% 
     filter(year >= rec_start_year) %>% 
     group_by(year) %>% 
@@ -296,7 +325,7 @@ p4 <- Pbref %>%
   geom_line(aes(col = rp)) +
   labs(y = 'Prob < Ref. point', x = 'Harvest rate (\u2265 45 cm)', 
        col = "Reference\npoint") + 
-  coord_cartesian(xlim = c(0.08, 0.16)) +
+  coord_cartesian(xlim = c(0.1, 0.25)) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   scale_x_continuous(expand = expansion(mult = c(0, .05)), n.breaks = 10) +
   scale_color_manual(values = rp_cols) +
