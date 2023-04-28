@@ -265,14 +265,19 @@ p2 <- ssb_dat %>%
   geom_hline(data = y_axis2, 
              aes(yintercept = value, color = RP)) +
   geom_line() +
-  # geom_text(
-  #   data = fit$res.by.year %>%
-  #     filter(stock == 'ghl_female_mat') %>%
-  #     dplyr::mutate(value = total.biomass/1e6, f = F) %>% 
-  #     dplyr::select(year, value, f),
-  #   aes(label = substr(year, 3,4)),
-  #   size = FS(8)) +
-  # scale_y_continuous(trans = "log1p", breaks = c(0,1,5,10,25,50,100,1000,2500,5000)) +
+  geom_text(
+    data = 
+      full_join(
+        plot_hr(optim_fit, min_catch_length = 45, return_data = TRUE) %>% 
+          dplyr::select(year, value) %>% 
+          rename(f = value),
+        plot_biomass(optim_fit, stocks = "ghl_female_mat", return_data = TRUE) %>% 
+          mutate(value = total.biomass/1e6) %>% 
+          dplyr::select(year, value),
+        by = "year"
+      ),
+    aes(label = substr(year, 3,4)),
+    size = FS(8)) +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   scale_x_continuous(expand = expansion(mult = c(0, .04)), n.breaks = 8) +
   scale_color_manual(values = rp_cols) +
@@ -280,10 +285,10 @@ p2 <- ssb_dat %>%
   labs(y="SSB (kt)", x = 'Harvest rate (\u2265 45 cm)', color = "Reference\npoint") +
   theme(legend.position = "none")
 
-tmp1 <- results_msy_nobtrigger %>% 
+tmp1 <- results_pre %>% # results_msy_nobtrigger
   # filter(rec > 0) %>% 
   filter(year > (max(year) -50)) %>% 
-  filter(step==1, hr_target == HRmsy$hr_target) %>%
+  # filter(step==1, hr_target == HRmsy$hr_target) %>%
   group_by(hr_target, year, trial) %>% 
   summarise(y = sum(catch), 
             ssb = mean(ssb),
@@ -292,7 +297,7 @@ tmp1 <- results_msy_nobtrigger %>%
 
 tmp2 <- tibble(
   ssb = seq(0,round(max(tmp1$ssb)),by=1e5), 
-  rec = pmin(1,(ssb)/(blim))*
+  rec = pmin(1,ssb/blim)*
     optim_fit$res.by.year %>% 
     filter(year >= rec_start_year) %>% 
     group_by(year) %>% 
@@ -306,7 +311,7 @@ p3 <- tmp1 %>%
   geom_point(alpha = 0.1) + 
   labs(y='Recruitment (millions)', x="SSB (kt)", color = "Reference\npoint") + 
   geom_vline(
-    data = y_axis2[1,], 
+    data = y_axis2, 
     aes(xintercept = value, color = RP)) + 
   scale_color_manual(values = rp_cols) +
   geom_line(data = tmp2, col = 'white', linewidth = 1.5) +
