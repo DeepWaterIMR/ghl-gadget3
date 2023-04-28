@@ -109,15 +109,16 @@ runfun <- function(adfun, pars, hr_len = 45){
  
    WL <- 
     ## Stock weight and numbers
-    res[names(res)[grepl('^proj_(.+)_(imm|mat)__(wgt$|num$)', names(res))]] %>%
+    res[names(res)[grepl('^proj_(.+)_(imm|mat)__(wgt$|num$|spawningnum$)', names(res))]] %>%
     map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>% 
     bind_rows(.id = 'comp') %>% 
-    mutate(stock = gsub('^proj_(.+)__(wgt$|num$)', '\\1', comp),
+    mutate(stock = gsub('^proj_(.+)__(wgt$|num$|spawningnum$)', '\\1', comp),
            var = gsub('^proj_(.+)_(.+)_(.+)__(.+)', '\\4', comp)) %>% 
     select(-comp) %>% 
     pivot_wider(names_from = var, values_from = Freq) %>% 
     select(-area) %>% 
-    mutate(biomass = wgt*num)
+    mutate(biomass = wgt*num,
+           biomass_that_spawns = wgt * spawningnum)
   
   out <- 
     WL %>% 
@@ -131,7 +132,8 @@ runfun <- function(adfun, pars, hr_len = 45){
       WL %>% 
         filter(stock == 'ghl_female_mat') %>% 
         group_by(time) %>% 
-        summarise(ssb = sum(biomass, na.rm = TRUE), .groups = 'drop')
+        summarise(ssb = sum(biomass, na.rm = TRUE),
+                  ssb_that_spawns = sum(biomass_that_spawns, na.rm = TRUE), .groups = 'drop')
       , by = 'time') %>% 
     left_join(catch, by = c('time')) %>%
     mutate(hrbar = catch/hr_biomass) %>% 
@@ -139,7 +141,7 @@ runfun <- function(adfun, pars, hr_len = 45){
     replace_na(list(hrbar = 0)) %>% 
     left_join(schedule, by = 'time') %>% 
     left_join(rec, by = 'year') %>% 
-    select(year, step, catch, hrbar, ssb, rec) %>% 
+    select(year, step, catch, hrbar, ssb, ssb_that_spawns, rec) %>% 
     rename(hr = hrbar) %>% 
     arrange(year) %>% 
     filter(year >= local(start_year))
@@ -147,6 +149,26 @@ runfun <- function(adfun, pars, hr_len = 45){
   
   return(out)
   
+}
+
+g3p_project_report2 <- function (actions,
+                                abundance_run_at = 1,
+                                run_at = 11) {
+  c(
+    gadget3::g3a_report_history(
+      actions = actions,
+      var_re = c('__num$', '__wgt$'),
+      out_prefix = "proj_",
+      run_f = ~TRUE,
+      run_at = abundance_run_at),
+    gadget3::g3a_report_history(
+      actions = actions,
+      var_re = c('__renewalnum$', '__spawnednum$', '__predby_', '__spawningnum$'),
+      out_prefix = 'proj_',
+      run_f = ~TRUE,
+      run_at = run_at),
+    NULL
+  )
 }
 
 ################################################################################

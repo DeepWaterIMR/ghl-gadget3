@@ -316,7 +316,7 @@ if (TRUE){
 
 ## UPDATE ACTIONS
 proj_actions <- c(proj_actions0, proj_fleet_actions)
-proj_actions <- c(proj_actions, list(g3experiments::g3p_project_report(proj_actions)))
+proj_actions <- c(proj_actions, list(g3p_project_report2(proj_actions)))
 
 tmb_proj <- g3_to_tmb(proj_actions)
 base.par.proj <- attributes(tmb_proj)$parameter_template
