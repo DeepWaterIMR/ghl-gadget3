@@ -411,7 +411,7 @@ save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_ye
 
 
 # ## -----------------------------------------------------------------------------
-# ## Precautionary reference points (flim): no assessment error and no Btrigger
+# ## Limit reference points (flim): no assessment error and no Btrigger
 # ## -----------------------------------------------------------------------------
 
 ## Create a list of input parameters with modified annual recruitment parameters (future ones)
@@ -497,7 +497,7 @@ save(projpar_msy_nobtrigger,
      file = file.path(outpath, 'projpar_msy_nobtrigger.Rdata'), compress = "xz")
 
 ## -----------------------------------------------------------------------------
-## MSY reference points (fmsy, fp0.5): assessment error and btrigger
+## Precautionary reference points (fmsy, fp0.5): assessment error and btrigger
 ## -----------------------------------------------------------------------------
 
 projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){

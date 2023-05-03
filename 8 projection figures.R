@@ -42,58 +42,37 @@ rp_cols <- c("MSY" = "#6CA67A", "HRmsy" = "#82C893", "Bpa" = "#056A89", "HRpa" =
 # Reference point calculus ####
 # All weights turned to kilotons and abundances to millions
 
-## Precautionary reference points (HR(>45cm) is called f)
-res_pre <-
+## Limit reference point: no assessment error and no Btrigger (HR(>45cm) is called f)
+lim_dat <-
   results_pre %>%
   filter(year > (max(year) -50)) %>%
   group_by(hr_target) %>%
   reframe(f = round(mean(hr), digits = f_round),
-          quantile_df(ssb, 1e6))
+          quantile_df(ssb_that_spawns, 1e6))
 
-### HRlim (called flim)
+### HRlim (called f)
 HRlim <-
-  res_pre %>%
+  lim_dat %>%
   filter(prob == 0.5, value > local(blim/1e6)) %>%
-  filter(hr_target == max(hr_target)) %>%
-  rename(hr_lim = hr_target, flim = f)
+  # slice(which.min(abs(value-blim/1e6))) %>%
+  filter(hr_target == max(hr_target))
 
-## MSY reference points
-
-## Yield curve no btrigger (HR(>45cm) is called f)
-yield_dat <-
-  results_msy_nobtrigger %>%
-  filter(year > (max(year) -50)) %>%
-  group_by(hr_target, year, trial) %>%
-  summarise(y = sum(catch),
-            ssb = mean(ssb_that_spawns),
-            f = mean(hr)) %>%
-  group_by(hr_target) %>%
-  reframe(f = round(mean(f), digits = f_round),
-          ssb = mean(ssb)/1e6,
-          quantile_df(y, 1e6))
-
-## Median yield
-HRmsy <- yield_dat %>%
-  filter(prob == 0.5) %>%
-  filter(value == max(value))
-
-HRmsy_range <- yield_dat %>%
-  filter(prob == 0.5) %>%
-  filter(value > 0.95*max(value)) %>%
-  filter(hr_target == min(hr_target) | hr_target == max(hr_target))
-
-## SSB quantiles from yield_dat
-ssb_dat <-
+##  Limit reference point: assessment error and btrigger (HR(>45cm) is called f)
+pre_dat <-
   results_msy %>%
   filter(year > (max(year) -50)) %>%
-  group_by(year, hr_target, trial) %>%
-  summarise(ssb = mean(ssb_that_spawns),
-            f = mean(hr)) %>%
   group_by(hr_target) %>%
-  reframe(f = round(mean(f), digits = f_round),
-          quantile_df(ssb, 1e6))
+  reframe(f = round(mean(hr), digits = f_round),
+          quantile_df(ssb_that_spawns, 1e6))
 
-### HRpa the complex ICES way
+## HRpa the Icelandic way (called f)
+HRpa <-
+  pre_dat %>%
+  filter(prob == 0.05) %>%
+  filter(value > blim/1e6) %>%
+  filter(hr_target == max(hr_target))
+
+### HRpa the ICES way (unfinished)
 # results_msy %>%
 #   filter(year > (max(year) - 50)) %>%
 #   mutate(pass = ssb_that_spawns > blim) %>%
@@ -106,21 +85,38 @@ ssb_dat <-
 #   slice(which.min(abs(0.95-prop)))
 ### end
 
-## HRpa the more straightforward Icelandic way (compare the HRpa to the above)
-HRpa <-
-  ssb_dat %>%
-  filter(prob == 0.05) %>%
-  filter(value > blim/1e6) %>%
-  filter(hr_target == max(hr_target))
+## MSY reference points
+
+## Yield curve no btrigger (HR(>45cm) is called f)
+yield_dat <-
+  results_msy_nobtrigger %>%
+  filter(year > (max(year) -50)) %>%
+  group_by(hr_target) %>%
+  reframe(f = mean(hr),
+          ssb = mean(ssb_that_spawns)/1e6,
+          quantile_df(catch, 1e6))
+
+## Median yield (MSY and HRmsy)
+HRmsy <- yield_dat %>%
+  filter(prob == 0.5) %>%
+  filter(value == max(value))
+
+## Uncertainty for HRmsy (does not work for MSY)
+HRmsy_range <- yield_dat %>%
+  filter(prob == 0.5) %>%
+  filter(value > 0.95*max(value)) %>%
+  filter(hr_target == min(hr_target) | hr_target == max(hr_target))
 
 ##############
 ## Tables ####
 
 rp_tab <- tibble::tibble(
   `Reference point` =
-    c("Blim", "Bpa", "Btrigger", "MSY", "HR(bar)lim", "HR(bar)msy", "HR(bar)pa", "HR(target)lim", "HR(target)msy", "HR(target)pa"),
+    c("Blim", "Bpa", "Btrigger", "MSY", "HR(bar)lim", "HR(bar)msy", "HR(bar)pa",
+      "HR(target)lim", "HR(target)msy", "HR(target)pa"),
   Value =
-    c(blim/1e6, bpa/1e6, btrigger/1e6, HRmsy$value, HRlim$flim, HRmsy$f, HRpa$f, HRlim$hr_lim, HRmsy$hr_target, HRpa$hr_target),
+    c(blim/1e6, bpa/1e6, btrigger/1e6, HRmsy$value, HRlim$f, HRmsy$f, HRpa$f,
+      HRlim$hr_target, HRmsy$hr_target, HRpa$hr_target),
   Basis = c("Lowest modelled mature female substock biomass",
             "Blim x 1.4",
             "Bpa",
@@ -142,7 +138,7 @@ save(rp_tab, file = file.path(base_dir, "projections/reference_point_table.rda")
 ## Simulation plot ####
 
 x_axis1 <- tibble(RP = c("HRmsy", "HRpa", "HRlim"),
-                  value = c(HRmsy$f, HRpa$f, HRlim$flim))
+                  value = c(HRmsy$f, HRpa$f, HRlim$f))
 x_axis2 <- tibble(RP = c("HRmsy"),
                   type = c("min", "max"),
                   value = c(HRmsy_range$f)) %>%
@@ -199,19 +195,19 @@ p1 <- yield_dat %>%
 
 ### SSB vs harvest rate
 
-p2 <- ssb_dat %>%
+p2 <- pre_dat %>%
   filter(prob==0.5) %>%
   ggplot(aes(f, value)) +
   geom_rect(data = x_axis2,
             aes(xmin = min, xmax = max, ymin = 0, ymax = Inf, fill = RP),
             alpha = 0.3, color = NA, inherit.aes = FALSE) +
-  geom_ribbon(data = ssb_dat %>%
+  geom_ribbon(data = pre_dat %>%
                 mutate(value = value) %>%
                 filter(prob %in% c(0.05,0.5,0.95)) %>%
                 pivot_wider(names_from = prob,values_from = value),
               aes(y=0.5,ymin = `0.05`, ymax = `0.95`),
               alpha = 0.5) +
-  geom_ribbon(data = ssb_dat %>%
+  geom_ribbon(data = pre_dat %>%
                 mutate(value = value) %>%
                 filter(prob %in% c(0.25,0.5,0.75)) %>%
                 pivot_wider(names_from = prob,values_from = value),
@@ -245,13 +241,9 @@ p2 <- ssb_dat %>%
 ### Stock - recruit plot
 
 tmp1 <- results_msy_nobtrigger %>% # For testing that RPs are correct: results_pre
-  filter(year > (max(year) -50)) %>%
-  filter(step==1, hr_target == HRmsy$hr_target) %>%
-  group_by(hr_target, year, trial) %>%
-  summarise(y = sum(catch),
-            ssb = mean(ssb_that_spawns),
-            f = mean(hr),
-            rec = sum(rec, na.rm = TRUE))
+  filter(year > (max(year) -50), hr_target == HRmsy$hr_target) %>%
+  dplyr::select(rec, ssb_that_spawns) %>%
+  rename(ssb = ssb_that_spawns)
 
 tmp2 <- tibble(
   ssb = seq(0,round(max(tmp1$ssb)),by=1e5),
@@ -285,13 +277,10 @@ p3 <- tmp1 %>%
 Pbref <-
   results_msy %>%
   filter(year > (max(year) -50)) %>%
-  group_by(year, hr_target, trial) %>%
-  summarise(ssb = mean(ssb_that_spawns),
-            f = mean(hr)) %>%
   group_by(hr_target) %>%
-  summarise(f = round(mean(f), digits = f_round),
-            pbpa = mean(ssb < bpa),
-            pblim = mean(ssb < blim))
+  summarise(f = mean(hr),
+            pbpa = mean(ssb_that_spawns < bpa),
+            pblim = mean(ssb_that_spawns < blim))
 
 p4 <- Pbref %>%
   rename(Bpa = pbpa, Blim = pblim) %>%
@@ -318,7 +307,7 @@ ggsave(
         ncol = 1, rel_heights = c(9,1)
       )),
   filename = file.path(base_dir, "figures/Simulation_plots.png"),
-  units = 'in', width = pagewidth_in, height = pagewidth_in*1.1,
+  units = 'in', width = pagewidth_in, height = pagewidth_in,
   bg = "white")
 
 ## Histogram of draws fit ####
