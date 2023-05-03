@@ -40,75 +40,13 @@ harvest_rates <- seq(0.00, 1, by = 0.01)
 hr_trials <- 100
 recstep <- 1
 
-#blim <- #138650858          # 125629491
-
 ## Blim in tonnes
-blim <- optim_fit$res.by.year %>% 
-  filter(year == 1992, stock == "ghl_female_mat") %>% 
-  pull(total.biomass) 
+blim <- optim_fit$res.by.year %>%
+  filter(year == 1992, stock == "ghl_female_mat") %>%
+  pull(total.biomass)
 
 bpa <- blim * 1.4
 btrigger <- bpa
-
-## -----------------------------------------------------------------------------
-
-# reitmapping <-
-#   read.table(
-#     system.file("demo-data", "reitmapping.tsv", package="mfdb"),
-#     header=TRUE,
-#     as.is=TRUE)
-#
-# defaults <- list(
-#   area = mfdb_group("1" = unique(reitmapping$SUBDIVISION)),
-#   timestep = mfdb::mfdb_timestep_biannually,
-#   year = year_range,
-#   species = species_code)
-#
-# # Map area names to integer area numbers (in this case only "1" ==> 1, but could be anything)
-# areas <- structure(
-#   seq_along(defaults$area),
-#   names = names(defaults$area))
-
-
-## Setup the stocks
-# female_imm <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'female', 'imm'),
-#   lengthgroups = seq(stock_params$female_imm$minlength,
-#                      stock_params$female_imm$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$female_imm$minage,
-#           maxage = stock_params$female_imm$maxage)
-#
-# male_imm <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'male', 'imm'),
-#   lengthgroups = seq(stock_params$male_imm$minlength,
-#                      stock_params$male_imm$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$male_imm$minage,
-#           maxage = stock_params$male_imm$maxage)
-#
-# female_mat <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'female', 'mat'),
-#   lengthgroups = seq(stock_params$female_mat$minlength,
-#                      stock_params$female_mat$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$female_mat$minage,
-#           maxage = stock_params$female_mat$maxage)
-#
-# male_mat <- g3_stock(
-#   c(species = tolower(defaults$species), sex = 'male', 'mat'),
-#   lengthgroups = seq(stock_params$male_mat$minlength,
-#                      stock_params$male_mat$maxlength,
-#                      stock_params$dl)) %>%
-#   g3s_livesonareas(areas[c('1')]) %>%
-#   g3s_age(minage = stock_params$male_mat$minage,
-#           maxage = stock_params$male_mat$maxage)
-#
-# ## List of stocks
-# stocks <- list(female_imm,female_mat,male_imm,male_mat)
 
 ## SSB rec relationship
 recage <- gadget3::g3_stock_def(male_imm, 'minage')
@@ -122,13 +60,13 @@ schedule <-
 
 # param_list <- c(list(base = fit$params))
 rec_list <- c(list(
-  base = 
-    fit$stock.recruitment %>% 
-    filter(recruitment > 0, year >= rec_start_year, 
-           year <= max(model_params$year) - 4, step == recstep) %>% 
-    group_by(year) %>% 
+  base =
+    fit$stock.recruitment %>%
+    filter(recruitment > 0, year >= rec_start_year,
+           year <= max(model_params$year) - 4, step == recstep) %>%
+    group_by(year) %>%
     summarise(recruitment = sum(recruitment))
-)) 
+))
 
 ## ------------------------------------------------------------------------------
 
@@ -178,11 +116,11 @@ exponentiate_fleets <- FALSE
 ## -----------------------------------------------------------------------------
 
 if (TRUE){
-  
+
   proj_fleet_actions <-
-    
+
     list(
-      
+
       proj_TrawlNor %>%
         g3a_predate_fleet(
           stocks,
@@ -208,7 +146,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-      
+
       proj_OtherNor %>%
         g3a_predate_fleet(
           stocks,
@@ -233,7 +171,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-      
+
       proj_TrawlRus %>%
         g3a_predate_fleet(
           stocks,
@@ -258,7 +196,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-      
+
       proj_OtherRus %>%
         g3a_predate_fleet(
           stocks,
@@ -283,7 +221,7 @@ if (TRUE){
                                   value_field = 'scalar'),
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection),
-      
+
       proj_Internat %>%
         g3a_predate_fleet(
           stocks,
@@ -309,7 +247,7 @@ if (TRUE){
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection)
     )
-  
+
 }
 
 ## -------------------------------------------------------------------------------
@@ -361,33 +299,17 @@ base.par.proj$value$otherrus_prop <- catch_props %>%
 base.par.proj$value$internat_prop <- catch_props %>%
   filter(fleet == "Internat") %>% pull(prop)
 
-## This is how Bjarki did it:
-# fleet_props <-
-#   fit$fleet.info %>%
-#   group_by(year,fleet) %>%
-#   summarise(harv.rate = mean(harv.rate,na.rm=TRUE)) %>%
-#   filter(!is.infinite(harv.rate)) %>%
-#   group_by(year) %>%
-#   mutate(m = harv.rate/sum(harv.rate)) %>%
-#   filter(year > 2016) %>%
-#   group_by(fleet) %>%
-#   summarise(m=mean(m)) %>%
-#   {set_names(as.list(.$m),.$fleet)}
-
 ## Fill in recruitment and harvest rates to build the ad function
 
 ################################################################################
 ##
 ## NOTE, FEMALE_MAT SPAWNS INTO A DUMMY STOCK WHICH SUBSEQUENTLY AGES INTO
-## FEMALE_IMM AND MALE_IMM AT A 50:50 RATIO. THE AMOUNT SPAWNED IS TAKEN 
+## FEMALE_IMM AND MALE_IMM AT A 50:50 RATIO. THE AMOUNT SPAWNED IS TAKEN
 ## FROM THE BASE FIT, THEREFORE THE VALUE SHOULD BE THE TOTAL RECRUITMENT
-## FOR EACH YEAR I.E. MALE.REC + FEMALE.REC BECAUSE IT WILL SUBEQUENTLY 
+## FOR EACH YEAR I.E. MALE.REC + FEMALE.REC BECAUSE IT WILL SUBEQUENTLY
 ## BE SPLIT BETWEEN THE TWO IMMATURE STOCKS
 ##
 ################################################################################
-
-
-## 2023-04-21: Things to fix: par.proj project_rec should start from 2021? (2022 for real but we set 2021 rec to 0 to avoid spikes). Project HR should start from 2022.
 
 # par.proj <- base.par.proj
 # par.proj <-
@@ -395,8 +317,8 @@ base.par.proj$value$internat_prop <- catch_props %>%
 #   g3p_project_rec(
 #     recruitment = fit$stock.recruitment %>%
 #       filter(year >= rec_start_year,
-#              year <= max(model_params$year) - 4) %>% 
-#       group_by(year) %>% 
+#              year <= max(model_params$year) - 4) %>%
+#       group_by(year) %>%
 #       summarise(recruitment = sum(recruitment)),
 #     method = 'bootstrap') %>%
 #   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
@@ -410,8 +332,8 @@ base.par.proj$value$internat_prop <- catch_props %>%
 
 ## Test to check spawning is working
 # test_par <- par.proj
-# test_par <- 
-#   test_par %>% 
+# test_par <-
+#   test_par %>%
 #   ## CONSTANT REC
 #   # g3p_project_rec(
 #   #   recruitment = fit$stock.recruitment %>%
@@ -421,40 +343,40 @@ base.par.proj$value$internat_prop <- catch_props %>%
 #   g3p_project_rec(
 #     recruitment = fit$stock.recruitment %>%
 #       filter(year >= rec_start_year,
-#              year <= max(model_params$year) - 4) %>% 
-#       group_by(year) %>% 
-#       summarise(recruitment = sum(recruitment)), 
+#              year <= max(model_params$year) - 4) %>%
+#       group_by(year) %>%
+#       summarise(recruitment = sum(recruitment)),
 #     method = 'bootstrap') %>%
-#   g3p_project_advice_error(hr_target = 0.1, advice_cv = 0) 
-# 
+#   g3p_project_advice_error(hr_target = 0.1, advice_cv = 0)
+#
 # ## TEST RUN
 # tmp <- attributes(r_proj(test_par$value))
-# 
+#
 # ## Plot recruitment
 # bind_rows(
-#   fit$stock.recruitment %>% 
-#     group_by(year) %>% 
+#   fit$stock.recruitment %>%
+#     group_by(year) %>%
 #     summarise(rec = sum(recruitment), .groups = 'drop'),
-#   tmp$proj_ghl_dummy__spawnednum %>% 
-#     as.data.frame.table() %>% 
-#     group_by(time) %>% 
+#   tmp$proj_ghl_dummy__spawnednum %>%
+#     as.data.frame.table() %>%
+#     group_by(time) %>%
 #     summarise(rec = sum(Freq)) %>%
-#     gadgetutils:::extract_year_step() %>% 
+#     gadgetutils:::extract_year_step() %>%
 #     filter(year > max(fit$stock.recruitment$year %>% max()))
 # ) %>% ggplot(aes(year, rec/1e6)) + geom_bar(stat = 'identity')
-# 
+#
 # ## Check female and male immature
-# tmp$proj_ghl_female_imm__num %>% 
-#   as.data.frame.table() %>% 
-#   mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
-#   gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
-#   group_by(year, age) %>% summarise(female = sum(Freq)) %>% 
+# tmp$proj_ghl_female_imm__num %>%
+#   as.data.frame.table() %>%
+#   mutate(age = gsub('age', '', age) %>% as.numeric()) %>%
+#   gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>%
+#   group_by(year, age) %>% summarise(female = sum(Freq)) %>%
 #   left_join(
-#     tmp$proj_ghl_male_imm__num %>% 
-#       as.data.frame.table() %>% 
-#       mutate(age = gsub('age', '', age) %>% as.numeric()) %>% 
-#       gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>% 
-#       group_by(year, age) %>% summarise(male = sum(Freq)) 
+#     tmp$proj_ghl_male_imm__num %>%
+#       as.data.frame.table() %>%
+#       mutate(age = gsub('age', '', age) %>% as.numeric()) %>%
+#       gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>%
+#       group_by(year, age) %>% summarise(male = sum(Freq))
 #   ) %>% view
 
 
@@ -481,7 +403,7 @@ hr_list <-
   split(f = as.factor(.$id))
 
 
-save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_years, 
+save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_years,
      harvest_rates, hr_trials, recstep, blim, bpa, btrigger, hr_list, rec_list, recage,
      base.par.proj,
      file = file.path(outpath, 'projection_defintions.Rdata'), compress = "xz"
@@ -495,21 +417,21 @@ save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_ye
 ## Create a list of input parameters with modified annual recruitment parameters (future ones)
 ## annual harvest rates, and btrigger
 projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-  
+
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim
-  
+
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
     g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0, advice_cv = 0) %>%
     g3_init_guess('btrigger', value = 1, optimise = TRUE)
-  
+
   return(out)
-  
+
 })
 
 ## This command loops over each parameter list, runs the model and collates the output
@@ -517,7 +439,7 @@ results_pre <-
   do.call('rbind',
           parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
             # print(x)
-            out <- runfun(fun_fun, projpar_pre[[x]]) 
+            out <- runfun(fun_fun, projpar_pre[[x]])
             out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
             #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
             out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
@@ -538,22 +460,22 @@ save(projpar_pre, file = file.path(outpath, 'projpar_pre.Rdata'), compress = "xz
 ## -----------------------------------------------------------------------------
 
 projpar_msy_nobtrigger <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-  
+
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim*1e3
-  
+
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
     #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
+    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423,
                              advice_cv = 0.212) %>%
     g3_init_guess('btrigger', value = 1, optimise = TRUE)
-  
+
   return(out)
-  
+
 })
 
 
@@ -569,9 +491,9 @@ results_msy_nobtrigger <-
           }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
   )
 
-save(results_msy_nobtrigger, 
+save(results_msy_nobtrigger,
      file = file.path(outpath, 'results_msy_nobtrigger.Rdata'), compress = "xz")
-save(projpar_msy_nobtrigger, 
+save(projpar_msy_nobtrigger,
      file = file.path(outpath, 'projpar_msy_nobtrigger.Rdata'), compress = "xz")
 
 ## -----------------------------------------------------------------------------
@@ -579,21 +501,21 @@ save(projpar_msy_nobtrigger,
 ## -----------------------------------------------------------------------------
 
 projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-  
+
   par.proj <- base.par.proj
   #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
   #par.proj$value$project_years <- num_project_years
   #par.proj$value$blim <- blim*1e3
-  
+
   out <-
     par.proj %>%
     g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423, 
+    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423,
                              advice_cv = 0.212)  %>%
     g3_init_guess('btrigger', value = btrigger, optimise = TRUE)
-  
+
   return(out)
-  
+
 })
 
 
