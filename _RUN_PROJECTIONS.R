@@ -539,5 +539,5 @@ save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'), compress = "xz
 r_proj <- g3_to_r(proj_actions)
 msy_fit <- gadgetutils::g3_fit(r_proj,projpar_msy[[2101]])
 tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(msy_fit, path = tmppath, file_name = "model_output_figures_proj_msy.html")
+make_html(msy_fit, path = tmppath, file_name = "model_output_figures_proj_msy.html", template = "nea_ghl")
 

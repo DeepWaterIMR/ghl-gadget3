@@ -300,7 +300,7 @@ if(run_iterative) {
 
   if(plot_html) {
     tmppath <- file.path(getwd(), base_dir, "figures")
-    make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html")
+    make_html(iter_fit, path = tmppath, file_name = "model_output_figures_iter.html", template = "nea_ghl")
     rm(tmppath)
   }
 }
@@ -367,7 +367,7 @@ if(run_optim) {
 
   if(plot_html) {
     tmppath <- file.path(getwd(), base_dir, "figures")
-    gadget_plots(optim_fit, path = tmppath, file_type = "html")
+    make_html(optim_fit, path = tmppath, template = "nea_ghl")
     rm(tmppath)
   }
 }
