@@ -15,7 +15,7 @@ library("knitr")
 library("DT")
 ```
 
-# A standardized Gadget 3 model for Northeast Atlantic Greenland halibut
+# Gadget3 model for Northeast Atlantic Greenland halibut
 **Institute of Marine Research, Norway** and **Marine and Freshwater Research Institute, Iceland**
 
 **Authors (alphabetic order): Butler Will, Elvarsson Bjarki, Hallfredsson Elvar H., Howell Daniel, Vihtakari Mikko, Windsland Kristin**
@@ -24,117 +24,33 @@ library("DT")
 
 ----
 
-This is a GitHub repository for a standardized [Gadget assessment model](https://gadget-framework.github.io/gadget3/) created for Northeast Arctic Greenland halibut. The model structure can be used as a base for other species. The aim of the project is to create a transparent model that is compatible with the Icelandic Greenland halibut model for the ICES AFWG benchmark for the species in 2023. The end goal of the process is to define harvest control rules which may consider the ecosystem interactions. The model is still under construction and does not work as intended. 
+This is a GitHub repository for a [Gadget assessment model](https://gadget-framework.github.io/gadget3/) benchmarked for [Northeast Arctic Greenland halibut](https://www.ices.dk/community/groups/Pages/AFWG.aspx) in 2023, and to be further developed for JNR-AFWG. The [model](https://github.com/deepWaterIMR/ghl-gadget3) and [data](https://github.com/deepWaterIMR/ghl-gadget-data) are available on GitHub. 
 
 The repository is private, which means that if you see it, you have been given permission to edit the repository. Please contact the maintainer if you have any questions.
+
+# Model overview
+
+Our model has been developed with transparency, reproducibility and automation of data acquisition in mind. We use the new [gadget3 framework](https://gadget-framework.github.io/gadget3/) for R that is currently under an active development. The model has four sub-stocks (immature/mature, female/male) from 1980 using a single time-step per year. There are five fishing fleets: TrawlNor, TrawlRus, OtherNor, OtherRus and Internat. Internat shares selectivity parameters with TrawlNor and OtherRus with OtherNor due to lack of sufficient length and sex distribution data for these fleets. In addition, there are 4 survey fleets (`EggaN, EcoS, WinterS, and RussianS) all with separate suitability parameters. 
+
+The model obtains data from the IMR database, Russian surveys and landings as well as landings from other countries. All of these data are compiled to a [duckdb](https://cran.r-project.org/web/packages/duckdb/index.html) database using the [*mfdb*](https://cran.r-project.org/web/packages/mfdb/index.html) package for R. The data are aggregated for the model and stored in the `file.path(base_dir, "data")` folder. This means that a working model can be run without an access to the mfdb database. The data are used to define initial values for sub-stocks (`3 stocks.R`), survey indices and fleets (`4 fleets.R`), which Gadget uses to iterate better fitting alternatives using the provided data. The data are collected in the `2-n.R` files. General model and species settings are defined in the `1 settings.R` file. The `5 likelihood.R` file sets up the likelihood components and `6 parameters.R` generates the model and defines model parameters. 
+
+The most fundamental differences to the previous assessment model setup are starting the model from 1980 instead of 1992, using only one time step per year instead of four, and using exact catches in tonnes instead of estimating catches through effort in likelihood. Further, data are no longer allocated to females and males externally, but the model considers sexual dimorphism internally through sub-stocks and likelihood components. These chances make data flow more transparent and possible to automise. The following sections explain model settings, fit, and results.
 
 # Organization of the repository
 
 Use [`_RUN_THE_MODEL.R`](https://github.com/DeepWaterIMR/ghl-gadget3/blob/master/_RUN_THE_MODEL.R) to run the model. The scripts should automatically install required packages for you. In order to run the model for first time, you'll need an [MFDB](https://cran.r-project.org/web/packages/mfdb/index.html) database stored in the [ghl-gadget-data](https://github.com/DeepWaterIMR/ghl-gadget-data) repository. The easiest way to set up the model is to clone both repositories (this and ghl-gadget-data) in the same root directory. 
 
 * Custom functions required by the model are located in the **R** folder.
-* The Gadget model runs are located in the **model_files** folder. 
-* The **figures** folder contains figures illustrating the data based into the model, as well as the model output diagnostics.
-* The **data** folder contains all data required by the model. In order to acquire the data for the first time, you'll need the [ghl-gadget-data](https://github.com/DeepWaterIMR/ghl-gadget-data) repository.
+* The **data** folder contains datasets used to start the model or as shortcuts for other options
+* The Gadget model runs are located in the folder specified by the `base_dir` object. 
+* The **figures** sub-folder contains figures illustrating the data based into the model, as well as the model output diagnostics.
+* The **data** sub-folder contains all data required by the model. In order to acquire the data for the first time, you'll need the [ghl-gadget-data](https://github.com/DeepWaterIMR/ghl-gadget-data) repository.
+* The **session** sub-folder contains copy of work space and .Rhistory.
+* The **scripts** sub-folder contains copy of R scripts used to generate the model.
+* The **optim** sub-folder is created when parameter optimization is run and contains optimised model parameters together with the optimised fit object (`optim_fit`), which is used to create the model diagnostic figures.
+* The **iterative_reweighting**, **jitter**, and **retro** sub-folders are created when iterative reweighting, jitter or retrospective analyses is run, respectively, and contains results of those processes (`run_iterative`, `run_jitter`, `run_retor`). 
+* The projections folder is created when `_RUN_PROJECTIONS.R` is run.
 
-# Model overview
+# Model projections
 
-We use the new [gadget3 framework](https://gadget-framework.github.io/gadget3/) for R that is currently under an active development. This means that gadget3 is not feature complete and contains bugs in addition to the bugs in this model. 
-
-The model obtains data from the IMR database, Russian surveys and landings as well as landings from other countries. All of these data are compiled to a [duckdb](https://cran.r-project.org/web/packages/duckdb/index.html) database using the [*mfdb*](https://cran.r-project.org/web/packages/mfdb/index.html) package for R. The data are aggregated for the model and stored in the `model_files/data` folder. This means that a working model can be run without an access to the mfdb database. The data are used to define initial values for sub-stocks (`3 stocks.R`), survey indices and fleets (`4 fleets.R`), which Gadget uses to iterate better fitting alternatives using the provided data. The data are collected in the `2-n.R` files. 
-
-# Model structure
-
-There are four sub-stocks, N fleets, and N survey time-series in the model. In contrast to the current Gadget model for NEA Greenland halibut, the data are not any longer allocated to females and males externally, when such information is not available, but the model considers sexual dimorphism internally through sub-stocks. 
-
-# Things to do before the benchmark
-
-*Last edited: MV, 13.10.2022.* Comments in italics.
-
-1.  Move to Gadget3. 
-
-    - Done. 
-    
-2.  Include age data. 
-
-    - Done. 
-      
-3.  Move to a one year time-step. Structure the model so that different time-steps can be examined.
-
-    - Done. Use the `model_params$timestep_fun` element to change the time step.
-
-4.  Move to Bjarki's data weighting scheme.
-
-    - Done. Compare the impacts on the model output once the model compiles.
-
-5.  Survey indices
-
-    - EggaN and BESS based juvenile index done. Potentially add: EcoSouth (>35 cm, ldist, sex?).
-
-6.  Estimate or exact catch in tonnes? 
-
-    - Try first with exact
-
-7.  Add Russian survey index
-
-    - Done
-
-8.  Fleet structure. 
-  
-    - Done. New structure proposed in [landings-data](https://github.com/DeepWaterIMR/ghl-gadget-data/blob/main/docs/landings-data.Rmd) and implemented.
-
-9.  Split M by sex (and maturity?)
-  
-    - Done. Gadget now estimates M for mature males
-
-10. Let the model split to sex instead of us doing it
-
-    - Done. Sex-split comes currently from `EggaN_mat`. Needs to be improved.
-
-11. Transparency, reproducibility and documentation
-
-    - Done. Improve the documentation once the model is complete and running.
-
-13. Method compatibility with the WN Greenland halibut model
-
-    - Done.
-
-14. Make the model extend further back in time. 
-
-    - Done. The model starts from 1980.
-
-15. Move to mature female SSB as the reporting measure instead of 45cm+
-  
-    - Done. female_mat is the SSB.
-
-16. Fix length-weight relationship 
-
-    - Make a separate document which explains the decisions behind all life history parameters and initial conditions. Split initial sigma by sex.
-    
-17. Add Russian catch and survey ldist with sex
-
-    - Done. 
-
-18. Add CPUE index
-
-    - So far not added because Russian SI reaches back to 1984.
-
-19. Make the model realistic
-
-    - Not done. Need help here.
-  
-20. Reference points
-
-21. Jitter
-
-    - Make the model realistic first.
-
-22. Uncertainties
-
-    - Make the model stable and realistic first.
-
-23. HCR
-
-    - Some time after the benchmark
-
-
+Model projections can be run using a parameter fit object (`optim_fit`). Projections are run using the `_RUN_PROJECTIONS.R` file and figures made using `8 projection figures.R`. These scripts are still unfinished and do not work as intended. 
