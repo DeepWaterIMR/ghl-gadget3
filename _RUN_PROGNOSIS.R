@@ -9,9 +9,9 @@ source("0 run first.R")
 load("data/gadget_workspace.RData")
 source("R/projection_functions.R")
 
-base_dir <- "projections"
+base_dir <- "short_term_projections"
 
-outpath <- file.path(base_dir, "projections")
+outpath <- file.path(base_dir, "short_term_projections")
 if(!dir.exists(outpath)) dir.create(outpath, recursive = TRUE)
 
 ## Load the desired model, params and fit
@@ -23,21 +23,20 @@ fit <- optim_fit
 
 year_range <- range(fit$res.by.year$year)
 end_year <- max(year_range)
-start_year <- end_year + 1
+start_year <- end_year + 1 # This is also assessment year, assessyear parameter
 num_steps <- length(unique(fit$stock.full$step))
+
+
 
 ## Recruitment will be re-sampled from this year onward
 rec_start_year <- 1990 ## min(fit$res.by.year$year)
 
 ## How many years to project forward
-num_project_years <- 100
+num_project_years <- 5
 
 ## A sequence of harvest rates to test, typically try #seq(0.00, 1, by = 0.01)
 harvest_rates <- seq(0.00, 1, by = 0.01)
 
-## How many trials per harvest rate (each trial will have a unique recruitment series
-## and a unique annual harvest rate sequence (if assessment error is present))
-hr_trials <- 100
 recstep <- 1
 
 ## Blim in tonnes
@@ -47,6 +46,7 @@ blim <- optim_fit$res.by.year %>%
 
 bpa <- blim * 1.4
 btrigger <- bpa
+hr_target <- 0.2 # HR(target)msy from the RP table
 
 ## SSB rec relationship
 recage <- gadget3::g3_stock_def(male_imm, 'minage')
@@ -59,14 +59,11 @@ schedule <-
 ## Use bootstrap parameters and recruitment TS'
 
 # param_list <- c(list(base = fit$params))
-rec_list <- c(list(
-  base =
-    fit$stock.recruitment %>%
+recruitment <- fit$stock.recruitment %>%
     filter(recruitment > 0, year >= rec_start_year,
            year <= max(model_params$year) - 4, step == recstep) %>%
     group_by(year) %>%
     summarise(recruitment = sum(recruitment))
-))
 
 ## ------------------------------------------------------------------------------
 
@@ -94,14 +91,12 @@ int_Internat <- g3_fleet(c("Internat", "int")) %>%
   g3s_livesonareas(areas[c('1')])
 
 ## Intermediate catches will be average of last three years
-meancatch <- 
-  fit$fleet.info %>% 
-  filter(year %in% (end_year - 2):end_year, !grepl('survey$', fleet)) %>% 
-  group_by(fleet) %>% summarise(meancatch = mean(amount), .groups = 'drop') %>% 
+meancatch <-
+  fit$fleet.info %>%
+  filter(year %in% (end_year - 2):end_year, !grepl('survey$', fleet)) %>%
+  group_by(fleet) %>%
+  summarise(meancatch = mean(amount), .groups = 'drop') %>%
   mutate(area = 1, year = start_year, step = 1)
-
-
-
 
 ## -----------------------------------------------------------------------------
 ## Setup projection fleets
@@ -128,8 +123,8 @@ proj_effort_scalar <-
 
 ## WB comment - Effort scalar turned to zero for the intermediate year.
 ## This ensures the quota fleets don't catch anything in this year
-proj_effort_scalar <- 
-  proj_effort_scalar %>% 
+proj_effort_scalar <-
+  proj_effort_scalar %>%
   mutate(scalar = case_when(year == start_year ~ 0, TRUE ~ 1))
 
 ## Setup a time-varying parameter table for harvest rates
@@ -278,11 +273,11 @@ if (TRUE){
               sum_stocks = list(female_mat)),
           run_f = ~cur_year_projection)
     )
-  
+
   int_fleet_actions <-
-    
+
     list(
-      
+
       int_TrawlNor %>%
         g3a_predate_fleet(
           stocks,
@@ -297,15 +292,16 @@ if (TRUE){
                                by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets))),
           catchability_f =
-            gadget3::g3a_predate_catchability_totalfleet(g3_timeareadata('TrawlNor_int',
-                                                                         meancatch %>% 
-                                                                           filter(fleet == 'TrawlNor_fishery') %>% 
-                                                                           select(-fleet),
-                                                                         value_field = 'meancatch')),
+            gadget3::g3a_predate_catchability_totalfleet(
+              g3_timeareadata('TrawlNor_int',
+                              meancatch %>%
+                                filter(fleet == 'TrawlNor_fishery') %>%
+                                select(-fleet),
+                              value_field = 'meancatch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))
         ),
-      
+
       int_OtherNor %>%
         g3a_predate_fleet(
           stocks,
@@ -320,14 +316,15 @@ if (TRUE){
                                by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets))),
           catchability_f =
-            gadget3::g3a_predate_catchability_totalfleet(g3_timeareadata('OtherNor_int',
-                                                                         meancatch %>% 
-                                                                           filter(fleet == 'OtherNor_fishery') %>% 
-                                                                           select(-fleet),
-                                                                         value_field = 'meancatch')),
+            gadget3::g3a_predate_catchability_totalfleet(
+              g3_timeareadata('OtherNor_int',
+                              meancatch %>%
+                                filter(fleet == 'OtherNor_fishery') %>%
+                                select(-fleet),
+                              value_field = 'meancatch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
-      
+
       int_TrawlRus %>%
         g3a_predate_fleet(
           stocks,
@@ -342,14 +339,15 @@ if (TRUE){
                                by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets))),
           catchability_f =
-            gadget3::g3a_predate_catchability_totalfleet(g3_timeareadata('TrawlRus_int',
-                                                                         meancatch %>% 
-                                                                           filter(fleet == 'TrawlRus_fishery') %>% 
-                                                                           select(-fleet),
-                                                                         value_field = 'meancatch')),
+            gadget3::g3a_predate_catchability_totalfleet(
+              g3_timeareadata('TrawlRus_int',
+                              meancatch %>%
+                                filter(fleet == 'TrawlRus_fishery') %>%
+                                select(-fleet),
+                              value_field = 'meancatch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
-      
+
       int_OtherRus %>%
         g3a_predate_fleet(
           stocks,
@@ -364,14 +362,15 @@ if (TRUE){
                                by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets))),
           catchability_f =
-            gadget3::g3a_predate_catchability_totalfleet(g3_timeareadata('OtherRus_int',
-                                                                         meancatch %>% 
-                                                                           filter(fleet == 'OtherRus_fishery') %>% 
-                                                                           select(-fleet),
-                                                                         value_field = 'meancatch')),
+            gadget3::g3a_predate_catchability_totalfleet(
+              g3_timeareadata('OtherRus_int',
+                              meancatch %>%
+                                filter(fleet == 'OtherRus_fishery') %>%
+                                select(-fleet),
+                              value_field = 'meancatch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
-      
+
       int_Internat %>%
         g3a_predate_fleet(
           stocks,
@@ -386,11 +385,12 @@ if (TRUE){
                                by_stock = c('species', 'sex'),
                                exponentiate = exponentiate_fleets))),
           catchability_f =
-            gadget3::g3a_predate_catchability_totalfleet(g3_timeareadata('Internat_int',
-                                                                         meancatch %>% 
-                                                                           filter(fleet == 'Internat_fishery') %>% 
-                                                                           select(-fleet),
-                                                                         value_field = 'meancatch')),
+            gadget3::g3a_predate_catchability_totalfleet(
+              g3_timeareadata('Internat_int',
+                              meancatch %>%
+                                filter(fleet == 'Internat_fishery') %>%
+                                select(-fleet),
+                              value_field = 'meancatch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year)))
     )
@@ -401,7 +401,7 @@ if (TRUE){
 
 ## UPDATE ACTIONS
 proj_actions <- c(proj_actions0, proj_fleet_actions, int_fleet_actions)
-proj_actions <- c(proj_actions, 
+proj_actions <- c(proj_actions,
                   list(gadget3::g3a_report_detail(proj_actions, run_f = ~TRUE)))
 
 tmb_proj <- g3_to_tmb(proj_actions)
@@ -409,7 +409,7 @@ base.par.proj <- attributes(tmb_proj)$parameter_template
 
 ## -----------------------------------------------------------------------------
 
-## Initial parameters, fill in everything except for btrigger, HRs and recruitment
+## Initial parameters
 ## Update values
 base.par.proj$value[optim_fit$params$switch] <- optim_fit$params$value
 
@@ -423,9 +423,17 @@ base.par.proj$value$project_years <- num_project_years
 base.par.proj$value$blim <- blim
 base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
 
+base.par.proj <-
+  base.par.proj %>%
+  g3_init_guess('project_years', value = num_project_years) %>%
+  g3_init_guess('blim', value = blim) %>%
+  g3_init_guess('btrigger', value = btrigger) %>%
+  g3_init_guess('project_hr', value = hr_target) %>%
+  g3_init_guess('project_rec', value = mean(recruitment$recruitment))
+
 ## THE PROPORTION PER FLEET
 
-n_catch_years <- 4
+n_catch_years <- 3
 
 catch_props <- fit$fleet.info %>%
   dplyr::filter(amount > 1,
@@ -534,11 +542,15 @@ base.par.proj$value$internat_prop <- catch_props %>%
 ## Quicker to use the R model for prognosis as you are only doing a few runs
 r_proj <- g3_to_r(proj_actions)
 
+test <- g3_fit(r_proj, base.par.proj)
+tmppath <- file.path(getwd(), base_dir, "figures")
+make_html(test, path = tmppath, file_name = "test.html", template = "nea_ghl")
+
 ## Collect the reports
 res <- attributes(r_proj(base.par.proj$value))
 
 ## Check catch reports to check they are doing what we expect
-catch_reports <- 
+catch_reports <-
   res[c(names(res)[grepl('^detail_(.+)__predby_TrawlNor$', names(res))],
         names(res)[grepl('^detail_(.+)__predby_TrawlNor_int$', names(res))],
         names(res)[grepl('^detail_(.+)__predby_TrawlNor_proj$', names(res))],
@@ -553,24 +565,112 @@ catch_reports <-
         names(res)[grepl('^detail_(.+)__predby_OtherRus_proj$', names(res))],
         names(res)[grepl('^detail_(.+)__predby_Internat$', names(res))],
         names(res)[grepl('^detail_(.+)__predby_Internat_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_Internat_proj$', names(res))])] %>% 
-  map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>% 
-  bind_rows(.id = 'comp') %>% 
+        names(res)[grepl('^detail_(.+)__predby_Internat_proj$', names(res))])] %>%
+  map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>%
+  bind_rows(.id = 'comp') %>%
   mutate(fleet = gsub('^detail_(.+)__predby_(.+)', '\\2', comp),
          stock = gsub('^detail_(.+)__predby_(.+)', '\\1', comp),
          harvest_rate = local(hr_target),
-         age = gsub('age', '', age) %>% as.numeric()) %>% 
+         age = gsub('age', '', age) %>% as.numeric()) %>%
   select(time, fleet, harvest_rate, stock, length, age, catch = Freq)
-  
+
 ## Catch by year by fleet
-progn_catch_by_fleet <- 
+# progn_catch_by_fleet <-
   catch_reports %>%
-  group_by(time, fleet, harvest_rate) %>% 
-  summarise(catch = sum(catch, na.rm = TRUE), .groups = 'drop') %>% 
-  gadgetutils::extract_year_step() %>% 
-  filter(year >= local(start_year)) %>% 
-  pivot_wider(names_from = fleet, values_from = catch) #%>% 
-  #mutate(catch = comm + comm_int + comm_proj)
+  group_by(time, fleet, harvest_rate) %>%
+  summarise(catch = sum(catch, na.rm = TRUE), .groups = 'drop') %>%
+  gadgetutils::extract_year_step() %>%
+  filter(year >= local(start_year)) %>%
+  pivot_wider(names_from = fleet, values_from = catch) #%>%
+#mutate(catch = comm + comm_int + comm_proj)
+
+
+
+# ################################################################################
+# ##
+# ## LOW RECRUITMENT
+# ##
+# ## 1st Simulation - F equals 0
+# ##
+# ################################################################################
+#
+pars <-
+  base.par.proj %>%
+  # g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[1]]),
+  #                 method = 'bootstrap') %>%
+  g3p_project_advice_error(hr_target = 0, advice_cv = 0)
+#
+out_F0 <- runfun(fun_fun, pars, cdredmat, cdredimmat)
+out_F0$blim <- refPoints$blim*1e3
+out_F0$baseline_rec <- rec_list$rec1
+print(out_F0)
+#
+# ################################################################################
+# ##
+# ## LOW RECRUITMENT
+# ##
+# ## 2nd Simulation - F equals F_target
+# ##
+# ################################################################################
+#
+# pars <-
+#   par.proj %>%
+#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[1]]), method = 'constant') %>%
+#   g3p_project_advice_error(hr_target = hr_target, advice_cv = 0)
+#
+# pars$value$btrigger <- btrigger*1e3
+#
+# out_mgt <- runfun(fun_fun, pars, cdredmat, cdredimmat)
+# out_mgt$blim <- refPoints$blim*1e3
+# out_mgt$baseline_rec <- rec_list$rec1
+# print(out_mgt)
+#
+# ################################################################################
+# ##
+# ## HIGH RECRUITMENT
+# ##
+# ## 1st Simulation - F equals 0
+# ##
+# ################################################################################
+#
+# pars <-
+#   par.proj %>%
+#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list$rec2), method = 'constant') %>%
+#   g3p_project_advice_error(hr_target = 0, advice_cv = 0)
+#
+# out_F0 <- runfun(fun_fun, pars, cdredmat, cdredimmat)
+# out_F0$blim <- refPoints$blim*1e3
+# out_F0$baseline_rec <- rec_list$rec2
+# print(out_F0)
+#
+# ################################################################################
+# ##
+# ## HIGH RECRUITMENT
+# ##
+# ## 2nd Simulation - F equals F_target
+# ##
+# ################################################################################
+#
+# pars <-
+#   par.proj %>%
+#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[2]]), method = 'constant') %>%
+#   g3p_project_advice_error(hr_target = hr_target, advice_cv = 0)
+#
+# pars$value$btrigger <- btrigger*1e3
+#
+# out_mgt <- runfun(fun_fun, pars, cdredmat, cdredimmat)
+# out_mgt$blim <- refPoints$blim*1e3
+# out_mgt$baseline_rec <- rec_list$rec2
+# print(out_mgt)
+#
+#
+#
+
+
+
+
+
+
 
 
 ## Plot the model

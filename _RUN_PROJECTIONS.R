@@ -11,7 +11,7 @@ source("R/projection_functions.R")
 
 base_dir <- "projections"
 
-outpath <- file.path(base_dir, "projections")
+outpath <- file.path(base_dir, "longterm_projections")
 if(!dir.exists(outpath)) dir.create(outpath, recursive = TRUE)
 
 ## Load the desired model, params and fit
