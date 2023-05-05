@@ -429,7 +429,8 @@ base.par.proj <-
   g3_init_guess('blim', value = blim) %>%
   g3_init_guess('btrigger', value = btrigger) %>%
   g3_init_guess('project_hr', value = hr_target) %>%
-  g3_init_guess('project_rec', value = mean(recruitment$recruitment))
+  g3experiments::g3p_project_rec(recruitment, method = 'constant') 
+  #g3_init_guess('project_rec', value = mean(recruitment$recruitment))
 
 ## THE PROPORTION PER FLEET
 
@@ -575,16 +576,94 @@ catch_reports <-
   select(time, fleet, harvest_rate, stock, length, age, catch = Freq)
 
 ## Catch by year by fleet
-# progn_catch_by_fleet <-
+catch_by_fleet <- 
   catch_reports %>%
   group_by(time, fleet, harvest_rate) %>%
   summarise(catch = sum(catch, na.rm = TRUE), .groups = 'drop') %>%
   gadgetutils::extract_year_step() %>%
-  filter(year >= local(start_year)) %>%
-  pivot_wider(names_from = fleet, values_from = catch) #%>%
-#mutate(catch = comm + comm_int + comm_proj)
+  filter(year >= local(start_year)) 
+
+progn_catch_by_fleet <-
+  catch_by_fleet %>%
+  pivot_wider(names_from = fleet, values_from = catch) %>%
+  mutate(catch = Internat_int + Internat_proj + 
+           OtherNor_proj + OtherNor_int +
+           OtherRus_proj + OtherRus_int +
+           TrawlNor_proj + TrawlNor_int +
+           TrawlRus_proj + TrawlRus_int)
+
+catch_by_fleet %>%  ggplot(aes(year, catch, fill = fleet)) + geom_bar(stat = 'identity')
+
+################################################################################
+################################################################################
+
+## Code to check recruitment
+## Dummy
+res$detail_ghl_dummy__spawnednum %>% 
+  as.data.frame.table(stringsAsFactors = FALSE) %>% 
+  extract_year_step() %>% filter(year %in% 2018:2025, age == 'age0') %>% 
+  group_by(year, step) %>% 
+  summarise(spawn = sum(Freq)) %>% 
+  
+  ## Renewal
+  left_join(
+    
+    res$detail_ghl_male_imm__renewalnum %>% 
+      as.data.frame.table(stringsAsFactors = FALSE) %>% 
+      extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>% 
+      group_by(year, step) %>% 
+      summarise(renew_male = sum(Freq))
+    
+  ) %>% 
+  
+  
+  ## Renewal
+  left_join(
+    
+    res$detail_ghl_female_imm__renewalnum %>% 
+      as.data.frame.table(stringsAsFactors = FALSE) %>% 
+      extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>% 
+      group_by(year, step) %>% 
+      summarise(renew_female = sum(Freq))
+    
+  ) %>% 
+  
+  ## Numbers
+  left_join(
+    
+    res$detail_ghl_female_imm__num %>% 
+      as.data.frame.table(stringsAsFactors = FALSE) %>% 
+      extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>% 
+      group_by(year, step) %>% 
+      summarise(numage1 = sum(Freq))
+    
+  ) %>% 
+  
+  ## Numbers
+  left_join(
+    
+    res$detail_ghl_female_imm__num %>% 
+      as.data.frame.table(stringsAsFactors = FALSE) %>% 
+      extract_year_step() %>% filter(year %in% 2018:2025, age == 'age2') %>% 
+      group_by(year, step) %>% 
+      summarise(numage2_female = sum(Freq))
+    
+  ) %>% 
+  
+  ## Numbers
+  left_join(
+    
+    res$detail_ghl_male_imm__num %>% 
+      as.data.frame.table(stringsAsFactors = FALSE) %>% 
+      extract_year_step() %>% filter(year %in% 2018:2025, age == 'age2') %>% 
+      group_by(year, step) %>% 
+      summarise(numage2_male = sum(Freq))
+    
+  )
 
 
+###############################################################################
+###############################################################################
 
 # ################################################################################
 # ##
@@ -699,6 +778,10 @@ save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_ye
      base.par.proj,
      file = file.path(outpath, 'projection_defintions.Rdata'), compress = "xz"
 )
+
+
+
+
 
 
 # ## -----------------------------------------------------------------------------
