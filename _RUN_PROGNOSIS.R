@@ -435,7 +435,6 @@ base.par.proj <-
   g3_init_guess('project_hr', value = hr_target) %>%
   g3experiments::g3p_project_rec(
     recruitment = data.frame(recruitment = mean(recruitment$recruitment)), method = 'constant')
-# g3_init_guess('project_rec', value = 0) # /1e6
 
 ## THE PROPORTION PER FLEET
 
@@ -464,8 +463,6 @@ base.par.proj$value$internat_prop <- catch_props %>%
 ## Quicker to use the R model for prognosis as you are only doing a few runs
 r_proj <- g3_to_r(proj_actions)
 
-## Scenarios
-
 proj_msy_fit <- g3_fit(r_proj, base.par.proj)
 proj_hr0_fit <- g3_fit(
   r_proj, base.par.proj %>% g3_init_guess('project_hr', value = 0))
@@ -486,6 +483,7 @@ cowplot::plot_grid(
   plot_hr(proj_hrly_fit, min_catch_length = 45) + ggtitle("HRlastyear"),
   ncol = 1
 )
+
 
 rp_cols <- c("MSY" = "#6CA67A", "HRmsy" = "#82C893", "Bpa" = "#056A89", "HRpa" = "#449BCF", "Blim" = "#D44F56", "HRlim" = "#FF5F68")
 
@@ -524,33 +522,34 @@ bind_rows(
 ## Basis table
 
 basis_tab <-
-  tibble(Variable =
-           c(
-             paste0("Harvest rate >= 45 cm (", start_year, ")"),
-             paste0("Biomass >= 45 cm (", start_year, ")"),
-             paste0("SSB (", start_year, ")"),
-             paste0("Recruitment (", start_year, "-", start_year + 2, ")"),
-             paste0("Expected catch (", start_year, ")")
-           ),
-         Value = c(
-           plot_hr(proj_msy_fit, min_catch_length = 45, return_data = T) %>%
-             filter(year == start_year) %>%
-             pull(value) %>% round(., 3),
-           plot_biomass(proj_msy_fit, min_catch_length = 45, return_data = TRUE) %>%
-             filter(year == start_year) %>%
-             pull(total.biomass) %>% {./1e3} %>% round(),
-           plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
-             filter(year == start_year) %>%
-             pull(total.biomass) %>% {./1e3} %>% round(),
-           mean(recruitment$recruitment)/1e6,
-           round(sum(expected_catch$catch)/1e3)),
-         Notes = c(
-           paste0("Based on expected catch (", start_year, "); for >= 45 cm"),
-           paste0("At 1 Januarty start_year; tonnes"),
-           paste0("At 1 Januarty start_year; tonnes. Bpa = ", round(bpa/1e3)),
-           paste0("Average ", paste(range(recruitment$year), collapse = "-"), " recruitment in millions. Does not influence short-term forecast"),
-           paste0("Based on catch in ", end_year, "; tonnes")
-         )
+  tibble(
+    Variable =
+      c(
+        paste0("Harvest rate >= 45 cm (", start_year, ")"),
+        paste0("Biomass >= 45 cm (", start_year, ")"),
+        paste0("SSB (", start_year, ")"),
+        paste0("Recruitment (", start_year, "-", start_year + 2, ")"),
+        paste0("Expected catch (", start_year, ")")
+      ),
+    Value = c(
+      plot_hr(proj_msy_fit, min_catch_length = 45, return_data = T) %>%
+        filter(year == start_year) %>%
+        pull(value) %>% round(., 3),
+      plot_biomass(proj_msy_fit, min_catch_length = 45, return_data = TRUE) %>%
+        filter(year == start_year) %>%
+        pull(total.biomass) %>% {./1e3} %>% round(),
+      plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+        filter(year == start_year) %>%
+        pull(total.biomass) %>% {./1e3} %>% round(),
+      mean(recruitment$recruitment)/1e6,
+      round(sum(expected_catch$catch)/1e3)),
+    Notes = c(
+      paste0("Based on expected catch (", start_year, "); for >= 45 cm"),
+      paste0("At 1 Januarty start_year; tonnes"),
+      paste0("At 1 Januarty start_year; tonnes. Bpa = ", round(bpa/1e3)),
+      paste0("Average ", paste(range(recruitment$year), collapse = "-"), " recruitment in millions. Does not influence short-term forecast"),
+      paste0("Based on catch in ", end_year, "; tonnes")
+    )
   )
 
 ## Values for advice tables ####
@@ -794,3 +793,132 @@ advice_calculations <- tmp
 save(advice_calculations, basis_tab, last_year_tab, next_year_tab, file = file.path(outpath, 'short_term_projection_tables.Rdata'), compress = "xz")
 
 save(proj_msy_fit, proj_hr0_fit, proj_hrly_fit, base.par.proj, file = file.path(outpath, 'short_term_projection_fit_objects.Rdata'), compress = "xz")
+
+
+
+
+
+
+
+
+## Will's stuff
+
+
+# test <- g3_fit(r_proj, base.par.proj)
+# tmppath <- file.path(getwd(), base_dir, "figures")
+# make_html(test, path = tmppath, file_name = "test.html", template = "nea_ghl")
+#
+# ## Collect the reports
+# res <- attributes(r_proj(base.par.proj$value))
+#
+# ## Check catch reports to check they are doing what we expect
+# catch_reports <-
+#   res[c(names(res)[grepl('^detail_(.+)__predby_TrawlNor$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_TrawlNor_int$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_TrawlNor_proj$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherNor$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherNor_int$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherNor_proj$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_TrawlRus$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_TrawlRus_int$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_TrawlRus_proj$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherRus$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherRus_int$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_OtherRus_proj$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_Internat$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_Internat_int$', names(res))],
+#         names(res)[grepl('^detail_(.+)__predby_Internat_proj$', names(res))])] %>%
+#   map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>%
+#   bind_rows(.id = 'comp') %>%
+#   mutate(fleet = gsub('^detail_(.+)__predby_(.+)', '\\2', comp),
+#          stock = gsub('^detail_(.+)__predby_(.+)', '\\1', comp),
+#          harvest_rate = local(hr_target),
+#          age = gsub('age', '', age) %>% as.numeric()) %>%
+#   select(time, fleet, harvest_rate, stock, length, age, catch = Freq)
+#
+# ## Catch by year by fleet
+# catch_by_fleet <-
+#   catch_reports %>%
+#   group_by(time, fleet, harvest_rate) %>%
+#   summarise(catch = sum(catch, na.rm = TRUE), .groups = 'drop') %>%
+#   gadgetutils::extract_year_step() %>%
+#   filter(year >= local(start_year))
+#
+# progn_catch_by_fleet <-
+#   catch_by_fleet %>%
+#   pivot_wider(names_from = fleet, values_from = catch) %>%
+#   mutate(catch = Internat_int + Internat_proj +
+#            OtherNor_proj + OtherNor_int +
+#            OtherRus_proj + OtherRus_int +
+#            TrawlNor_proj + TrawlNor_int +
+#            TrawlRus_proj + TrawlRus_int)
+#
+# catch_by_fleet %>%  ggplot(aes(year, catch, fill = fleet)) + geom_bar(stat = 'identity')
+#
+# ################################################################################
+# ################################################################################
+#
+# ## Code to check recruitment
+# ## Dummy
+# res$detail_ghl_dummy__spawnednum %>%
+#   as.data.frame.table(stringsAsFactors = FALSE) %>%
+#   extract_year_step() %>% filter(year %in% 2018:2025, age == 'age0') %>%
+#   group_by(year, step) %>%
+#   summarise(spawn = sum(Freq)) %>%
+#
+#   ## Renewal
+#   left_join(
+#
+#     res$detail_ghl_male_imm__renewalnum %>%
+#       as.data.frame.table(stringsAsFactors = FALSE) %>%
+#       extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>%
+#       group_by(year, step) %>%
+#       summarise(renew_male = sum(Freq))
+#
+#   ) %>%
+#
+#
+#   ## Renewal
+#   left_join(
+#
+#     res$detail_ghl_female_imm__renewalnum %>%
+#       as.data.frame.table(stringsAsFactors = FALSE) %>%
+#       extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>%
+#       group_by(year, step) %>%
+#       summarise(renew_female = sum(Freq))
+#
+#   ) %>%
+#
+#   ## Numbers
+#   left_join(
+#
+#     res$detail_ghl_female_imm__num %>%
+#       as.data.frame.table(stringsAsFactors = FALSE) %>%
+#       extract_year_step() %>% filter(year %in% 2018:2025, age == 'age1') %>%
+#       group_by(year, step) %>%
+#       summarise(numage1 = sum(Freq))
+#
+#   ) %>%
+#
+#   ## Numbers
+#   left_join(
+#
+#     res$detail_ghl_female_imm__num %>%
+#       as.data.frame.table(stringsAsFactors = FALSE) %>%
+#       extract_year_step() %>% filter(year %in% 2018:2025, age == 'age2') %>%
+#       group_by(year, step) %>%
+#       summarise(numage2_female = sum(Freq))
+#
+#   ) %>%
+#
+#   ## Numbers
+#   left_join(
+#
+#     res$detail_ghl_male_imm__num %>%
+#       as.data.frame.table(stringsAsFactors = FALSE) %>%
+#       extract_year_step() %>% filter(year %in% 2018:2025, age == 'age2') %>%
+#       group_by(year, step) %>%
+#       summarise(numage2_male = sum(Freq))
+#
+#   )
+#
