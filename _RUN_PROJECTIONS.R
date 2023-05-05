@@ -11,7 +11,7 @@ source("R/projection_functions.R")
 
 base_dir <- "projections"
 
-outpath <- file.path(base_dir, "longterm_projections")
+outpath <- file.path(base_dir, "long_term_projections")
 if(!dir.exists(outpath)) dir.create(outpath, recursive = TRUE)
 
 ## Load the desired model, params and fit
@@ -30,14 +30,14 @@ num_steps <- length(unique(fit$stock.full$step))
 rec_start_year <- 1990 ## min(fit$res.by.year$year)
 
 ## How many years to project forward
-num_project_years <- 100
+num_project_years <- 5 # 100
 
 ## A sequence of harvest rates to test, typically try #seq(0.00, 1, by = 0.01)
-harvest_rates <- seq(0.00, 1, by = 0.01)
+harvest_rates <- 0.2 # seq(0.00, 1, by = 0.01)
 
 ## How many trials per harvest rate (each trial will have a unique recruitment series
 ## and a unique annual harvest rate sequence (if assessment error is present))
-hr_trials <- 100
+hr_trials <- 1 # 100
 recstep <- 1
 
 ## Blim in tonnes
@@ -271,13 +271,21 @@ base.par.proj <- base.par.proj %>%
                 ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x)))
 
 # New columns
-base.par.proj$value$project_years <- num_project_years
-base.par.proj$value$blim <- blim
-base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
+# base.par.proj$value$project_years <- num_project_years
+# base.par.proj$value$blim <- blim
+# base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
+
+base.par.proj <-
+  base.par.proj %>%
+  g3_init_guess('project_years', value = num_project_years) %>%
+  g3_init_guess('blim', value = blim) %>%
+  g3_init_guess('btrigger', value = btrigger) %>%
+  g3_init_guess('project_hr', value = hr_target) %>%
+  g3_init_guess('project_rec', value = mean(rec_list[[1]]$recruitment))
 
 ## THE PROPORTION PER FLEET
 
-n_catch_years <- 4
+n_catch_years <- 3 # 4
 
 catch_props <- fit$fleet.info %>%
   dplyr::filter(amount > 1,

@@ -26,8 +26,6 @@ end_year <- max(year_range)
 start_year <- end_year + 1 # This is also assessment year, assessyear parameter
 num_steps <- length(unique(fit$stock.full$step))
 
-
-
 ## Recruitment will be re-sampled from this year onward
 rec_start_year <- 1990 ## min(fit$res.by.year$year)
 
@@ -60,10 +58,10 @@ schedule <-
 
 # param_list <- c(list(base = fit$params))
 recruitment <- fit$stock.recruitment %>%
-    filter(recruitment > 0, year >= rec_start_year,
-           year <= max(model_params$year) - 4, step == recstep) %>%
-    group_by(year) %>%
-    summarise(recruitment = sum(recruitment))
+  filter(recruitment > 0, year >= rec_start_year,
+         year <= max(model_params$year) - 4, step == recstep) %>%
+  group_by(year) %>%
+  summarise(recruitment = sum(recruitment))
 
 ## ------------------------------------------------------------------------------
 
@@ -90,13 +88,19 @@ int_OtherRus <- g3_fleet(c("OtherRus", "int")) %>%
 int_Internat <- g3_fleet(c("Internat", "int")) %>%
   g3s_livesonareas(areas[c('1')])
 
-## Intermediate catches will be average of last three years
-meancatch <-
+## Intermediate catches assume the catch from the previous year (untick the other option to average last three years).
+
+expected_catch <-
   fit$fleet.info %>%
-  filter(year %in% (end_year - 2):end_year, !grepl('survey$', fleet)) %>%
+  filter(year %in% end_year, !grepl('survey$', fleet)) %>%
   group_by(fleet) %>%
-  summarise(meancatch = mean(amount), .groups = 'drop') %>%
+  summarise(catch = mean(amount), .groups = 'drop') %>%
   mutate(area = 1, year = start_year, step = 1)
+# fit$fleet.info %>%
+# filter(year %in% (end_year - 2):end_year, !grepl('survey$', fleet)) %>%
+# group_by(fleet) %>%
+# summarise(meancatch = mean(amount), .groups = 'drop') %>%
+# mutate(area = 1, year = start_year, step = 1)
 
 ## -----------------------------------------------------------------------------
 ## Setup projection fleets
@@ -294,10 +298,10 @@ if (TRUE){
           catchability_f =
             gadget3::g3a_predate_catchability_totalfleet(
               g3_timeareadata('TrawlNor_int',
-                              meancatch %>%
+                              expected_catch %>%
                                 filter(fleet == 'TrawlNor_fishery') %>%
                                 select(-fleet),
-                              value_field = 'meancatch')),
+                              value_field = 'catch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))
         ),
@@ -318,10 +322,10 @@ if (TRUE){
           catchability_f =
             gadget3::g3a_predate_catchability_totalfleet(
               g3_timeareadata('OtherNor_int',
-                              meancatch %>%
+                              expected_catch %>%
                                 filter(fleet == 'OtherNor_fishery') %>%
                                 select(-fleet),
-                              value_field = 'meancatch')),
+                              value_field = 'catch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
 
@@ -341,10 +345,10 @@ if (TRUE){
           catchability_f =
             gadget3::g3a_predate_catchability_totalfleet(
               g3_timeareadata('TrawlRus_int',
-                              meancatch %>%
+                              expected_catch %>%
                                 filter(fleet == 'TrawlRus_fishery') %>%
                                 select(-fleet),
-                              value_field = 'meancatch')),
+                              value_field = 'catch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
 
@@ -364,10 +368,10 @@ if (TRUE){
           catchability_f =
             gadget3::g3a_predate_catchability_totalfleet(
               g3_timeareadata('OtherRus_int',
-                              meancatch %>%
+                              expected_catch %>%
                                 filter(fleet == 'OtherRus_fishery') %>%
                                 select(-fleet),
-                              value_field = 'meancatch')),
+                              value_field = 'catch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year))),
 
@@ -387,10 +391,10 @@ if (TRUE){
           catchability_f =
             gadget3::g3a_predate_catchability_totalfleet(
               g3_timeareadata('Internat_int',
-                              meancatch %>%
+                              expected_catch %>%
                                 filter(fleet == 'Internat_fishery') %>%
                                 select(-fleet),
-                              value_field = 'meancatch')),
+                              value_field = 'catch')),
           run_f = gadget3:::f_substitute(~cur_year == assessyear,
                                          list(assessyear = start_year)))
     )
@@ -419,9 +423,9 @@ base.par.proj <- base.par.proj %>%
                 ~ coalesce(optim_fit$params[[cur_column()]][match(switch, optim_fit$params$switch)], .x)))
 
 # New columns
-base.par.proj$value$project_years <- num_project_years
-base.par.proj$value$blim <- blim
-base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
+# base.par.proj$value$project_years <- num_project_years
+# base.par.proj$value$blim <- blim
+# base.par.proj[base.par.proj$switch=="btrigger","optimise"] <- TRUE
 
 base.par.proj <-
   base.par.proj %>%
@@ -429,7 +433,9 @@ base.par.proj <-
   g3_init_guess('blim', value = blim) %>%
   g3_init_guess('btrigger', value = btrigger) %>%
   g3_init_guess('project_hr', value = hr_target) %>%
-  g3_init_guess('project_rec', value = mean(recruitment$recruitment))
+  g3experiments::g3p_project_rec(
+    recruitment = data.frame(recruitment = mean(recruitment$recruitment)), method = 'constant')
+# g3_init_guess('project_rec', value = 0) # /1e6
 
 ## THE PROPORTION PER FLEET
 
@@ -455,380 +461,336 @@ base.par.proj$value$otherrus_prop <- catch_props %>%
 base.par.proj$value$internat_prop <- catch_props %>%
   filter(fleet == "Internat") %>% pull(prop)
 
-## Fill in recruitment and harvest rates to build the ad function
-
-################################################################################
-##
-## NOTE, FEMALE_MAT SPAWNS INTO A DUMMY STOCK WHICH SUBSEQUENTLY AGES INTO
-## FEMALE_IMM AND MALE_IMM AT A 50:50 RATIO. THE AMOUNT SPAWNED IS TAKEN
-## FROM THE BASE FIT, THEREFORE THE VALUE SHOULD BE THE TOTAL RECRUITMENT
-## FOR EACH YEAR I.E. MALE.REC + FEMALE.REC BECAUSE IT WILL SUBEQUENTLY
-## BE SPLIT BETWEEN THE TWO IMMATURE STOCKS
-##
-################################################################################
-
-# par.proj <- base.par.proj
-# par.proj <-
-#   par.proj %>%
-#   g3p_project_rec(
-#     recruitment = fit$stock.recruitment %>%
-#       filter(year >= rec_start_year,
-#              year <= max(model_params$year) - 4) %>%
-#       group_by(year) %>%
-#       summarise(recruitment = sum(recruitment)),
-#     method = 'bootstrap') %>%
-#   g3p_project_advice_error(hr_target = min(harvest_rates), advice_cv = 0) %>%
-#   g3_init_guess('btrigger', 1)
-
-# r_proj <- g3_to_r(proj_actions)
-
-################################################################################
-## Checks
-################################################################################
-
-## Test to check spawning is working
-# test_par <- par.proj
-# test_par <-
-#   test_par %>%
-#   ## CONSTANT REC
-#   # g3p_project_rec(
-#   #   recruitment = fit$stock.recruitment %>%
-#   #     filter(year == 2020) %>%
-#   #     summarise(recruitment = sum(recruitment)), method = 'constant') %>%
-#   ## VARIABLE REC
-#   g3p_project_rec(
-#     recruitment = fit$stock.recruitment %>%
-#       filter(year >= rec_start_year,
-#              year <= max(model_params$year) - 4) %>%
-#       group_by(year) %>%
-#       summarise(recruitment = sum(recruitment)),
-#     method = 'bootstrap') %>%
-#   g3p_project_advice_error(hr_target = 0.1, advice_cv = 0)
-#
-# ## TEST RUN
-# tmp <- attributes(r_proj(test_par$value))
-#
-# ## Plot recruitment
-# bind_rows(
-#   fit$stock.recruitment %>%
-#     group_by(year) %>%
-#     summarise(rec = sum(recruitment), .groups = 'drop'),
-#   tmp$proj_ghl_dummy__spawnednum %>%
-#     as.data.frame.table() %>%
-#     group_by(time) %>%
-#     summarise(rec = sum(Freq)) %>%
-#     gadgetutils:::extract_year_step() %>%
-#     filter(year > max(fit$stock.recruitment$year %>% max()))
-# ) %>% ggplot(aes(year, rec/1e6)) + geom_bar(stat = 'identity')
-#
-# ## Check female and male immature
-# tmp$proj_ghl_female_imm__num %>%
-#   as.data.frame.table() %>%
-#   mutate(age = gsub('age', '', age) %>% as.numeric()) %>%
-#   gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>%
-#   group_by(year, age) %>% summarise(female = sum(Freq)) %>%
-#   left_join(
-#     tmp$proj_ghl_male_imm__num %>%
-#       as.data.frame.table() %>%
-#       mutate(age = gsub('age', '', age) %>% as.numeric()) %>%
-#       gadgetutils:::extract_year_step() %>% filter(year > 2020, step == 1) %>%
-#       group_by(year, age) %>% summarise(male = sum(Freq))
-#   ) %>% view
-
-
-################################################################################
-
-
 ## Quicker to use the R model for prognosis as you are only doing a few runs
 r_proj <- g3_to_r(proj_actions)
 
-test <- g3_fit(r_proj, base.par.proj)
-tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(test, path = tmppath, file_name = "test.html", template = "nea_ghl")
+## Scenarios
 
-## Collect the reports
-res <- attributes(r_proj(base.par.proj$value))
-
-## Check catch reports to check they are doing what we expect
-catch_reports <-
-  res[c(names(res)[grepl('^detail_(.+)__predby_TrawlNor$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_TrawlNor_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_TrawlNor_proj$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherNor$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherNor_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherNor_proj$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_TrawlRus$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_TrawlRus_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_TrawlRus_proj$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherRus$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherRus_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_OtherRus_proj$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_Internat$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_Internat_int$', names(res))],
-        names(res)[grepl('^detail_(.+)__predby_Internat_proj$', names(res))])] %>%
-  map(.f = function(x) as.data.frame.table(x, stringsAsFactors = FALSE)) %>%
-  bind_rows(.id = 'comp') %>%
-  mutate(fleet = gsub('^detail_(.+)__predby_(.+)', '\\2', comp),
-         stock = gsub('^detail_(.+)__predby_(.+)', '\\1', comp),
-         harvest_rate = local(hr_target),
-         age = gsub('age', '', age) %>% as.numeric()) %>%
-  select(time, fleet, harvest_rate, stock, length, age, catch = Freq)
-
-## Catch by year by fleet
-# progn_catch_by_fleet <-
-  catch_reports %>%
-  group_by(time, fleet, harvest_rate) %>%
-  summarise(catch = sum(catch, na.rm = TRUE), .groups = 'drop') %>%
-  gadgetutils::extract_year_step() %>%
-  filter(year >= local(start_year)) %>%
-  pivot_wider(names_from = fleet, values_from = catch) #%>%
-#mutate(catch = comm + comm_int + comm_proj)
-
-
-
-# ################################################################################
-# ##
-# ## LOW RECRUITMENT
-# ##
-# ## 1st Simulation - F equals 0
-# ##
-# ################################################################################
-#
-pars <-
+proj_msy_fit <- g3_fit(r_proj, base.par.proj)
+proj_hr0_fit <- g3_fit(
+  r_proj, base.par.proj %>% g3_init_guess('project_hr', value = 0))
+proj_hrly_fit <- g3_fit(
+  r_proj,
   base.par.proj %>%
-  # g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[1]]),
-  #                 method = 'bootstrap') %>%
-  g3p_project_advice_error(hr_target = 0, advice_cv = 0)
-#
-out_F0 <- runfun(fun_fun, pars, cdredmat, cdredimmat)
-out_F0$blim <- refPoints$blim*1e3
-out_F0$baseline_rec <- rec_list$rec1
-print(out_F0)
-#
-# ################################################################################
-# ##
-# ## LOW RECRUITMENT
-# ##
-# ## 2nd Simulation - F equals F_target
-# ##
-# ################################################################################
-#
-# pars <-
-#   par.proj %>%
-#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[1]]), method = 'constant') %>%
-#   g3p_project_advice_error(hr_target = hr_target, advice_cv = 0)
-#
-# pars$value$btrigger <- btrigger*1e3
-#
-# out_mgt <- runfun(fun_fun, pars, cdredmat, cdredimmat)
-# out_mgt$blim <- refPoints$blim*1e3
-# out_mgt$baseline_rec <- rec_list$rec1
-# print(out_mgt)
-#
-# ################################################################################
-# ##
-# ## HIGH RECRUITMENT
-# ##
-# ## 1st Simulation - F equals 0
-# ##
-# ################################################################################
-#
-# pars <-
-#   par.proj %>%
-#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list$rec2), method = 'constant') %>%
-#   g3p_project_advice_error(hr_target = 0, advice_cv = 0)
-#
-# out_F0 <- runfun(fun_fun, pars, cdredmat, cdredimmat)
-# out_F0$blim <- refPoints$blim*1e3
-# out_F0$baseline_rec <- rec_list$rec2
-# print(out_F0)
-#
-# ################################################################################
-# ##
-# ## HIGH RECRUITMENT
-# ##
-# ## 2nd Simulation - F equals F_target
-# ##
-# ################################################################################
-#
-# pars <-
-#   par.proj %>%
-#   g3p_project_rec(recruitment = data.frame(recruitment = rec_list[[2]]), method = 'constant') %>%
-#   g3p_project_advice_error(hr_target = hr_target, advice_cv = 0)
-#
-# pars$value$btrigger <- btrigger*1e3
-#
-# out_mgt <- runfun(fun_fun, pars, cdredmat, cdredimmat)
-# out_mgt$blim <- refPoints$blim*1e3
-# out_mgt$baseline_rec <- rec_list$rec2
-# print(out_mgt)
-#
-#
-#
+    g3_init_guess(
+      'project_hr',
+      value = plot_hr(optim_fit, min_catch_length = 45, return_data = TRUE) %>%
+        filter(year == max(year)) %>% pull(value)))
 
-
-
-
-
-
-
-
-## Plot the model
-# result <- model(par.proj$value)
-# result[[1]]
-# r_proj <- g3_to_r(proj_actions)
-# test_fit <- gadgetutils::g3_fit(r_proj,projpar_pre[[45]])
 # tmppath <- file.path(getwd(), base_dir, "figures")
-# make_html(test_fit, path = tmppath, file_name = "model_output_figures_proj.html")
+# make_html(proj_hrly_fit, path = tmppath, file_name = "test.html", template = "nea_ghl")
 
-## So much fun...
-fun_fun <- g3_tmb_adfun(tmb_proj, base.par.proj, type = 'Fun')
-#fun_fun <- g3_tmb_adfun(tmb_proj, par.proj)
-
-## Set up the harvest rates and trials-per-harvest-rate
-hr_list <-
-  expand.grid(hr = harvest_rates, trial = 1:hr_trials) %>%
-  #expand.grid(hr = 0.1, trial = 1) %>%
-  unite(id, remove = FALSE) %>%
-  mutate(id = paste0('h', id)) %>%
-  split(f = as.factor(.$id))
-
-
-save(year_range, end_year, start_year, num_steps, rec_start_year, num_project_years,
-     harvest_rates, hr_trials, recstep, blim, bpa, btrigger, hr_list, rec_list, recage,
-     base.par.proj,
-     file = file.path(outpath, 'projection_defintions.Rdata'), compress = "xz"
+cowplot::plot_grid(
+  plot_hr(proj_hr0_fit, min_catch_length = 45) + ggtitle("HR0"),
+  plot_hr(proj_msy_fit, min_catch_length = 45) + ggtitle("HRmsy"),
+  plot_hr(proj_hrly_fit, min_catch_length = 45) + ggtitle("HRlastyear"),
+  ncol = 1
 )
 
+rp_cols <- c("MSY" = "#6CA67A", "HRmsy" = "#82C893", "Bpa" = "#056A89", "HRpa" = "#449BCF", "Blim" = "#D44F56", "HRlim" = "#FF5F68")
 
-# ## -----------------------------------------------------------------------------
-# ## Limit reference points (flim): no assessment error and no Btrigger
-# ## -----------------------------------------------------------------------------
+bind_rows(
+  plot_biomass(proj_hr0_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+    dplyr::select(year, value) %>%
+    filter(year <= start_year+3) %>%
+    mutate(HR = "0"),
+  plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+    dplyr::select(year, value) %>%
+    filter(year <= start_year+3) %>%
+    mutate(HR = "MSY"),
+  plot_biomass(proj_hrly_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+    dplyr::select(year, value) %>%
+    filter(year <= start_year+3) %>%
+    mutate(HR = as.character(end_year))
+) %>%
+  ggplot(ggplot2::aes(.data$year, .data$value, linetype = .data$HR)) +
+  ggplot2::geom_line() +
+  geom_hline(data = rp_tab %>%
+               rename(rp = `Reference point`) %>%
+               filter(rp %in% c("Bpa")),
+             aes(yintercept = Value, color = rp)) +
+  ggplot2::expand_limits(y = 0) +
+  ggplot2::coord_cartesian(expand = FALSE) +
+  ggplot2::scale_x_continuous(breaks = seq(1980,2030,2)) +
+  scale_linetype_manual(values = c("MSY" = 1, "0" = 2, "2021" = 3)) +
+  labs(x = "Year", y = "Spawning stock biomass (kt)", color =
+         "Reference\npoint",
+       linetype = "Harvest\nrate") +
+  scale_color_manual(values = rp_cols) +
+  ggplot2::theme_classic(base_size = 8) +
+  theme(legend.position = "bottom")
 
-## Create a list of input parameters with modified annual recruitment parameters (future ones)
-## annual harvest rates, and btrigger
-projpar_pre <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
 
-  par.proj <- base.par.proj
-  #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
-  #par.proj$value$project_years <- num_project_years
-  #par.proj$value$blim <- blim
+## Basis table
 
-  out <-
-    par.proj %>%
-    g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
-    #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0, advice_cv = 0) %>%
-    g3_init_guess('btrigger', value = 1, optimise = TRUE)
-
-  return(out)
-
-})
-
-## This command loops over each parameter list, runs the model and collates the output
-results_pre <-
-  do.call('rbind',
-          parallel::mclapply(setNames(names(projpar_pre), names(projpar_pre)), function(x){
-            # print(x)
-            out <- runfun(fun_fun, projpar_pre[[x]])
-            out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
-            #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
-            out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
-            return(out)
-          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
+basis_tab <-
+  tibble(Variable =
+           c(
+             paste0("Harvest rate >= 45 cm (", start_year, ")"),
+             paste0("Biomass >= 45 cm (", start_year, ")"),
+             paste0("SSB (", start_year, ")"),
+             paste0("Recruitment (", start_year, "-", start_year + 2, ")"),
+             paste0("Expected catch (", start_year, ")")
+           ),
+         Value = c(
+           plot_hr(proj_msy_fit, min_catch_length = 45, return_data = T) %>%
+             filter(year == start_year) %>%
+             pull(value) %>% round(., 3),
+           plot_biomass(proj_msy_fit, min_catch_length = 45, return_data = TRUE) %>%
+             filter(year == start_year) %>%
+             pull(total.biomass) %>% {./1e3} %>% round(),
+           plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+             filter(year == start_year) %>%
+             pull(total.biomass) %>% {./1e3} %>% round(),
+           mean(recruitment$recruitment)/1e6,
+           round(sum(expected_catch$catch)/1e3)),
+         Notes = c(
+           paste0("Based on expected catch (", start_year, "); for >= 45 cm"),
+           paste0("At 1 Januarty start_year; tonnes"),
+           paste0("At 1 Januarty start_year; tonnes. Bpa = ", round(bpa/1e3)),
+           paste0("Average ", paste(range(recruitment$year), collapse = "-"), " recruitment in millions. Does not influence short-term forecast"),
+           paste0("Based on catch in ", end_year, "; tonnes")
+         )
   )
 
-save(results_pre, file = file.path(outpath, 'results_pre.Rdata'), compress = "xz")
-save(projpar_pre, file = file.path(outpath, 'projpar_pre.Rdata'), compress = "xz")
+## Values for advice tables ####
 
-# Notes
-## - Calculate the risk of going below Blim
-## - Interannual variation in catch
-
-
-## -----------------------------------------------------------------------------
-## MSY reference points (fmsy, fp0.5): assessment error and no btrigger
-## -----------------------------------------------------------------------------
-
-projpar_msy_nobtrigger <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-
-  par.proj <- base.par.proj
-  #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
-  #par.proj$value$project_years <- num_project_years
-  #par.proj$value$blim <- blim*1e3
-
-  out <-
-    par.proj %>%
-    g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
-    #g3p_project_rec(recruitment = fit$stock.recruitment %>% filter(year >= rec_start_year) %>% summarise(recruitment = mean(recruitment)), method = 'constant') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423,
-                             advice_cv = 0.212) %>%
-    g3_init_guess('btrigger', value = 1, optimise = TRUE)
-
-  return(out)
-
-})
-
-
-results_msy_nobtrigger <-
-  do.call('rbind',
-          parallel::mclapply(setNames(names(projpar_msy_nobtrigger), names(projpar_msy_nobtrigger)), function(x){
-            print(x)
-            out <- runfun(fun_fun, projpar_msy_nobtrigger[[x]])
-            out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
-            #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
-            out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
-            return(out)
-          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
+tmp <-
+  bind_rows(
+    full_join(
+      plot_hr(proj_msy_fit, min_catch_length = 45, return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        dplyr::select(-step, -area) %>%
+        mutate(type = "msy", .before = 1),
+      plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        mutate(ssb = total.biomass/1e3) %>%
+        dplyr::select(year, ssb),
+      by = "year") %>%
+      mutate(
+        below_bpa = ssb < bpa/1e3,
+        d_ssb = 100*(ssb/ssb[year == start_year]-1),
+        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_biom = 100*(biomass/biomass[year == start_year]-1)),
+    full_join(
+      plot_hr(proj_hr0_fit, min_catch_length = 45, return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        dplyr::select(-step, -area) %>%
+        mutate(type = "0", .before = 1),
+      plot_biomass(proj_hr0_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        mutate(ssb = total.biomass/1e3) %>%
+        dplyr::select(year, ssb),
+      by = "year") %>%
+      mutate(
+        below_bpa = ssb < bpa/1e3,
+        d_ssb = 100*(ssb/ssb[year == start_year]-1),
+        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_biom = 100*(biomass/biomass[year == start_year]-1)),
+    full_join(
+      plot_hr(proj_hrly_fit, min_catch_length = 45, return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        dplyr::select(-step, -area) %>%
+        mutate(type = "ly", .before = 1),
+      plot_biomass(proj_hrly_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
+        filter(year %in% start_year:(start_year+3)) %>%
+        mutate(ssb = total.biomass/1e3) %>%
+        dplyr::select(year, ssb),
+      by = "year") %>%
+      mutate(
+        below_bpa = ssb < bpa/1e3,
+        d_ssb = 100*(ssb/ssb[year == start_year]-1),
+        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_biom = 100*(biomass/biomass[year == start_year]-1))
   )
 
-save(results_msy_nobtrigger,
-     file = file.path(outpath, 'results_msy_nobtrigger.Rdata'), compress = "xz")
-save(projpar_msy_nobtrigger,
-     file = file.path(outpath, 'projpar_msy_nobtrigger.Rdata'), compress = "xz")
 
-## -----------------------------------------------------------------------------
-## Precautionary reference points (fmsy, fp0.5): assessment error and btrigger
-## -----------------------------------------------------------------------------
+## Advice for the next year table ####
 
-projpar_msy <- lapply(setNames(names(hr_list), names(hr_list)), function(x){
-
-  par.proj <- base.par.proj
-  #par.proj$value[param_list[[hr_list[[x]]$boot]]$switch] <- param_list[[hr_list[[x]]$boot]]$value
-  #par.proj$value$project_years <- num_project_years
-  #par.proj$value$blim <- blim*1e3
-
-  out <-
-    par.proj %>%
-    g3p_project_rec(recruitment = rec_list$base, method = 'bootstrap') %>%
-    g3p_project_advice_error(hr_target = hr_list[[x]]$hr, advice_rho = 0.423,
-                             advice_cv = 0.212)  %>%
-    g3_init_guess('btrigger', value = btrigger, optimise = TRUE)
-
-  return(out)
-
-})
-
-
-results_msy <-
-  do.call('rbind',
-          parallel::mclapply(setNames(names(projpar_msy), names(projpar_msy)), function(x){
-            print(x)
-            out <- runfun(fun_fun, projpar_msy[[x]])
-            out$hr_target <- as.numeric(gsub('h', '', gsub('(.+)_(.+)', '\\1', x)))
-            #out$boot <- as.numeric(gsub('(.+)_(.+)_(.+)', '\\2', x))
-            out$trial <- as.numeric(gsub('(.+)_(.+)', '\\2', x))
-            return(out)
-          }, mc.cores = 30)#parallel::detectCores(logical = TRUE))
+next_year_tab <-
+  tibble(
+    Basis =
+      c(paste0("ICES advice basis for ", start_year + 1),
+        paste0("HRmsy = ", hr_target),
+        paste0("Other scenarios for ", start_year + 1),
+        "HR = 0",
+        paste0("Catch", start_year)
+      ),
+    TAC =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 1) %>%
+          pull(catch_biom) %>% {./1e3} %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 1) %>%
+          pull(catch_biom) %>% {./1e3} %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 1) %>%
+          pull(catch_biom) %>% {./1e3} %>% round()
+      ),
+    HR =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 1) %>%
+          pull(value) %>% round(3),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 1) %>%
+          pull(value) %>% round(3),
+        tmp %>%
+          filter(type == "ly", year == start_year + 1) %>%
+          pull(value) %>% round(3)
+      ),
+    `SSB the following year` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(ssb) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(ssb) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(ssb) %>% round()
+      ),
+    `SSB_below_Bpa`=
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(below_bpa) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(below_bpa) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(below_bpa) %>% round()
+      ),
+    `SSB change` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(d_ssb) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(d_ssb) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(d_ssb) %>% round()
+      ),
+    `TAC change` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 1) %>%
+          pull(d_tac) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 1) %>%
+          pull(d_tac) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 1) %>%
+          pull(d_tac) %>% round()
+      )
   )
 
-save(results_msy, file = file.path(outpath, 'results_msy.Rdata'), compress = "xz")
-save(projpar_msy, file = file.path(outpath, 'projpar_msy.Rdata'), compress = "xz")
+## Advice for the year after table ####
 
-## -----------------------------------------------------------------------------
+last_year_tab <-
+  tibble(
+    Basis =
+      c(paste0("ICES advice basis for ", start_year + 2),
+        paste0("HRmsy = ", hr_target),
+        paste0("Other scenarios for ", start_year + 2),
+        "HR = 0",
+        paste0("Catch", start_year)
+      ),
+    TAC =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(catch_biom) %>% {./1e3} %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(catch_biom) %>% {./1e3} %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(catch_biom) %>% {./1e3} %>% round()
+      ),
+    HR =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(value) %>% round(3),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(value) %>% round(3),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(value) %>% round(3)
+      ),
+    `SSB the following year` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 3) %>%
+          pull(ssb) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 3) %>%
+          pull(ssb) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 3) %>%
+          pull(ssb) %>% round()
+      ),
+    `SSB_below_Bpa`=
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 3) %>%
+          pull(below_bpa) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 3) %>%
+          pull(below_bpa) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 3) %>%
+          pull(below_bpa) %>% round()
+      ),
+    `SSB change` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 3) %>%
+          pull(d_ssb) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 3) %>%
+          pull(d_ssb) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 3) %>%
+          pull(d_ssb) %>% round()
+      ),
+    `TAC change` =
+      c("",
+        tmp %>%
+          filter(type == "msy", year == start_year + 2) %>%
+          pull(d_tac) %>% round(),
+        "",
+        tmp %>%
+          filter(type == "0", year == start_year + 2) %>%
+          pull(d_tac) %>% round(),
+        tmp %>%
+          filter(type == "ly", year == start_year + 2) %>%
+          pull(d_tac) %>% round()
+      )
+  )
 
-r_proj <- g3_to_r(proj_actions)
-msy_fit <- gadgetutils::g3_fit(r_proj,projpar_msy[[2101]])
-tmppath <- file.path(getwd(), base_dir, "figures")
-make_html(msy_fit, path = tmppath, file_name = "model_output_figures_proj_msy.html", template = "nea_ghl")
+## Save ####
 
+advice_calculations <- tmp
+
+save(advice_calculations, basis_tab, last_year_tab, next_year_tab, file = file.path(outpath, 'short_term_projection_tables.Rdata'), compress = "xz")
+
+save(proj_msy_fit, proj_hr0_fit, proj_hrly_fit, base.par.proj, file = file.path(outpath, 'short_term_projection_fit_objects.Rdata'), compress = "xz")
