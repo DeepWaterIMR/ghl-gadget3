@@ -537,18 +537,18 @@ basis_tab <-
         pull(value) %>% round(., 3),
       plot_biomass(proj_msy_fit, min_catch_length = 45, return_data = TRUE) %>%
         filter(year == start_year) %>%
-        pull(total.biomass) %>% {./1e3} %>% round(),
+        pull(total.biomass) %>% {./1e6},
       plot_biomass(proj_msy_fit, stocks = "ghl_female_mat", return_data = TRUE) %>%
         filter(year == start_year) %>%
-        pull(total.biomass) %>% {./1e3} %>% round(),
+        pull(total.biomass) %>% {./1e6},
       mean(recruitment$recruitment)/1e6,
-      round(sum(expected_catch$catch)/1e3)),
+      sum(expected_catch$catch)/1e6),
     Notes = c(
       paste0("Based on expected catch (", start_year, "); for >= 45 cm"),
-      paste0("At 1 Januarty start_year; tonnes"),
-      paste0("At 1 Januarty start_year; tonnes. Bpa = ", round(bpa/1e3)),
+      paste0("Beginning of ", start_year, "; kilotonnes"),
+      paste0("Beginning of ", start_year, "; kilotonnes. Bpa = ", round(bpa/1e6, 3)),
       paste0("Average ", paste(range(recruitment$year), collapse = "-"), " recruitment in millions. Does not influence short-term forecast"),
-      paste0("Based on catch in ", end_year, "; tonnes")
+      paste0("Based on catch in ", end_year, "; kilotonnes")
     )
   )
 
@@ -569,7 +569,7 @@ tmp <-
       mutate(
         below_bpa = ssb < bpa/1e3,
         d_ssb = 100*(ssb/ssb[year == start_year]-1),
-        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_tac = 100*(catch_biom/(19094*1e3)-1),
         d_biom = 100*(biomass/biomass[year == start_year]-1)),
     full_join(
       plot_hr(proj_hr0_fit, min_catch_length = 45, return_data = TRUE) %>%
@@ -584,7 +584,7 @@ tmp <-
       mutate(
         below_bpa = ssb < bpa/1e3,
         d_ssb = 100*(ssb/ssb[year == start_year]-1),
-        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_tac = 100*(catch_biom/(19094*1e3)-1),
         d_biom = 100*(biomass/biomass[year == start_year]-1)),
     full_join(
       plot_hr(proj_hrly_fit, min_catch_length = 45, return_data = TRUE) %>%
@@ -599,7 +599,7 @@ tmp <-
       mutate(
         below_bpa = ssb < bpa/1e3,
         d_ssb = 100*(ssb/ssb[year == start_year]-1),
-        d_tac = 100*(catch_biom/catch_biom[year == start_year]-1),
+        d_tac = 100*(catch_biom/(19094*1e3)-1),
         d_biom = 100*(biomass/biomass[year == start_year]-1))
   )
 
@@ -641,7 +641,7 @@ next_year_tab <-
           filter(type == "ly", year == start_year + 1) %>%
           pull(value) %>% round(3)
       ),
-    `SSB the following year` =
+    `SSB` =
       c("",
         tmp %>%
           filter(type == "msy", year == start_year + 2) %>%
@@ -732,7 +732,7 @@ last_year_tab <-
           filter(type == "ly", year == start_year + 2) %>%
           pull(value) %>% round(3)
       ),
-    `SSB the following year` =
+    `SSB` =
       c("",
         tmp %>%
           filter(type == "msy", year == start_year + 3) %>%
