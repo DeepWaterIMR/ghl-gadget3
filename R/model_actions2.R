@@ -235,8 +235,11 @@ model_actions2 <- function(
   natm <- setup_g3_param('M', by_stock = comp_id, tv_params, by_age_params, exp_params)
 
   ## Create some variables
-  initvonb <- gadget3::g3a_renewal_vonb(Linf = Linf, K = kk, recl = recl)
-
+  initvonb <- gadget3::g3a_renewal_vonb(Linf = Linf, 
+                                        K = kk, 
+                                        recl = recl, 
+                                        recage = gadget3::g3_stock_def(imm, 'minage'))
+  
   ## ---------------------------------------------------------------------------
   ## SETUP ACTIONS
   ## ---------------------------------------------------------------------------
